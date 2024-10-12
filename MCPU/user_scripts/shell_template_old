@@ -1,0 +1,20 @@
+#!/bin/bash
+#SBATCH -N USERVAR_NODES
+#SBATCH -n USERVAR_NTASKS
+#SBATCH -p USERVAR_PARTITION
+#SBATCH -t USERVAR_DAY-USERVAR_HOUR:USERVAR_MIN
+#SBATCH --mem=USERVAR_MEM
+#SBATCH -J USERVAR_JOB_%j                                                            
+#SBATCH -o USERVAR_JOB_%j.out                                                         
+#SBATCH -e USERVAR_JOB_%j.err                                                         
+#SBATCH --mail-type=ALL                                                         
+#SBATCH --mail-user=kibum_park@g.harvard.edu
+# This file can be anywhere, but the dir that contains the cfg file
+# must also have fold_potential_mpi. Then, the config_files dir should
+# be one level up from that one.
+
+module purge
+module load gcc/8.2.0-fasrc01 openmpi/4.1.1-fasrc02
+
+cd USERVAR_DIR
+srun -n ${SLURM_NTASKS} --mpi=pmi2 ./fold_potential_mpi ./cfg
