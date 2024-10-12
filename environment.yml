@@ -1,0 +1,11 @@
+name: dbfold
+channels:
+  - conda-forge
+dependencies:
+  - numpy
+  - pandas
+  - pymbar
+  - matplotlib
+  - seaborn
+  - natsort
+  - hmmlearn
