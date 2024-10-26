@@ -2,6 +2,7 @@ name: dbfold
 channels:
   - conda-forge
 dependencies:
+  - python==3.10
   - numpy
   - pandas
   - pymbar
@@ -9,3 +10,7 @@ dependencies:
   - seaborn
   - natsort
   - hmmlearn
+  - pyyaml
+  - ipykernel
+  - nb_conda_kernels
+  - mdtraj

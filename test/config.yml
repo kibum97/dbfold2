@@ -1,0 +1,14 @@
+simulation:
+  pdbroot: test
+  directory: /n/home01/kibumpark/group_folder/p14__DHFR/test/
+  mc_step: 1000000000
+  log_interval: 1000000
+  use_cluster: false
+  umbrella:
+    enabled: true
+    ca_cutoff: 10
+  temperature_replica:
+    enabled: true
+    temperature_range:
+      min: 0.4
+      max: 1.0
