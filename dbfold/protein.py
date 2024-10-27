@@ -9,6 +9,8 @@ import glob
 import re
 import collections
 import joblib
+import pickle
+from functools import partial
 from dbfold.utils import substructures as subs
 from dbfold.utils import utils
 
@@ -94,17 +96,25 @@ class Protein:
         self.subs = subs.load_scores(self.score, self.native_distances, self.substructures, f)
         return self.subs
 
-    def compute_custom_features(self,f,save=None):
+    def compute_features(self,f,save=None):
+        """
+        Compute features from trajectory
+        Parameters
+        ----------
+        f : function
+            Function to compute feature from trajectory; Need to be partial so that only input needed is MDtraj trajectory
+        save : str, optional
+        """
         # compute feature
         feature_list = []
-        for xtc in prot.xtc_list:
-            traj = md.load(xtc,top=native)
+        for xtc in self.xtc_list:
+            traj = md.load(xtc,top=self.native)
             traj = traj.atom_slice(traj.top.select('name CA'))
-            for step in remove_list:
+            for step in self.remove_list:
                 print(f'Step {step} removed')
                 traj = traj[traj.time != step]
             feature_list = []
-            featuare_list.append(f(traj))
+            feature_list.append(f(traj))
         feature_array = np.stack(feature_list)
         if save:
             np.save(feature_array,save)
