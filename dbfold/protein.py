@@ -122,11 +122,30 @@ class Protein:
 
     def compute_fes(self,features,ftype='discrete'):
         self.log_df['feat'] = features
-        self.log_df['mbar'] = mbar
+        self.log_df['mbar'] = self.mbar
         if ftype == 'discrete':
-            print('d')
+            histogram_parameters = {}
+            nbins= int(self.log_df['feat'].values.max() - self.log_df['feat'].values.min())
+            bin_center_i = np.zeros([nbins], np.float64)
+            hist_values, bin_edges = np.histogram(self.log_df['feat'].values, bins=nbins)
+            for i in range(nbins):
+                bin_center_i[i] = 0.5 * (bin_edges[i] + bin_edges[i + 1])
         elif ftype == 'continuous':
-            print('c')
-        return 0
+            histogram_parameters = {}
+            nbins=30
+            bin_center_i = np.zeros([nbins], np.float64)
+            hist_values, bin_edges = np.histogram(self.log_df['feat'].values, bins=nbins)
+            for i in range(nbins):
+                bin_center_i[i] = 0.5 * (bin_edges[i] + bin_edges[i + 1])
+        
+        nconditions = self.log_df.index.droplevel("step").nunique()
+        bin_edges[-1] += 1e-10 # To ensure np.digitize to work properly
+        histogram_parameters["bin_edges"] = bin_edges
+        self.fes.generate_fes(self.log_df['energy'].values.reshape(nconditions,-1),self.log_df['feat'].values,fes_type="histogram",histogram_parameters=histogram_parameters)
+        uncertainty_method = "analytical"#"bootstrap"
+        results = self.fes.get_fes(
+            bin_center_i[hist_values != 0], reference_point="from-lowest", uncertainty_method=uncertainty_method
+        )
+        return results
 
     
