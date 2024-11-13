@@ -1,5 +1,6 @@
 import os
 import numpy as np
+from scipy.special import logsumexp
 import pandas as pd
 import mdtraj as md
 import multiprocessing
@@ -32,20 +33,36 @@ class Protein:
         log_df = utils.logfiles_to_dataframe(self.datadir)
         self.log_df = log_df[log_df.index.get_level_values(2) >= eq_step]
 
-    def create_mbar(self,k_bias):
+    def create_mbar(self,k_bias,recompute=False):
         self.k_bias = k_bias
-        if os.path.exists(f'{self.datadir}/mbar.pkl'):
+        if os.path.exists(f'{self.datadir}/mbar.pkl') and not recompute:
             self.mbar = pickle.load(open(f'{self.datadir}/mbar.pkl','rb'))
         else:
             self.mbar = utils.initialize_mbar(self.log_df, self.k_bias, self.datadir)
     
-    def create_fes(self,k_bias):
+    def create_fes(self,k_bias,recompute=False):
         self.k_bias = k_bias
-        if os.path.exists(f'{self.datadir}/fes.pkl'):
+        if os.path.exists(f'{self.datadir}/fes.pkl') and not recompute:
             self.fes = pickle.load(open(f'{self.datadir}/fes.pkl','rb'))
         else:
             self.fes = utils.initialize_fes(self.log_df, self.k_bias, self.datadir)
-        
+    
+    def compute_weights(self,temperature):
+        u_n = self.log_df['energy'].values
+        log_w_nb = self.mbar._computeUnnormalizedLogWeights(u_n/temperature)
+        # calculate a few other things used for multiple methods
+        max_log_w_nb = np.max(log_w_nb)  # we need to solve underflow.
+        w_nb = np.exp(log_w_nb - max_log_w_nb)
+        w_nb = w_nb / np.sum(w_nb)
+        self.weights = w_nb
+        self.log_weights = log_w_nb
+    
+    def compute_free_energy(self,indices):
+        return -logsumexp(self.log_weights[indices])
+    
+    def compute_prob(self, indices):
+        return np.sum(self.weights[indices])
+    
     def get_xtc_list(self):
         xtc_list = glob.glob(f'{self.datadir}/*.xtc')
         xtc_list = natsort.natsorted(xtc_list)
@@ -68,22 +85,22 @@ class Protein:
     def compute_score(self):
         # substructure to pair
         pair_list = []
-        for s in range(substructures.shape[2]):
-            sub = substructures[:,:,s]
+        for s in range(self.substructures.shape[2]):
+            sub = self.substructures[:,:,s]
             temp_list = []
             for i in range(sub.shape[0]):
                 for j in range(i,sub.shape[1]):
-                    if sub[j,i] == 1.0:
+                    if (sub[i,j] == 1.0) or (sub[j,i] == 1.0):
                         temp_list.append([i,j])
             pair_list.append(temp_list)
         # compute score
         tot_score_list = []
-        for xtc in prot.xtc_list:
-            traj = md.load(xtc,top=native)
+        for xtc in self.xtc_list:
+            traj = md.load(xtc,top=self.native)
             traj = traj.atom_slice(traj.top.select('name CA'))
-            for step in remove_list:
-                print(f'Step {step} removed')
-                traj = traj[traj.time != step]
+            #for step in remove_list:
+            #    print(f'Step {step} removed')
+            #    traj = traj[traj.time != step]
             score_list = []
             for pair in pair_list:
                 score_list.append(np.mean(md.compute_distances(traj,pair),axis=1))
@@ -120,16 +137,14 @@ class Protein:
             np.save(feature_array,save)
         return feature_array
 
-    def compute_fes(self,features,ftype='discrete'):
+    def compute_fes(self,features,temperature,ftype='discrete'):
         self.log_df['feat'] = features
-        self.log_df['mbar'] = self.mbar
+        #self.log_df['mbar'] = self.mbar
         if ftype == 'discrete':
             histogram_parameters = {}
-            nbins= int(self.log_df['feat'].values.max() - self.log_df['feat'].values.min())
-            bin_center_i = np.zeros([nbins], np.float64)
-            hist_values, bin_edges = np.histogram(self.log_df['feat'].values, bins=nbins)
-            for i in range(nbins):
-                bin_center_i[i] = 0.5 * (bin_edges[i] + bin_edges[i + 1])
+            bin_edges = np.arange(self.log_df['feat'].values.min(),self.log_df['feat'].values.max()+2,1)
+            bin_center_i = np.arange(self.log_df['feat'].values.min(),self.log_df['feat'].values.max()+1,1)
+            hist_values, bin_edges = np.histogram(self.log_df['feat'].values, bins=bin_edges)
         elif ftype == 'continuous':
             histogram_parameters = {}
             nbins=30
@@ -141,11 +156,14 @@ class Protein:
         nconditions = self.log_df.index.droplevel("step").nunique()
         bin_edges[-1] += 1e-10 # To ensure np.digitize to work properly
         histogram_parameters["bin_edges"] = bin_edges
-        self.fes.generate_fes(self.log_df['energy'].values.reshape(nconditions,-1),self.log_df['feat'].values,fes_type="histogram",histogram_parameters=histogram_parameters)
+        self.fes.generate_fes(self.log_df['energy'].values.reshape(nconditions,-1)/temperature,self.log_df['feat'].values,fes_type="histogram",histogram_parameters=histogram_parameters)
         uncertainty_method = "analytical"#"bootstrap"
         results = self.fes.get_fes(
             bin_center_i[hist_values != 0], reference_point="from-lowest", uncertainty_method=uncertainty_method
         )
-        return results
+        
+        return results, bin_center_i[hist_values != 0]
 
+    def save_pdb_from_index(self,index):
+        self.xtc_list
     

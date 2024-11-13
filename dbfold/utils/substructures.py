@@ -2,6 +2,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import scipy
 from scipy import linalg
+import mdtraj as md
+from sklearn import metrics
 
 def loop_clustering(thresh, files, d_contacts, sort_orphans=False, min_clustersize=1, verbose=True):
     """
@@ -119,12 +121,26 @@ def loop_clustering(thresh, files, d_contacts, sort_orphans=False, min_clustersi
 
     return clusters, clustered_files, mean_intercluster, mean_intracluster
 
+def read_coords(traj, atom='CA'):
+    traj = traj.atom_slice(traj.top.select(f'name {atom}'))
+    coords = traj.xyz[0]
+    return coords
+
+def compute_contacts(traj, mode='distances', min_seq_separation=2):
+    distances, pairs = md.compute_contacts(traj, scheme='ca')
+    filter_idx = [i for i,pair in enumerate(pairs) if pair[1] - pair[0] > 7]
+    distances = distances[:,filter_idx]
+    pairs = pairs[filter_idx]
+    contacts = md.geometry.squareform(distances, pairs)*10
+    return contacts[0]
+
 def generate_substructures(native_file, d_cutoff, min_seq_separation, contact_sep_thresh, min_clustersize,atom='CA', manual_merge=None ,labelsize = 30, fontsize = 30, max_res = None, plot=False, ax = None, native_contacts=[], verbose=False):
     if len(native_contacts)==0:
-        coords, resis=read_PDB(native_file, atom)
+        traj = md.load(native_file)
+        coords = read_coords(traj, atom)
         #we get a contact map with a min seq separation larger than usual to avoid helices
    
-        native_distances=compute_contacts_matrix(coords, mode='distances', min_seq_separation=min_seq_separation)
+        native_distances=compute_contacts(traj, mode='distances', min_seq_separation=min_seq_separation)
         
         native_contacts=np.zeros(np.shape(native_distances))
         native_contacts[np.where((native_distances<d_cutoff) & (native_distances!=0))]=1
@@ -137,7 +153,7 @@ def generate_substructures(native_file, d_cutoff, min_seq_separation, contact_se
     #To find connected components, I  use my loopCluster function by feeding in the positions ofr the contacts instead of the "files",
     #as well as above matrix M as d_contacts
     
-    clusters, pairs_in_substructures, mean_intercluster, mean_intracluster=loopCluster(contact_sep_thresh, positions, M, sort_orphans=False, min_clustersize=min_clustersize, verbose=verbose)
+    clusters, pairs_in_substructures, mean_intercluster, mean_intracluster=loop_clustering(contact_sep_thresh, positions, M, sort_orphans=False, min_clustersize=min_clustersize, verbose=verbose)
 
 
     #pairs in substructures is a list of sublists, each of which correspodns to a given substructure
@@ -167,7 +183,7 @@ def generate_substructures(native_file, d_cutoff, min_seq_separation, contact_se
     if plot:
         visualize_substructures(native_contacts, substructures, max_res = max_res, ax = ax, labelsize = labelsize, fontsize = fontsize)
     #print(positions)
-    return native_contacts, substructures
+    return native_distances, substructures
 
 def load_scores(scores, native_distances, substructures, thresh, convert_to_binary=True):
     
