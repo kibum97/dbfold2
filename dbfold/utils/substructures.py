@@ -128,7 +128,7 @@ def read_coords(traj, atom='CA'):
 
 def compute_contacts(traj, mode='distances', min_seq_separation=2):
     distances, pairs = md.compute_contacts(traj, scheme='ca')
-    filter_idx = [i for i,pair in enumerate(pairs) if pair[1] - pair[0] > 7]
+    filter_idx = [i for i,pair in enumerate(pairs) if pair[1] - pair[0] > min_seq_separation]
     distances = distances[:,filter_idx]
     pairs = pairs[filter_idx]
     contacts = md.geometry.squareform(distances, pairs)*10
