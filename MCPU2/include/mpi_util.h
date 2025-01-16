@@ -3,7 +3,6 @@
 
 #include <mpi.h>
 
-// Function declarations
 void mpi_initialize(int *argc, char ***argv, int *rank, int *size);
 void mpi_finalize(void);
 

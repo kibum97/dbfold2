@@ -3,5 +3,39 @@
     // Hover to view descriptions of existing attributes.
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
-    "configurations": []
+    "configurations": [
+        {
+            "name": "Remote Debug",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/MCPU2/build/MCPU2",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}/MCPU2/build",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "miDebuggerPath": "/usr/bin/gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ],
+            "preLaunchTask": "build",
+            "logging": {
+                "engineLogging": true
+            },
+            "pipeTransport": {
+                "pipeCwd": "",
+                "pipeProgram": "ssh",
+                "pipeArgs": ["kibumpark@login.rc.fas.harvard.edu"],
+                "debuggerPath": "/usr/bin/gdb"
+            },
+            "sourceFileMap": {
+                "/remote/source/path": "${workspaceFolder}"
+            }
+        }
+    ]
 }

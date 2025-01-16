@@ -1,0 +1,39 @@
+native_protein_data:
+  NATIVE_FILE: /n/home01/kibumpark/pkg/dbfold2/examples/chignolin/1uao.pdb
+  STRUCTURE_FILE: /n/home01/kibumpark/pkg/dbfold2/examples/chignolin/1uao.pdb
+  NATIVE_DIRECTORY: None
+  TEMPLATE_FILE: /n/home01/kibumpark/pkg/dbfold2/examples/chignolin/1uao/nothing.template
+  ALIGNMENT_FILE: 1lfb
+  PDB_OUT_FILE: /n/home01/kibumpark/pkg/dbfold2/examples/chignolin/1uao/MCPU_run/1uao
+  PROTEIN_NAME: p1afvA
+
+potential_parameters:
+  NO_NEW_CLASHES: 1
+  READ_POTENTIAL: 1
+  USE_GO_POTENTIAL: 0
+  CLASH_WEIGHT: 0
+  RMS_WEIGHT: 0
+  HYDROGEN_BOND: -2
+  NATIVE_ATTRACTION: 0
+  NON_NATIVE_REPULSION: 0
+  NON_SPECIFIC_ENERGY: 0
+
+contact_definition:
+  SKIP_LOCAL_CONTACT_RANGE: 4
+  SKIP_BB_CONTACT_RANGE: 1000
+
+monte_carlo_parameters:
+  CONSTRAINT_RMSD: -1
+
+parameter_files:
+  TRIPLET_ENERGY_FILE: /n/home01/kibumpark/pkg/dbfold2/examples/chignolin/1uao/1uao.triple
+  SIDECHAIN_TORSION_FILE: /n/home01/kibumpark/pkg/dbfold2/examples/chignolin/1uao/1uao.sctorsion
+  SECONDARY_STRUCTURE_FILE: /n/home01/kibumpark/pkg/dbfold2/examples/chignolin/1uao/1uao.sec_str
+  AMINO_DATA_FILE: /n/home01/kibumpark/pkg/dbfold2/MCPU2/config_files/amino_torsion.data
+  ROTAMER_DATA_FILE: /n/home01/kibumpark/pkg/dbfold2/MCPU2/config_files/bbind02.May.lib
+  ATOM_TYPE_FILE: /n/home01/kibumpark/pkg/dbfold2/MCPU2/config_files/twenty_res_typing
+  HELICITY_DATA: /n/home01/kibumpark/pkg/dbfold2/MCPU2/config_files/T0130.seq
+  HYDROGEN_BONDING_DATA: /n/home01/kibumpark/pkg/dbfold2/MCPU2/config_files/hydrogen_jPL3h.data
+  HYDROGEN_BOND_FILE: /n/home01/kibumpark/pkg/dbfold2/MCPU2/config_files/jPL3h.energy
+  POTENTIAL_DATA: /n/home01/kibumpark/pkg/dbfold2/MCPU2/config_files/p178_conrange4_potential_0.995054
+  AROMATIC_FILE: /n/home01/kibumpark/pkg/dbfold2/MCPU2/config_files/aromatic_noTYR.energy

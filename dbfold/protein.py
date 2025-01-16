@@ -8,12 +8,14 @@ import natsort
 import argparse
 import glob
 import re
-import collections
+from collections import defaultdict
 import joblib
 import pickle
 from functools import partial
 from dbfold.utils import substructures as subs
 from dbfold.utils import utils
+import seaborn as sns
+import matplotlib.pyplot as plt
 
 class Protein:
     def __init__(self, native, pdbroot, homedir, savedir=None, datadir=None):
@@ -31,7 +33,8 @@ class Protein:
 
     def create_log_dataframe(self,eq_step):
         log_df = utils.logfiles_to_dataframe(self.datadir)
-        self.log_df = log_df[log_df.index.get_level_values(2) >= eq_step]
+        self.eq_step = eq_step
+        self.log_df = log_df[log_df.index.get_level_values(2) >= self.eq_step]
 
     def create_mbar(self,k_bias,recompute=False):
         self.k_bias = k_bias
@@ -46,12 +49,23 @@ class Protein:
             self.fes = pickle.load(open(f'{self.datadir}/fes.pkl','rb'))
         else:
             self.fes = utils.initialize_fes(self.log_df, self.k_bias, self.datadir)
-    
+
+    """
+    TODO: ADD MCPU feature to track replica and use auto detection
+    def detect_equilibration(self):
+        unique_trajs = self.log_df.index.droplevel("step").unique()
+        for unique_traj in unique_trajs:
+            traj = self.log_df.loc[unique_traj]
+            g_k[k] = timeseries.statistical_inefficiency(u_kn[k, :], u_kn[k, 0 : N_k[k]])
+            print(f"Correlation time for set {k:5d} is {g_k[k]:10.3f}")
+            indices = timeseries.subsample_correlated_data(u_kn[k, 0 : N_k[k]])
+            print(indices)
+    """
+
     def compute_weights(self,temperature):
         u_n = self.log_df['energy'].values
         log_w_nb = self.mbar._computeUnnormalizedLogWeights(u_n/temperature)
-        # calculate a few other things used for multiple methods
-        max_log_w_nb = np.max(log_w_nb)  # we need to solve underflow.
+        max_log_w_nb = np.max(log_w_nb)  # Use log to solve underflow
         w_nb = np.exp(log_w_nb - max_log_w_nb)
         w_nb = w_nb / np.sum(w_nb)
         self.weights = w_nb
@@ -68,17 +82,16 @@ class Protein:
         xtc_list = natsort.natsorted(xtc_list)
         self.xtc_list = xtc_list
     
-    def define_substructure(self, substructure_file=None):
-        # Need to correct
+    #TODO: Move this to substructures.py and modify so that it can be used for compute_features
+    def define_substructure(self, substructure_file=None, min_seq_separation=8, contact_sep_thresh=7, min_clustersize=5):
+        self.min_seq_separation = min_seq_separation
+        self.contact_sep_thresh = contact_sep_thresh
+        self.min_clustersize = min_clustersize
         if substructure_file:
             substructures, native_distances, d_cutoff, min_seq_separation = joblib.load(substructure_file)
         else:
-            min_seq_separation = 8
-            contact_sep_thresh = 7
-            min_clustersize = 5
             native_distances, substructures = subs.generate_substructures(self.native, self.dist_cutoff,
                                                                     min_seq_separation, contact_sep_thresh, min_clustersize)
-        
         self.substructures = substructures
         self.native_distances = native_distances
     
@@ -97,6 +110,7 @@ class Protein:
         tot_score_list = []
         for xtc in self.xtc_list:
             traj = md.load(xtc,top=self.native)
+            traj = traj[traj.time >= self.eq_step]
             traj = traj.atom_slice(traj.top.select('name CA'))
             #for step in remove_list:
             #    print(f'Step {step} removed')
@@ -109,8 +123,11 @@ class Protein:
         score_arr = np.vstack(tot_score_list)
         self.score = score_arr
     
-    def convert_score2subs(self,f=1.7):
-        self.subs = subs.load_scores(self.score, self.native_distances, self.substructures, f)
+    def convert_score2subs(self,f=1.7,mean_substructure_distances=None):
+        if mean_substructure_distances:
+            self.subs = subs.load_scores(self.score, self.native_distances, self.substructures, f, mean_substructure_distances=mean_substructure_distances)
+        else:
+            self.subs = subs.load_scores(self.score, self.native_distances, self.substructures, f)
         return self.subs
 
     def compute_features(self,f,save=None):
@@ -164,6 +181,106 @@ class Protein:
         
         return results, bin_center_i[hist_values != 0]
 
-    def save_pdb_from_index(self,index):
-        self.xtc_list
+    def merge_traj_from_indices(self,indices):
+        """
+        Create a single trajectory from snapshots of given indices
+        Parameters
+        ----------
+        indices : list
+            List of indices of snapshots
+        Returns
+        -------
+        saving_traj : mdtraj.Trajectory
+            Trajectory of snapshots
+        """
+        saving_snaps = self.log_df.loc[indices].index.values
+        saving_dict = defaultdict(list)
+        saving_traj = []
+        for snap in saving_snaps:
+            temperature, setpoint, step = snap
+            saving_dict[f'{temperature:.3f}_{int(setpoint)}'].append(step)
+        for key, value in saving_dict.items():
+            traj = md.load(f'{self.datadir}/{self.pdbroot}_{key}.xtc',top=self.native)
+            traj = traj[np.where(np.isin(traj.time, value))[0]]
+            saving_traj.append(traj)
+        saving_traj = md.join(saving_traj)
+        return saving_traj
     
+    def compute_contacts_frequency(self,indices=None):
+        contacts_list = []
+        for xtc in self.xtc_list:
+            traj = md.load(xtc, top=self.native)
+            traj = traj[traj.time >= self.eq_step]
+            traj = traj.atom_slice(traj.top.select('name CA'))
+            contacts_list.append(utils.compute_contacts(traj, mode='contacts',
+                                              min_seq_separation=self.min_seq_separation,
+                                              dist_cutoff=self.dist_cutoff,
+                                              sqaureform=True))
+        contacts = np.vstack(contacts_list)
+        weights = self.weights
+        if indices is not None:
+            contacts = contacts[indices]
+            weights = weights[indices]
+        weights = weights / weights.sum()
+        self.contacts_frequency = np.average(contacts, axis=0, weights=weights)
+        return self.contacts_frequency
+
+    def compute_average_distance(self,indices=None):
+        distances_list = []
+        for xtc in self.xtc_list:
+            traj = md.load(xtc, top=self.native)
+            traj = traj[traj.time >= self.eq_step]
+            traj = traj.atom_slice(traj.top.select('name CA'))
+            distances_list.append(utils.compute_contacts(traj, mode='distances',
+                                              min_seq_separation=self.min_seq_separation,
+                                              dist_cutoff=self.dist_cutoff,
+                                              sqaureform=True))
+        distances = np.vstack(distances_list)
+        weights = self.weights
+        if indices is not None:
+            contacts = contacts[indices]
+            weights = weights[indices]
+        weights = weights / weights.sum()
+        self.average_distance = np.average(distances, axis=0, weights=weights)
+        return self.average_distance
+    
+    def plot_contacts_frequency(self,savepath=None):
+        fig, ax = plt.subplots()
+        sns.heatmap(self.contacts_frequency,cmap='Reds', square=True, ax=ax, vmin=0, vmax=1,
+                    linewidths=0.5, linecolor='lightgrey')
+        for _, spine in ax.spines.items():
+            spine.set_visible(True)
+            spine.set_linewidth(1.5)
+            spine.set_color('black')
+        ticks = [i + 0.5 for i in range(0, len(self.contacts_frequency), 10)]
+        ax.set_xticks(ticks)
+        ax.set_yticks(ticks)
+        ax.set_xticklabels([str(int(i+0.5)) for i in ticks])
+        ax.set_yticklabels([str(int(i+0.5)) for i in ticks])
+        plt.tight_layout()
+        if savepath:
+            plt.savefig(savepath)
+            plt.close()
+        else:
+            plt.show()
+            plt.close()
+    
+    def plot_average_distance(self,savepath=None):
+        fig, ax = plt.subplots()
+        sns.heatmap(self.average_distance,cmap='YlGnBu',square=True,ax=ax, linewidths=0.5, linecolor='lightgrey')
+        for _, spine in ax.spines.items():
+            spine.set_visible(True)
+            spine.set_linewidth(1.5)
+            spine.set_color('black')
+        ticks = [i + 0.5 for i in range(0, len(self.average_distance), 10)]
+        ax.set_xticks(ticks)
+        ax.set_yticks(ticks)
+        ax.set_xticklabels([str(int(i+0.5)) for i in ticks])
+        ax.set_yticklabels([str(int(i+0.5)) for i in ticks])
+        plt.tight_layout()
+        if savepath:
+            plt.savefig(savepath)
+            plt.close()
+        else:
+            plt.show()
+            plt.close()

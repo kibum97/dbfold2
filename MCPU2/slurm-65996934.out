@@ -1,0 +1,11 @@
+Preset CMake variables:
+
+  CMAKE_TOOLCHAIN_FILE="/n/home01/kibumpark/pkg/vcpkg/scripts/buildsystems/vcpkg.cmake"
+
+Preset environment variables:
+
+  VCPKG_ROOT="/n/home01/kibumpark/pkg/vcpkg"
+
+-- Running vcpkg install
+Detecting compiler hash for triplet x64-linux...
+slurmstepd: error: *** JOB 65996934 ON holy7c02410 CANCELLED AT 2025-01-10T04:16:00 ***

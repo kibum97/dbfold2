@@ -175,7 +175,8 @@ def initialize_mbar(log_df, k_bias, trajdir, solver_protocol='pymbar3'):
     natives = np.repeat(np.array(log_df["ncontacts"]).reshape((n_conditions,n_samples))[:,np.newaxis,:],repeats=n_conditions,axis=1)
     setpoints = np.repeat(np.array(log_df["setpoint"]).reshape((n_conditions,n_samples))[np.newaxis,:,:],repeats=n_conditions,axis=0)
     bias = k_bias * (natives-setpoints)**2         
-    u_kln = energies[:,None,:]/temperatures[:,0][None,:,None]+bias
+    u_kln = (energies[:,None,:]+bias)/temperatures[:,0][None,:,None]
+    print(u_kln.shape)
     print('Initializing MBAR')
     if solver_protocol == 'pymbar3':
         solver_options = {"maximum_iterations":10000,"verbose":True}
@@ -204,8 +205,8 @@ def initialize_fes(log_df, k_bias, trajdir, solver_protocol='pymbar3'):
     N_k = np.array([n_samples]*n_conditions)
     natives = np.repeat(np.array(log_df["ncontacts"]).reshape((n_conditions,n_samples))[:,np.newaxis,:],repeats=n_conditions,axis=1)
     setpoints = np.repeat(np.array(log_df["setpoint"]).reshape((n_conditions,n_samples))[np.newaxis,:,:],repeats=n_conditions,axis=0)
-    bias = k_bias * (natives-setpoints)**2         
-    u_kln = energies[:,None,:]/temperatures[:,0][None,:,None]+bias
+    bias = k_bias * (natives-setpoints)**2
+    u_kln = (energies[:,None,:]+bias)/temperatures[:,0][None,:,None]
     print('Initializing FES')
     if solver_protocol == 'pymbar3':
         solver_options = {"maximum_iterations":10000,"verbose":True}
@@ -218,52 +219,27 @@ def initialize_fes(log_df, k_bias, trajdir, solver_protocol='pymbar3'):
         pickle.dump(fes, pickle_file)
     return fes
 
-def generate_substructure(native, d_cutoff, min_seq_separation, contact_sep_thresh, min_clustersize,atom='CA', manual_merge=None ,labelsize = 30, fontsize = 30, max_res = None, plot=True, ax = None, native_contacts=[], verbose=False):
-    if len(native_contacts)==0:
-        coords, resis=read_PDB(native_file, atom)
-        #we get a contact map with a min seq separation larger than usual to avoid helices
-
-        native_distances=compute_contacts_matrix(coords, mode='distances', min_seq_separation=min_seq_separation)
-        
-        native_contacts=np.zeros(np.shape(native_distances))
-        native_contacts[np.where((native_distances<d_cutoff) & (native_distances!=0))]=1
-
-    
-    positions=np.where(native_contacts==1) #which residues participate in contacts
-    positions=np.transpose(positions)
-    M=metrics.pairwise.pairwise_distances(positions, metric='manhattan')  #how far is each contact from each other contact?
-    
-    #To find connected components, I  use my loopCluster function by feeding in the positions ofr the contacts instead of the "files",
-    #as well as above matrix M as d_contacts
-    
-    clusters, pairs_in_substructures, mean_intercluster, mean_intracluster=loopCluster(contact_sep_thresh, positions, M, sort_orphans=False, min_clustersize=min_clustersize, verbose=verbose)
-
-
-    #pairs in substructures is a list of sublists, each of which correspodns to a given substructure
-    #Within a given sublist, there are a bunch of pairs which tell you which pairs of residues belong to that substructure
-    
-    #The above is in a messy form, so we convert it into a form that allows for numpy indexing,
-    #where we have a list of sublists, each sublist contains two arrays, the first of which gives the first indices for the interacting residues
-    #pairs_in_substructures=[[np.array(C)[:,0], np.array(C)[:,1]] for C in pairs_in_substructures]
-    pairs_in_substructures=[(np.array(C)[:,0], np.array(C)[:,1]) for C in pairs_in_substructures]
-    
-    
-    
-    
-    nsubstructures=len(pairs_in_substructures)  #we now produce a set of matrices...the ith page tells you which contacts belong to the ith substructure
-    substructures=np.zeros((np.shape(native_contacts)[0], np.shape(native_contacts)[1], nsubstructures))
-    for n in range(nsubstructures):
-        SS=np.zeros(np.shape(native_contacts))
-        SS[pairs_in_substructures[n]]=1
-        substructures[:,:,n]=SS
-    if manual_merge is not None:
-        del_idx = []
-        for pair in manual_merge:
-            substructures[:,:,pair[0]] = np.sum(substructures[:,:,pair],axis=2)
-            del_idx.append(pair[1:])
-        del_idx = [item for sublist in del_idx for item in sublist]
-        substructures = np.delete(substructures,del_idx,axis=2)
-    if plot:
-        visualize_substructures(native_contacts, substructures, max_res = max_res, ax = ax, labelsize = labelsize, fontsize = fontsize)
-    #print(positions)
-    return native_contacts, substructures
+def compute_contacts(traj, mode='distances', min_seq_separation=2, sqaureform=True, **kwargs):
+    distances, pairs = md.compute_contacts(traj, scheme='ca')
+    filter_idx = [i for i,pair in enumerate(pairs) if pair[1] - pair[0] > min_seq_separation]
+    distances = distances[:,filter_idx]
+    pairs = pairs[filter_idx]
+    if mode == 'distances':
+        if sqaureform:
+            result = md.geometry.squareform(distances, pairs)*10
+            return result
+        else:
+            result = {'pair':pairs, 'distances':distances*10}
+            return result
+    elif mode == 'contacts':
+        dist_cutoff = kwargs.get('dist_cutoff')
+        if dist_cutoff is None:
+            raise ValueError("dist_cutoff must be provided when mode is 'contacts'")
+        contacts = np.zeros(distances.shape)
+        contacts[(distances > 0) & (distances < dist_cutoff/10)] = 1
+        if sqaureform:
+            result = md.geometry.squareform(contacts, pairs)
+            return result
+        else:
+            result = {'pair':pairs, 'contacts':contacts}
+            return result

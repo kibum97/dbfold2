@@ -1,0 +1,94 @@
+!!
+!! NATIVE PROTEIN DATA
+!!
+NATIVE_FILE			/net/h-nfs15-p/data/shakhnovich_lab/share/users/kibumpark/p8__MCPU_mpi/test/in_pdbs/1uao.pdb
+STRUCTURE_FILE  		/net/h-nfs15-p/data/shakhnovich_lab/share/users/kibumpark/p8__MCPU_mpi/test/in_pdbs/1uao.pdb
+NATIVE_DIRECTORY		None
+TEMPLATE_FILE  			/n/netscratch/shakhnovich_lab/Lab/kpark/MCPU/202412_test_1uao/MCPU_min/1uao/nothing.template
+ALIGNMENT_FILE  		1lfb	
+PDB_OUT_FILE			/n/netscratch/shakhnovich_lab/Lab/kpark/MCPU/202412_test_1uao/MCPU_min/1uao/MCPU_run/1uao
+PROTEIN_NAME			p1afvA
+!!
+!!
+!! POTENTIAL PARAMETERS
+!!
+NO_NEW_CLASHES			1
+READ_POTENTIAL 			1Lfb
+USE_GO_POTENTIAL		0
+CLASH_WEIGHT			0
+RMS_WEIGHT			0
+HYDROGEN_BOND			-2
+NATIVE_ATTRACTION		0
+NON_NATIVE_REPULSION		0
+NON_SPECIFIC_ENERGY 		0
+!!
+!! CONTACT DEFINITION
+!!
+SKIP_LOCAL_CONTACT_RANGE	4
+SKIP_BB_CONTACT_RANGE		1000
+!!
+!! MONTE-CARLO PARAMETERS
+!!
+!!
+MC_STEPS			10
+MC_ANNEAL_STEPS 		200000000000000
+MC_PDB_PRINT_STEPS		5
+PRINT_PDB			1
+MC_PRINT_STEPS			5
+!!
+!! Replica Exchange Parameter
+!!
+MC_REPLICA_STEPS                5
+MAX_EXCHANGE                    20
+!!
+!! SIMULATION PARAMETERS
+!!
+MC_TEMP_MIN			0.1
+TEMP_STEP			0.05
+NODES_PER_TEMP			1
+ALPHA				0.75
+LAMBDA				1.8
+MC_STEP_SIZE			2.0
+SIDECHAIN_MOVES			1
+SIDECHAIN_NOISE			10
+USE_GLOBAL_BB_MOVES		0
+YANG_MOVE                       0.5
+YANG_SCALE                      30
+USE_CLUSTER			0.0
+MAX_CLUSTERSTEP			0
+USE_SIDECHAINS			1
+USE_ROTAMERS			1
+USE_ROT_PROB			0
+SEQ_DEP_HB			1
+
+ 
+!!
+!!
+!! Umbrella parameters !!
+!!
+!!
+UMBRELLA			1
+K_BIAS				0.02
+NUMBER_OF_CONTACTS_MAX		0
+CONTACTS_STEP			10
+MIN_SEQ_SEP			8
+CONTACT_CALPHA_CUTOFF		6
+!!
+!! CONSTRAINT_RMSD is a new feature
+!!   MC simulation will not let RMSD exceed set value
+!!   A negative value means this feature is inactive
+CONSTRAINT_RMSD			-1
+!!
+!! PARAMETER FILES
+!!
+TRIPLET_ENERGY_FILE		/n/netscratch/shakhnovich_lab/Lab/kpark/MCPU/202412_test_1uao/MCPU_min/1uao/1uao.triple
+SIDECHAIN_TORSION_FILE		/n/netscratch/shakhnovich_lab/Lab/kpark/MCPU/202412_test_1uao/MCPU_min/1uao/1uao.sctorsion
+SECONDARY_STRUCTURE_FILE	/n/netscratch/shakhnovich_lab/Lab/kpark/MCPU/202412_test_1uao/MCPU_min/1uao/1uao.sec_str
+!!
+AMINO_DATA_FILE			/n/home01/kibumpark/pkg/dbfold/MCPU/config_files/amino_torsion.data
+ROTAMER_DATA_FILE		/n/home01/kibumpark/pkg/dbfold/MCPU/config_files/bbind02.May.lib
+ATOM_TYPE_FILE  		/n/home01/kibumpark/pkg/dbfold/MCPU/config_files/twenty_res_typing
+HELICITY_DATA			/n/home01/kibumpark/pkg/dbfold/MCPU/config_files/T0130.seq
+HYDROGEN_BONDING_DATA		/n/home01/kibumpark/pkg/dbfold/MCPU/config_files/hydrogen_jPL3h.data
+POTENTIAL_DATA 		        /n/home01/kibumpark/pkg/dbfold/MCPU/config_files/p178_conrange4_potential_0.995054
+AROMATIC_FILE			/n/home01/kibumpark/pkg/dbfold/MCPU/config_files/aromatic_noTYR.energy

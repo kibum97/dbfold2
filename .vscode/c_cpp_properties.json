@@ -1,0 +1,19 @@
+{
+    "configurations": [
+        {
+            "name": "Linux",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "/usr/include/eigen3",
+                "${workspaceFolder}/MCPU2/include",
+                "${workspaceFolder}/MCPU2/include/ff"
+            ],
+            "defines": [],
+            "compilerPath": null,
+            "cStandard": "c17",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "linux-clang-x64"
+        }
+    ],
+    "version": 4
+}
