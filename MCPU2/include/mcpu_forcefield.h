@@ -23,9 +23,13 @@ public:
     MCPUForceField();
     ~MCPUForceField();
 
-    void initialize();
     Eigen::MatrixXd getMuPotential() const;
     std::unordered_map<std::string, int> getSmogTypeMap() const;
+    std::tuple<std::vector<int>, std::vector<int>> getSmogType(Topology& topology);
+
+    // Updating topology and positions
+    std::tuple<Topology, Eigen::Matrix3Xd> removeAtomsByID(Topology& old_topology, Eigen::Matrix3Xd old_positions, std::vector<int> remove_atom_ids);
+
     std::map<int, double> getHBondPotential() const;
     HBondConfig getHBondConfig() const;
     int computeHBondindex(int ss, int phi_donor, int psi_donor, int phi_acceptor, int psi_acceptor, int bisect_angle, int plane_angle);
@@ -45,7 +49,7 @@ private:
     void loadSmogTypeMap(const std::string& filename);
     // Hydrogen Bonding Energy
     void loadHbondPotential(const std::string& filename);
-    
+
     //void loadAromatics(const std::string& filename);
 };
 

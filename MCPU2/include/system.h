@@ -21,7 +21,9 @@ public:
     System(Topology& topology, MCPUForceField& forcefield);
     ~System();
 
-    void initialize();
+    // Refine topology by removing atoms
+    // TODO: maybe split backbone and side chain positions?
+    std::tuple<std::vector<size_t>, std::vector<size_t>> splitBackboneSidechain(Topology& topology);
     // Contact Energy - Mu Potential
     Eigen::MatrixXd getMuParameters() const;
     std::vector<int> getSmogType() const;

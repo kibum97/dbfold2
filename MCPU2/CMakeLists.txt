@@ -7,6 +7,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Include directories
 include_directories(include)
+include_directories(include/xtc)
 
 # Find MPI
 set(CMAKE_C_COMPILER mpicc)
@@ -24,6 +25,12 @@ set(SOURCES
     src/topology.cpp
     src/context.cpp
     src/cell_list.cpp
+    src/system.cpp
+    src/mcpu_forcefield.cpp
+    src/integrator.cpp
+    src/reporter.cpp
+    src/xtc/xdrfile.c
+    src/xtc/xdrfile_xtc.c
 )
 
 # Add the executable

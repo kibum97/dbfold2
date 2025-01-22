@@ -29,8 +29,6 @@ CellList::CellList(Eigen::Matrix3Xd positions, double cellSize, const Eigen::Mat
     }
     for (size_t atomID = 0; atomID < positions.cols(); ++atomID) {
         std::array<int, 3> cellIndex = getCellIndex(positions.col(atomID));
-        std::cout << cellIndex[0] << " " << cellIndex[1] << " " << cellIndex[2] << std::endl;
-        std::cout << flattenIndex(cellIndex) << std::endl;
         size_t cellId = flattenIndex(cellIndex);
         cells[cellId].addAtomID(atomID);
     }

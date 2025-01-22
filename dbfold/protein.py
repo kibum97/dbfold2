@@ -36,12 +36,12 @@ class Protein:
         self.eq_step = eq_step
         self.log_df = log_df[log_df.index.get_level_values(2) >= self.eq_step]
 
-    def create_mbar(self,k_bias,recompute=False):
+    def create_mbar(self,k_bias,recompute=False, **mbar_kwargs):
         self.k_bias = k_bias
         if os.path.exists(f'{self.datadir}/mbar.pkl') and not recompute:
             self.mbar = pickle.load(open(f'{self.datadir}/mbar.pkl','rb'))
         else:
-            self.mbar = utils.initialize_mbar(self.log_df, self.k_bias, self.datadir)
+            self.mbar = utils.initialize_mbar(self.log_df, self.k_bias, self.datadir, **mbar_kwargs)
     
     def create_fes(self,k_bias,recompute=False):
         self.k_bias = k_bias
@@ -70,6 +70,8 @@ class Protein:
         w_nb = w_nb / np.sum(w_nb)
         self.weights = w_nb
         self.log_weights = log_w_nb
+
+#    def compute_expectation(self, observables, temperature)
     
     def compute_free_energy(self,indices):
         return -logsumexp(self.log_weights[indices])

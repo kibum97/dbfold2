@@ -28,7 +28,7 @@ std::tuple<Topology, Eigen::Matrix3Xd> parsePDB(const std::string &filename) {
             coord(0) = std::stod(line.substr(30, 8)); // X coordinate (columns 31-38)
             coord(1) = std::stod(line.substr(38, 8));      // Y coordinate (columns 39-46)
             coord(2) = std::stod(line.substr(46, 8));      // Z coordinate (columns 47-54)
-            
+
             // Check if chain ID is already in the map
             size_t chainIndex;
             if (chainMap.find(chainName) == chainMap.end()) {
@@ -41,17 +41,21 @@ std::tuple<Topology, Eigen::Matrix3Xd> parsePDB(const std::string &filename) {
             size_t residueIndex;
             if (residueMap.find(resNum) == residueMap.end()) {
                 topology.chains[chainIndex].residues.push_back(Residue{resName, resNum, topology.chains[chainIndex].residues.size(), chainIndex, {}});
+                topology.residues.push_back(Residue{resName, resNum, topology.residues.size(), chainIndex, {}});
                 residueMap[resNum] = topology.chains[chainIndex].residues.size() - 1;
             }
             residueIndex = residueMap[resNum];
 
-            // Add atom to residue
+            // Add atom to topology
             topology.chains[chainIndex].residues[residueIndex].atoms.push_back(Atom{atomName, element, atomNum, topology.atoms.size(), residueIndex});
+            topology.residues[residueIndex].atoms.push_back(Atom{atomName, element, atomNum, topology.atoms.size(), residueIndex});
+            topology.atoms.push_back(Atom{atomName, element, atomNum, topology.atoms.size(), residueIndex});
 
             // Add coordinates to all_coords
             all_coords.push_back(coord);
         }
     }
+    topology.updateTopology();
 
     // Merge coordinates into a single matrix and set periodic box
     positions = Eigen::Matrix3Xd::Zero(3, all_coords.size());

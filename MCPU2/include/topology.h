@@ -82,9 +82,10 @@ public:
     Eigen::Matrix3d getPeriodicBox() const;
 
     std::vector<Atom> atoms;       // Member variable to store atoms
-    std::vector<Residue> residues; // Member variable to store residues
+    std::vector<Residue> residues; // Member variable to store residues; DO I NEED THIS?
     std::vector<Chain> chains;     // Member variable to store chains
 
+    void removeAtomsByID(const std::vector<int>& atomIDs);
     void updateTopology();
     void printTopology();
 

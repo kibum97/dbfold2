@@ -15,7 +15,6 @@ void Context::computeContacts(size_t cellID) {
     // Compute contacts using cell list data type
     Cell cell = cellList.cells[cellID];
         for (auto atomID1 : cell.atomIDs) {
-            std::cout << "Atom ID: " << atomID1 << std::endl;
             for (int neighborID : cell.neighborIds) {
                 Cell neighbor = cellList.cells[neighborID];
                 for (auto atomID2 : neighbor.atomIDs) {
@@ -27,11 +26,49 @@ void Context::computeContacts(size_t cellID) {
         }
 }
 
-void Context::updatePositions(std::map<size_t, Eigen::Vector3d> new_positions) {
-    for (auto const& [atom_id, new_position] : new_positions) {
-        if (atom_id >= positions.cols()) exit(1);
-        positions.col(atom_id) = new_position;
+void Context::removePosiotionsByAtomID(const std::vector<int>& atomIDs) {
+    // Create a mask to keep track of columns to keep
+    std::vector<bool> keep(positions.cols(), true);
+    for (int index : atomIDs) {
+        if (index >= 0 && index < positions.cols()) {
+            keep[index] = false;
+        }
     }
+    // Count the number of columns to keep
+    int newCols = std::count(keep.begin(), keep.end(), true);
+    // Create a new matrix with the appropriate number of columns
+    Eigen::Matrix3Xd newPositions(3, newCols);
+    // Copy the columns that are to be kept
+    for (int i = 0, j = 0; i < positions.cols(); ++i) {
+        if (keep[i]) {
+            newPositions.col(j++) = positions.col(i);
+        }
+    }
+    // Replace the original matrix with the new matrix
+    positions = newPositions;
+}
+
+std::tuple<Eigen::Matrix3Xd, Eigen::Matrix3Xd> Context::splitBackboneSidechainPositions(std::vector<size_t> backboneAtomIDs, std::vector<size_t> sidechainAtomIDs) {
+    // Split the positions of backbone and side chain atoms
+    Eigen::Matrix3Xd backbonePositions(3, backboneAtomIDs.size());
+    Eigen::Matrix3Xd sidechainPositions(3, sidechainAtomIDs.size());
+    for (int i = 0; i < backboneAtomIDs.size(); ++i) {
+        backbonePositions.col(i) = positions.col(backboneAtomIDs[i]);
+    }
+    for (int i = 0; i < sidechainAtomIDs.size(); ++i) {
+        sidechainPositions.col(i) = positions.col(sidechainAtomIDs[i]);
+    }
+    return std::make_tuple(backbonePositions, sidechainPositions);
+}
+
+void Context::updateContext(std::vector<size_t> movedAtomIDs, Eigen::Matrix3Xd new_positions) {
+    updatePositions(movedAtomIDs, new_positions);
+    updateContacts();
+}
+
+void Context::updatePositions(std::vector<size_t> movedAtomIDs, Eigen::Matrix3Xd new_positions) {
+    this->positions = new_positions;
+    this->movedAtomIDs = movedAtomIDs;
 }
 
 void Context::updateContacts() {
@@ -56,8 +93,4 @@ Eigen::Matrix3Xd Context::getPositions() const {
 
 CellList Context::getCellList() const {
     return cellList;
-}
-
-std::vector<size_t> Context::setMovedAtomIDs() {
-    return movedAtomIDs;
 }

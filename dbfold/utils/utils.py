@@ -159,7 +159,7 @@ def logfiles_to_dataframe(trajdir):
     print(outname, "written to file")
     return dataframe
 
-def initialize_mbar(log_df, k_bias, trajdir, solver_protocol='pymbar3'):
+def initialize_mbar(log_df, k_bias, trajdir, solver_protocol='pymbar3', **mbar_kwargs):
     # Set up for mbar calculation
     conditions = []
     for cond in zip(log_df.index.get_level_values(0),log_df.index.get_level_values(1)):
@@ -181,9 +181,9 @@ def initialize_mbar(log_df, k_bias, trajdir, solver_protocol='pymbar3'):
     if solver_protocol == 'pymbar3':
         solver_options = {"maximum_iterations":10000,"verbose":True}
         solver_protocol = {"method":"adaptive","options":solver_options}
-        mbar = pymbar.MBAR(u_kln, N_k, solver_protocol = (solver_protocol,))
+        mbar = pymbar.MBAR(u_kln, N_k, solver_protocol = (solver_protocol,), **mbar_kwargs)
     else:
-        mbar = pymbar.MBAR(u_kln, N_k, solver_protocol = (solver_protocol,))
+        mbar = pymbar.MBAR(u_kln, N_k, solver_protocol = (solver_protocol,), **mbar_kwargs)
     print('Initialization complete')
     # Saving
     with open(f'{trajdir}/mbar.pkl', 'wb') as pickle_file:
