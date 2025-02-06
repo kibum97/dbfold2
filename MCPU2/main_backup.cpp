@@ -11,6 +11,7 @@
 #include "logger.h"
 #include "load_pdb.h"
 
+
 int main(int argc, char *argv[]) {
     int rank, size;
 
@@ -83,3 +84,36 @@ int main(int argc, char *argv[]) {
 
     return EXIT_SUCCESS;
 }
+
+
+
+
+/*
+UNUSED CODE BLOCKS BACKUP
+
+double sign(double a, double b) {
+    if (b >= 0.)
+        return fabs(a);
+    else
+        return -fabs(a);
+}
+
+double Context::computeDihedralAngle2(const Eigen::Vector3d& a, const Eigen::Vector3d& b, const Eigen::Vector3d& c, const Eigen::Vector3d& d) {
+    Eigen::Vector3d b1 = a - b;
+    Eigen::Vector3d b2 = c - b;
+    Eigen::Vector3d b3 = c - d;
+
+    Eigen::Vector3d p = b1.cross(b2);
+    Eigen::Vector3d q = b2.cross(b3);
+    Eigen::Vector3d s = b3.cross(b1);
+
+    
+    double arg = p.dot(q) / sqrt(p.dot(p) * q.dot(q));
+    arg = sign(std::min(fabs(arg), 1.0e0), arg);
+    double angle = sign(acos(arg),s.dot(b2));
+
+    return angle;
+}
+---------------------------------------
+
+*/

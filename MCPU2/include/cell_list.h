@@ -13,7 +13,7 @@ public:
     size_t cellID = 0;
     std::vector<size_t> atomIDs = {};
     std::vector<size_t> neighborIds = {};
-
+    // Functions handling atomIDs
     void addAtomID(size_t atomID);
     void removeAtomID(size_t atomID);
 };

@@ -66,8 +66,8 @@ def generate_substructures(native_file, d_cutoff, min_seq_separation, contact_se
     """
     # Compute pairwise distances and contacts of native structure
     traj = md.load(native_file)
-    native_distances = compute_contacts(traj, mode='distances', min_seq_separation = min_seq_separation)
-    native_contacts_dict = compute_contacts(traj, mode='contacts', min_seq_separation = min_seq_separation, dist_cutoff = d_cutoff, sqaureform=False)
+    native_distances = compute_contacts(traj, mode='distances', min_seq_separation = min_seq_separation)[0]
+    native_contacts_dict = compute_contacts(traj, mode='contacts', min_seq_separation = min_seq_separation, dist_cutoff = d_cutoff, squareform=False)
     native_contacts = native_contacts_dict['contacts']
     native_pairs = native_contacts_dict['pair']
     positions = native_pairs[native_contacts[0] == 1]
@@ -77,6 +77,8 @@ def generate_substructures(native_file, d_cutoff, min_seq_separation, contact_se
     
     # Save substructures in corresponding variable
     substructures = []
+    print(f'Number of substructures: {cluster_labels.max()+1}')
+    print(positions.shape, np.shape(native_distances))
     for n in range(cluster_labels.max()+1):
         substructure_temp = np.zeros(np.shape(native_distances))
         substructure_temp[positions[cluster_labels == n,0],positions[cluster_labels == n,1]] = 1

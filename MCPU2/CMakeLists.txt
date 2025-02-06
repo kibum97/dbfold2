@@ -31,6 +31,8 @@ set(SOURCES
     src/reporter.cpp
     src/xtc/xdrfile.c
     src/xtc/xdrfile_xtc.c
+    src/utils/geometry.cpp
+    src/utils/hbond.cpp
 )
 
 # Add the executable

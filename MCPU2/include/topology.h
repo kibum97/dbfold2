@@ -24,11 +24,12 @@ public:
     std::string resName;     // Residue name (e.g., "TYR")
     int resNum;              // Residue sequence number
     size_t resID;            // Residue index in the vector of residues
+    size_t resType;             // Residue type (numerical label for amino acid)
     std::vector<Atom> atoms; // Vector of atoms in residue
     size_t chainID;          // Chain index in the vector of chains
 
     Residue(const std::string& resName, int resNum, size_t resID, size_t chainID, const std::vector<Atom>& atoms)
-        : resName(resName), resNum(resNum), resID(resID), chainID(chainID), atoms(atoms) {}
+        : resName(resName), resNum(resNum), resID(resID), resType(0), chainID(chainID), atoms(atoms) {}
 };
 
 class Chain

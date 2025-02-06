@@ -1,5 +1,6 @@
 #include "mcpu_forcefield.h"
 #include "read_config.h"
+#include "utils/hbond.h"
 #include <fstream>
 #include <iostream>
 
@@ -10,12 +11,32 @@ extern std::string potential_file;
 extern std::string atom_type_file;
 extern std::string hbond_file;
 extern std::string hydrogen_bonding_data;
+extern std::string all_triplet_file;
+extern std::string all_sctorsion_file;
 
 MCPUForceField::MCPUForceField() {
     // Initialize force field implementation
     loadMuPotential(potential_file);
     loadSmogTypeMap(atom_type_file);
     loadHbondPotential(hbond_file);
+    loadSequenceDependentHBondPotential(seq_hbond_file);
+    for (int i; i < 20; i++) {
+        for (int j; j < 20; j++) {
+            for (int k; k < 20; k++) {
+                for (int l; l < 6; l++) {
+                    for (int m; m < 6; m++) {
+                        for (int n; n < 6; n++) {
+                            for (int o; o < 6; o++) {
+                                bbTorsions[i][j][k][l][m][n][o] = 1000;
+                                scTorsions[i][j][k][l][m][n][o] = 1000;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    loadTorsionalPotential(all_triplet_file, all_sctorsion_file);
 }
 
 MCPUForceField::~MCPUForceField() {
@@ -26,7 +47,7 @@ void MCPUForceField::loadMuPotential(const std::string& filename) {
     // Load mu potential implementation
     std::ifstream file(filename);
     if (!file.is_open()) {
-        throw std::runtime_error("Could not open file.");
+        throw std::runtime_error("Could not open mu potential file.");
     }
 
     // Find the matrix dimensions dynamically
@@ -60,7 +81,7 @@ void MCPUForceField::loadSmogTypeMap(const std::string& filename) {
     // Open the file
     std::ifstream inputFile(filename);
     if (!inputFile.is_open()) {
-        throw std::runtime_error("Could not open file.");
+        throw std::runtime_error("Could not open SMOG type file.");
     }
 
     // Read the file line by line
@@ -91,23 +112,93 @@ void MCPUForceField::loadHbondPotential(const std::string& filename) {
     // Load hydrogen bond potential implementation
     std::ifstream file(filename);
     if (!file.is_open()) {
-        throw std::runtime_error("Could not open file.");
+        throw std::runtime_error("Could not open Hbond file.");
     }
 
     // Find the matrix dimensions dynamically
-    std::map <int, double> hbondPotential;
     int ss;
-    int phi_donor, psi_donor, phi_acceptor, psi_acceptor;
-    int bisect_angle, plane_angle;
+    int plane_angle_ca, bisect_angle_ca, plane_angle_ca_off, bisect_angle_ca_off;
+    int bisect_angle_strand, plane_angle_strand;
     double value;
     int index;
 
     // Store the value in the map
-    while (file >> ss >> phi_donor >> psi_donor >> phi_acceptor >> psi_acceptor >> bisect_angle >> plane_angle >> value) {    
-        index = computeHBondindex(ss, phi_donor, psi_donor, phi_acceptor, psi_acceptor, bisect_angle, plane_angle);
+    while (file >> ss >> plane_angle_ca >> bisect_angle_ca >> plane_angle_ca_off >> bisect_angle_ca_off >> plane_angle_strand >> bisect_angle_strand >> value) {    
+        std::array <int, 3> bisect_indices = {bisect_angle_ca, bisect_angle_ca_off, bisect_angle_strand};
+        std::array <int, 3> plane_indices = {plane_angle_ca, plane_angle_ca_off, plane_angle_strand};
+        index = computeHBondindex(ss, bisect_indices, plane_indices);
         hbondPotential[index] = value;
     }
-    file.close();    
+    file.close();
+}
+
+void MCPUForceField::loadSequenceDependentHBondPotential(const std::string& filename) {
+    // Load sequence dependent hydrogen bond potential implementation
+    std::ifstream file(filename);
+    if (!file.is_open()) {
+        throw std::runtime_error("Could not open sequence dependent Hbond file.");
+    }
+    // Read and store values
+    int secondary_structure_label, donor_resType, acceptor_resType;
+    double value;
+    int obs, tot_obs;
+    while (file >> secondary_structure_label >> donor_resType >> acceptor_resType >> value >> obs >> tot_obs) {
+        std::cout << "Value from file - HBOND SEQ DEP : " << value << std::endl;
+        sequenceDependentHBondPotential[secondary_structure_label][donor_resType][acceptor_resType] = (-1.) * value;
+    }
+    file.close();
+}
+
+void MCPUForceField::loadTorsionalPotential(const std::string& triple_filename, const std::string& sctorsion_filename) {
+    // Load backbone torsion parameters
+    std::ifstream triple_file(triple_filename);
+    if (!triple_file.is_open()) {
+        throw std::runtime_error("Could not open backbone torsion file.");
+    }
+    //bbTorsions = {};
+    size_t res1, res2, res3;
+    size_t plane_angle_index, bisect_angle_index, phi_index, psi_index;
+    int energy, obs, tot_obs, val;
+    while (triple_file >> res1 >> res2 >> res3 >> plane_angle_index >> bisect_angle_index >> phi_index >> psi_index >> energy >> obs >> tot_obs >> val) {
+        // Store the value in the array
+        if (res1 < 20 && res2 < 20 && res3 < 20 && plane_angle_index < 6 && bisect_angle_index < 6 && phi_index < 6 && psi_index < 6) {
+            bbTorsions[res1][res2][res3][plane_angle_index][bisect_angle_index][phi_index][psi_index] = energy;
+        } else {
+            std::cerr << "Index out of bounds: " << res1 << " " << res2 << " " << res3 << " " << plane_angle_index << " " << bisect_angle_index << " " << phi_index << " " << psi_index << std::endl;
+        }
+    }
+    triple_file.close();
+    // Load sidechain torsion parameters
+    std::ifstream sctorsion_file(sctorsion_filename);
+    if (!sctorsion_file.is_open()) {
+        throw std::runtime_error("Could not open sidechain torsion file.");
+    }
+    //scTorsions = {};
+    size_t chi1, chi2, chi3, chi4;
+    while (sctorsion_file >> res1 >> res2 >> res3 >> chi1 >> chi2 >> chi3 >> chi4 >> energy >> obs >> tot_obs >> val) {
+        // Store the value in the array
+        if (res1 < 20 && res2 < 20 && res3 < 20 && chi1 < 12 && chi2 < 12 && chi3 < 12 && chi4 < 12) {
+            scTorsions[res1][res2][res3][chi1][chi2][chi3][chi4] = energy;
+        } else {
+            std::cerr << "Index out of bounds: " << res1 << " " << res2 << " " << res3 << " " << chi1 << " " << chi2 << " " << chi3 << " " << chi4 << std::endl;
+        }
+    }
+    sctorsion_file.close();
+}
+
+void MCPUForceField::loadAromaticPotential(const std::string& filename) {
+    // Load aromatic potential implementation
+    std::ifstream file(filename);
+    if (!file.is_open()) {
+        throw std::runtime_error("Could not open aromatic file.");
+    }
+    // Define variables to read the file
+    int index, value, obs, tot_obs;
+    // Read file
+    while (file >> index >> value >> obs >> tot_obs) {
+        aromaticPotential[index] = value;
+    }
+    file.close();
 }
 
 std::tuple<std::vector<int>, std::vector<int>> MCPUForceField::getSmogType(Topology& topology) {
@@ -139,32 +230,37 @@ std::tuple<Topology, Eigen::Matrix3Xd> MCPUForceField::removeAtomsByID(Topology&
     std::vector<Atom> new_atoms;
     std::vector<Residue> new_residues;
     int new_atom_id = 0;
+    std::unordered_map<int, int> old_to_new_atom_id;
     for (int i = 0; i < old_topology.getNumAtoms(); ++i) {
+        int old_atom_id = old_topology.atoms[i].atomID;
         if (std::find(remove_atom_ids.begin(), remove_atom_ids.end(), old_topology.atoms[i].atomID) == remove_atom_ids.end()) {
             new_atoms.push_back(old_topology.atoms[i]);
             new_atoms.back().atomID = new_atom_id;
             new_positions.col(new_atom_id) = old_positions.col(i);
+            old_to_new_atom_id[old_atom_id] = new_atom_id;
             new_atom_id++;
         }
     }
     new_topology.atoms = new_atoms;
+    for (auto& residue : new_topology.residues) {
+        for (auto& atom : residue.atoms) {
+            atom.atomID = old_to_new_atom_id[atom.atomID];
+        }
+    }
     new_topology.updateTopology();
     return std::make_tuple(new_topology, new_positions);
 }
 
-int MCPUForceField::computeHBondindex(int ss, int phi_donor, int psi_donor, int phi_acceptor, int psi_acceptor, int bisect_angle, int plane_angle) {
-    // Compute hydrogen bond index implementation
-    return plane_angle 
-       + bisect_angle * 9 
-       + psi_acceptor * 9 * 9 
-       + phi_acceptor * 9 * 9 * 9 
-       + psi_donor * 9 * 9 * 9 * 9 
-       + phi_donor * 9 * 9 * 9 * 9 * 9 
-       + ss * 9 * 9 * 9 * 9 * 9 * 9;
-}
-
 Eigen::MatrixXd MCPUForceField::getMuPotential() const {
     return muPotential;
+}
+
+BBTorsionArray MCPUForceField::getBackBoneTorsions() const {
+    return bbTorsions;
+}
+
+SCTorsionArray MCPUForceField::getSideChainTorsions() const {
+    return scTorsions;
 }
 
 std::unordered_map<std::string, int> MCPUForceField::getSmogTypeMap() const {
@@ -173,6 +269,14 @@ std::unordered_map<std::string, int> MCPUForceField::getSmogTypeMap() const {
 
 std::map<int, double> MCPUForceField::getHBondPotential() const {
     return hbondPotential;
+}
+
+HBondParamArray MCPUForceField::getSequenceDependentHBondPotential() const {
+    return sequenceDependentHBondPotential;
+}
+
+std::map<int, double> MCPUForceField::getAromaticPotential() const {
+    return aromaticPotential;
 }
 
 HBondConfig MCPUForceField::getHBondConfig() const {

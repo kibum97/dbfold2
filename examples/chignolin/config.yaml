@@ -35,5 +35,8 @@ parameter_files:
   HELICITY_DATA: /n/home01/kibumpark/pkg/dbfold2/MCPU2/config_files/T0130.seq
   HYDROGEN_BONDING_DATA: /n/home01/kibumpark/pkg/dbfold2/MCPU2/config_files/hydrogen_jPL3h.data
   HYDROGEN_BOND_FILE: /n/home01/kibumpark/pkg/dbfold2/MCPU2/config_files/jPL3h.energy
+  SEQ_HYDROGEN_BOND_FILE: /n/home01/kibumpark/pkg/dbfold2/MCPU2/config_files/seq_dep_hb_mu_low.energy
   POTENTIAL_DATA: /n/home01/kibumpark/pkg/dbfold2/MCPU2/config_files/p178_conrange4_potential_0.995054
   AROMATIC_FILE: /n/home01/kibumpark/pkg/dbfold2/MCPU2/config_files/aromatic_noTYR.energy
+  TRIPLET_FILE: /n/home01/kibumpark/pkg/dbfold2/MCPU2/config_files/triple.energy
+  SC_TORISON_FILE: /n/home01/kibumpark/pkg/dbfold2/MCPU2/config_files/sct.energy

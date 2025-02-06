@@ -11,7 +11,8 @@ std::string native_file, structure_file, native_directory, template_file;
 std::string substructure_path, alignment_file, triplet_file, sctorsion_file;
 std::string sec_str_file, amino_data_file, atom_type_file, rotamer_data_file;
 std::string pdb_out_file, std_prefix, potential_file, helicity_data;
-std::string hydrogen_bonding_data, hbond_file, aromatic_file, PROTEIN_NAME;
+std::string hydrogen_bonding_data, hbond_file, seq_hbond_file, aromatic_file, PROTEIN_NAME;
+std::string all_triplet_file, all_sctorsion_file;
 int PRINT_PDB, SIDECHAIN_MOVES, MC_PRINT_STEPS, MC_PDB_PRINT_STEPS, NODES_PER_TEMP;
 int SKIP_LOCAL_CONTACT_RANGE, SKIP_BB_CONTACT_RANGE, my_rank_offset, USE_SIDECHAINS;
 int NO_NEW_CLASHES, USE_ROTAMERS, READ_POTENTIAL, USE_GO_POTENTIAL, MC_REPLICA_STEPS;
@@ -63,8 +64,11 @@ void SetProgramOptions(const std::string &cfg_file) {
     helicity_data = config["parameter_files"]["HELICITY_DATA"].as<std::string>();
     hydrogen_bonding_data = config["parameter_files"]["HYDROGEN_BONDING_DATA"].as<std::string>();
     hbond_file = config["parameter_files"]["HYDROGEN_BOND_FILE"].as<std::string>();
+    seq_hbond_file = config["parameter_files"]["SEQ_HYDROGEN_BOND_FILE"].as<std::string>();
     potential_file = config["parameter_files"]["POTENTIAL_DATA"].as<std::string>();
     aromatic_file = config["parameter_files"]["AROMATIC_FILE"].as<std::string>();
+    all_triplet_file = config["parameter_files"]["TRIPLET_FILE"].as<std::string>();
+    all_sctorsion_file = config["parameter_files"]["SC_TORISON_FILE"].as<std::string>();
 }
 
 void LogConfigurationDetails() {

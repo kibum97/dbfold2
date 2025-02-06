@@ -1,5 +1,3 @@
-DIR	/home/shimada/projects/protein_design/amino_acids/
-*
 !! amino -#heavy atoms- #torsions filename
 0  ALA 6  0 ALA.pdb A
 1  ARG 12 4 ARG.pdb R

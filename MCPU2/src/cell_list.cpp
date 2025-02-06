@@ -58,11 +58,7 @@ std::array<int, 3> CellList::getCellIndex(const Eigen::Vector3d& position) const
         static_cast<int>(position[2] / cellSize)
     };
     for (int i = 0; i < 3; ++i) {
-        if (index[i] < 0) {
-            index[i] += numCells[i];
-        } else if (index[i] >= numCells[i]) {
-            index[i] -= numCells[i];
-        }
+        index[i] = (index[i] % numCells[i] + numCells[i]) % numCells[i];
     }
     return index;
 }

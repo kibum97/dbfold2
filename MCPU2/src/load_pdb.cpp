@@ -1,4 +1,5 @@
 #include "load_pdb.h"
+#include "amino_acids.h"
 
 std::tuple<Topology, Eigen::Matrix3Xd> parsePDB(const std::string &filename) {
     Topology topology;
@@ -40,8 +41,10 @@ std::tuple<Topology, Eigen::Matrix3Xd> parsePDB(const std::string &filename) {
             // Check if residue sequence number is already in the map
             size_t residueIndex;
             if (residueMap.find(resNum) == residueMap.end()) {
-                topology.chains[chainIndex].residues.push_back(Residue{resName, resNum, topology.chains[chainIndex].residues.size(), chainIndex, {}});
-                topology.residues.push_back(Residue{resName, resNum, topology.residues.size(), chainIndex, {}});
+                Residue residue{resName, resNum, topology.residues.size(), chainIndex, {}};
+                residue.resType = residueType_map.at(resName);
+                topology.chains[chainIndex].residues.push_back(residue);
+                topology.residues.push_back(residue);
                 residueMap[resNum] = topology.chains[chainIndex].residues.size() - 1;
             }
             residueIndex = residueMap[resNum];

@@ -1,4 +1,5 @@
 #include "integrator.h"
+#include "utils/random.h"
 
 Integrator::Integrator() {
     // Constructor
@@ -29,7 +30,8 @@ Eigen::Matrix3Xd Integrator::partialRotation(Eigen::Matrix3Xd& positions, const 
     // Create a rotation matrix
     Eigen::Matrix3d rotationMatrix = createRotationMatrix(angle, axis);
     // Eigen::Quaterniond quaternion = createQuaternion(angle, axis);
-    for (size_t atomID : atomIDs) {
+    for (auto atomid = atomIDs.begin() + 2; atomid != atomIDs.end(); ++atomid) {
+        size_t atomID = *atomid;
         positions.col(atomID) = rotationMatrix * positions.col(atomID);
     }
     // Translate the molecule back to its original position
@@ -70,6 +72,42 @@ std::vector<size_t> Integrator::selectAtomIDs(size_t atomID1, size_t atomID2, co
     }
     return atomIDs;
 }
+
+Eigen::Matrix3Xd Integrator::sidechainRotation(size_t resID, Eigen::Matrix3Xd& positions, std::unordered_map<size_t, std::vector<RotamerData>> rotamerIDMap, std::unordered_map<size_t, std::vector<TorsionIDData>> rotatingSCAtomsMap, std::vector<std::array<double, 4>> sidechain_torsions) {
+    // Get rotation angles from rotamer data
+    std::cout << "Performing sc rotation at residue " << resID << std::endl;
+    std::vector<size_t> rotamerIDs = {};
+    std::vector<double> weights = {};
+    size_t index = 0;
+    for (const auto& rotamerData : rotamerIDMap[resID]) {
+        rotamerIDs.push_back(index);
+        weights.push_back(rotamerData.probability);
+        ++index;
+    }
+    if (rotamerIDs.size() > 0) {
+        RotamerData selected_rotamer = rotamerIDMap[resID][selectElementWithWeights(rotamerIDs, weights)];
+        std::cout << "Selected rotamer confirmed" << std::endl;
+        // Perform sidechain rotation
+        for (const auto& torsionIDData : rotatingSCAtomsMap[resID]) {
+            int torsion_id = torsionIDData.torsion_id;
+            std::vector<size_t> atomIDs;
+            atomIDs.push_back(torsionIDData.torsion_atomIDs[1]);
+            atomIDs.push_back(torsionIDData.torsion_atomIDs[2]);
+            for (size_t atomID : torsionIDData.rotating_atomIDs) {
+                atomIDs.push_back(atomID);
+            }
+            std::cout << "Atom IDs confirmed" << std::endl;
+            Eigen::Vector3d axis = positions.col(atomIDs[1]) - positions.col(atomIDs[0]);
+            axis.normalize();
+            std::cout << "Axis computed" << std::endl;
+            double angle = generateGaussian(selected_rotamer.chiMeans[torsion_id],selected_rotamer.chiStdDevs[torsion_id]) - sidechain_torsions[resID][torsion_id];
+            std::cout << "Angle computed" << std::endl;
+            positions = partialRotation(positions, atomIDs, angle, axis);
+        }
+    }
+    return positions;
+}
+
 /*
 void Integrator::concertedRotation(Eigen::Matrix3Xd& positions, const std::vector<size_t>& atomIDs, double angle    ) {
     // Perform concerted rotation
