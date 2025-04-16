@@ -13,7 +13,7 @@ import joblib
 import pickle
 from functools import partial
 from dbfold.utils import substructures as subs
-from dbfold.utils import utils
+from dbfold.utils import postprocessing
 import seaborn as sns
 import matplotlib.pyplot as plt
 
@@ -32,7 +32,7 @@ class Protein:
             self.datadir = f'{homedir}/{pdbroot}/MCPU_run/'
 
     def create_log_dataframe(self,eq_step):
-        log_df = utils.logfiles_to_dataframe(self.datadir)
+        log_df = postprocessing.logfiles_to_dataframe(self.datadir)
         self.eq_step = eq_step
         self.log_df = log_df[log_df.index.get_level_values(2) >= self.eq_step]
 
@@ -41,15 +41,14 @@ class Protein:
         if os.path.exists(f'{self.datadir}/mbar.pkl') and not recompute:
             self.mbar = pickle.load(open(f'{self.datadir}/mbar.pkl','rb'))
         else:
-            self.mbar = utils.initialize_mbar(self.log_df, self.k_bias, self.datadir, **mbar_kwargs)
+            self.mbar = postprocessing.initialize_mbar(self.log_df, self.k_bias, self.datadir, **mbar_kwargs)
     
-    def create_fes(self,k_bias,recompute=False):
+    def create_fes(self,k_bias,recompute=False, **fes_kwargs):
         self.k_bias = k_bias
         if os.path.exists(f'{self.datadir}/fes.pkl') and not recompute:
             self.fes = pickle.load(open(f'{self.datadir}/fes.pkl','rb'))
         else:
-            self.fes = utils.initialize_fes(self.log_df, self.k_bias, self.datadir)
-
+            self.fes = postprocessing.initialize_fes(self.log_df, self.k_bias, self.datadir, **fes_kwargs)
     """
     TODO: ADD MCPU feature to track replica and use auto detection
     def detect_equilibration(self):
@@ -71,7 +70,8 @@ class Protein:
         self.weights = w_nb
         self.log_weights = log_w_nb
 
-#    def compute_expectation(self, observables, temperature)
+#    def compute_fes_kde(self,temperature):
+
     
     def compute_free_energy(self,indices):
         return -logsumexp(self.log_weights[indices])
@@ -113,6 +113,7 @@ class Protein:
         for xtc in self.xtc_list:
             traj = md.load(xtc,top=self.native)
             traj = traj[traj.time >= self.eq_step]
+            traj = traj[traj.time <= self.log_df.index.get_level_values(2).max()]
             traj = traj.atom_slice(traj.top.select('name CA'))
             #for step in remove_list:
             #    print(f'Step {step} removed')
@@ -156,7 +157,7 @@ class Protein:
             np.save(feature_array,save)
         return feature_array
 
-    def compute_fes(self,features,temperature,ftype='discrete'):
+    def compute_fes(self,features,temperature,ftype='discrete',nbins=30,n_bootstrap=None):
         self.log_df['feat'] = features
         #self.log_df['mbar'] = self.mbar
         if ftype == 'discrete':
@@ -166,22 +167,28 @@ class Protein:
             hist_values, bin_edges = np.histogram(self.log_df['feat'].values, bins=bin_edges)
         elif ftype == 'continuous':
             histogram_parameters = {}
-            nbins=30
+            nbins=nbins
             bin_center_i = np.zeros([nbins], np.float64)
             hist_values, bin_edges = np.histogram(self.log_df['feat'].values, bins=nbins)
             for i in range(nbins):
                 bin_center_i[i] = 0.5 * (bin_edges[i] + bin_edges[i + 1])
         
         nconditions = self.log_df.index.droplevel("step").nunique()
-        bin_edges[-1] += 1e-10 # To ensure np.digitize to work properly
+        bin_edges[-1] += 1e-1 # To ensure np.digitize to work properly
         histogram_parameters["bin_edges"] = bin_edges
-        self.fes.generate_fes(self.log_df['energy'].values.reshape(nconditions,-1)/temperature,self.log_df['feat'].values,fes_type="histogram",histogram_parameters=histogram_parameters)
+        if n_bootstrap is not None:
+            self.fes.generate_fes(self.log_df['energy'].values.reshape(nconditions,-1)/temperature,self.log_df['feat'].values,fes_type="histogram",histogram_parameters=histogram_parameters,n_bootstraps=n_bootstrap)
+        else:
+            self.fes.generate_fes(self.log_df['energy'].values.reshape(nconditions,-1)/temperature,self.log_df['feat'].values,fes_type="histogram",histogram_parameters=histogram_parameters)
         uncertainty_method = "analytical"#"bootstrap"
+        bin_center_i = [self.fes.histogram_data["bin_label"][key] for key in self.fes.histogram_data["nonzero_bins"]]
         results = self.fes.get_fes(
-            bin_center_i[hist_values != 0], reference_point="from-lowest", uncertainty_method=uncertainty_method
+            bin_center_i, reference_point="from-lowest", uncertainty_method=uncertainty_method
         )
-        
-        return results, bin_center_i[hist_values != 0]
+        #results = self.fes.get_fes(
+        #    bin_center_i[hist_values != 0], reference_point="from-lowest", uncertainty_method=uncertainty_method
+        #)
+        return results, bin_center_i
 
     def merge_traj_from_indices(self,indices):
         """
@@ -208,32 +215,65 @@ class Protein:
         saving_traj = md.join(saving_traj)
         return saving_traj
     
+    def merge_traj_from_indices_nous(self,indices):
+        """
+        Create a single trajectory from snapshots of given indices
+        Parameters
+        ----------
+        indices : list
+            List of indices of snapshots
+        Returns
+        -------
+        saving_traj : mdtraj.Trajectory
+            Trajectory of snapshots
+        """
+        saving_snaps = self.log_df.loc[indices].index.values
+        saving_dict = defaultdict(list)
+        saving_traj = []
+        for snap in saving_snaps:
+            temperature, setpoint, step = snap
+            saving_dict[f'{round(temperature,3):.3f}'].append(step)
+        for key, value in saving_dict.items():
+            traj = md.load(f'{self.datadir}/{self.pdbroot}_{key}.xtc',top=self.native)
+            traj = traj[np.where(np.isin(traj.time, value))[0]]
+            saving_traj.append(traj)
+        saving_traj = md.join(saving_traj)
+        return saving_traj
+    
     def compute_contacts_frequency(self,indices=None):
         contacts_list = []
         for xtc in self.xtc_list:
             traj = md.load(xtc, top=self.native)
             traj = traj[traj.time >= self.eq_step]
+            traj = traj[traj.time <= self.log_df.index.get_level_values(2).max()]
             traj = traj.atom_slice(traj.top.select('name CA'))
-            contacts_list.append(utils.compute_contacts(traj, mode='contacts',
+            results = postprocessing.compute_contacts(traj, mode='contacts',
                                               min_seq_separation=self.min_seq_separation,
                                               dist_cutoff=self.dist_cutoff,
-                                              sqaureform=True))
+                                              sqaureform=False)
+            distances = results['contacts']
+            pairs = results['pair']
+            contacts_list.append(distances)
         contacts = np.vstack(contacts_list)
         weights = self.weights
+        print(contacts.shape, pairs.shape)
         if indices is not None:
             contacts = contacts[indices]
             weights = weights[indices]
+        self.contacts = contacts
         weights = weights / weights.sum()
         self.contacts_frequency = np.average(contacts, axis=0, weights=weights)
-        return self.contacts_frequency
+        self.contacts_pairs = pairs
+        return self.contacts_pairs, self.contacts_frequency
 
     def compute_average_distance(self,indices=None):
         distances_list = []
         for xtc in self.xtc_list:
             traj = md.load(xtc, top=self.native)
             traj = traj[traj.time >= self.eq_step]
+            traj = traj[traj.time <= self.log_df.index.get_level_values(2).max()]
             traj = traj.atom_slice(traj.top.select('name CA'))
-            distances_list.append(utils.compute_contacts(traj, mode='distances',
+            distances_list.append(postprocessing.compute_contacts(traj, mode='distances',
                                               min_seq_separation=self.min_seq_separation,
                                               dist_cutoff=self.dist_cutoff,
                                               sqaureform=True))
@@ -245,16 +285,17 @@ class Protein:
         weights = weights / weights.sum()
         self.average_distance = np.average(distances, axis=0, weights=weights)
         return self.average_distance
-    
+
     def plot_contacts_frequency(self,savepath=None):
         fig, ax = plt.subplots()
-        sns.heatmap(self.contacts_frequency,cmap='Reds', square=True, ax=ax, vmin=0, vmax=1,
-                    linewidths=0.5, linecolor='lightgrey')
+        contacts_frequency_map = md.geometry.squareform(self.contacts_frequency.reshape(1,-1),self.contacts_pairs)[0]
+        sns.heatmap(contacts_frequency_map,cmap='Reds', square=True, ax=ax, vmin=0, vmax=1,
+                    linewidths=0, linecolor='lightgrey')
         for _, spine in ax.spines.items():
             spine.set_visible(True)
             spine.set_linewidth(1.5)
             spine.set_color('black')
-        ticks = [i + 0.5 for i in range(0, len(self.contacts_frequency), 10)]
+        ticks = [i + 0.5 for i in range(0, len(contacts_frequency_map), 10)]
         ax.set_xticks(ticks)
         ax.set_yticks(ticks)
         ax.set_xticklabels([str(int(i+0.5)) for i in ticks])
@@ -265,7 +306,7 @@ class Protein:
             plt.close()
         else:
             plt.show()
-            plt.close()
+            plt.close()       
     
     def plot_average_distance(self,savepath=None):
         fig, ax = plt.subplots()

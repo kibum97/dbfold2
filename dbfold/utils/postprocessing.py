@@ -175,13 +175,15 @@ def initialize_mbar(log_df, k_bias, trajdir, solver_protocol='pymbar3', **mbar_k
     natives = np.repeat(np.array(log_df["ncontacts"]).reshape((n_conditions,n_samples))[:,np.newaxis,:],repeats=n_conditions,axis=1)
     setpoints = np.repeat(np.array(log_df["setpoint"]).reshape((n_conditions,n_samples))[np.newaxis,:,:],repeats=n_conditions,axis=0)
     bias = k_bias * (natives-setpoints)**2         
-    u_kln = (energies[:,None,:]+bias)/temperatures[:,0][None,:,None]
+    u_kln = (energies[:,None,:])/temperatures[:,0][None,:,None] + bias
     print(u_kln.shape)
     print('Initializing MBAR')
     if solver_protocol == 'pymbar3':
         solver_options = {"maximum_iterations":10000,"verbose":True}
         solver_protocol = {"method":"adaptive","options":solver_options}
         mbar = pymbar.MBAR(u_kln, N_k, solver_protocol = (solver_protocol,), **mbar_kwargs)
+    elif type(solver_protocol) == str:
+        mbar = pymbar.MBAR(u_kln, N_k, solver_protocol = solver_protocol, **mbar_kwargs)
     else:
         mbar = pymbar.MBAR(u_kln, N_k, solver_protocol = (solver_protocol,), **mbar_kwargs)
     print('Initialization complete')
@@ -190,7 +192,7 @@ def initialize_mbar(log_df, k_bias, trajdir, solver_protocol='pymbar3', **mbar_k
         pickle.dump(mbar, pickle_file)
     return mbar
 
-def initialize_fes(log_df, k_bias, trajdir, solver_protocol='pymbar3'):
+def initialize_fes(log_df, k_bias, trajdir, solver_protocol='pymbar3', **fes_kwargs):
     # Set up for mbar calculation
     conditions = []
     for cond in zip(log_df.index.get_level_values(0),log_df.index.get_level_values(1)):
@@ -211,13 +213,25 @@ def initialize_fes(log_df, k_bias, trajdir, solver_protocol='pymbar3'):
     if solver_protocol == 'pymbar3':
         solver_options = {"maximum_iterations":10000,"verbose":True}
         solver_protocol = {"method":"adaptive","options":solver_options}
-    mbar_options = {'solver_protocol':(solver_protocol,)}
-    fes = pymbar.FES(u_kln, N_k, mbar_options=mbar_options)
+        mbar_options = {'solver_protocol':(solver_protocol,)}
+        fes = pymbar.FES(u_kln, N_k, mbar_options=mbar_options, **fes_kwargs)
+    elif type(solver_protocol) == str:
+        mbar_options = {'solver_protocol':solver_protocol}
+        fes = pymbar.FES(u_kln, N_k, mbar_options=mbar_options, **fes_kwargs)
+    else:
+        mbar_options = {'solver_protocol':(solver_protocol,)}
+        fes = pymbar.FES(u_kln, N_k, mbar_options=mbar_options, **fes_kwargs)
     print('Initialization complete')
     # Saving
     with open(f'{trajdir}/fes.pkl', 'wb') as pickle_file:
         pickle.dump(fes, pickle_file)
     return fes
+
+def m_to_n_bootstrap(log_df, trajdir, m, n):
+    sampled_df = log_df.sample(n=m, replace=True)
+    sampled_df.to_pickle(f'{trajdir}/logfiles_as_dataframe_bootstrap.pkl')
+    
+    
 
 def compute_contacts(traj, mode='distances', min_seq_separation=2, sqaureform=True, **kwargs):
     distances, pairs = md.compute_contacts(traj, scheme='ca')

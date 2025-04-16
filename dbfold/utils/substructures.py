@@ -78,7 +78,6 @@ def generate_substructures(native_file, d_cutoff, min_seq_separation, contact_se
     # Save substructures in corresponding variable
     substructures = []
     print(f'Number of substructures: {cluster_labels.max()+1}')
-    print(positions.shape, np.shape(native_distances))
     for n in range(cluster_labels.max()+1):
         substructure_temp = np.zeros(np.shape(native_distances))
         substructure_temp[positions[cluster_labels == n,0],positions[cluster_labels == n,1]] = 1
@@ -92,6 +91,21 @@ def generate_substructures(native_file, d_cutoff, min_seq_separation, contact_se
 
     return native_distances, substructures
 
+def load_substructures(native_file, substructure_dict, min_seq_separation):
+    traj = md.load(native_file)
+    native_distances = compute_contacts(traj, mode='distances', min_seq_separation = min_seq_separation)[0]
+
+    # Load predefined substructures
+    substructures = []
+    for key, value in substructure_dict.items():
+        substructure_temp = np.zeros(np.shape(native_distances))
+        for i, j in value:
+            substructure_temp[i, j] = 1
+        substructures.append(substructure_temp)
+    substructures = np.stack(substructures, axis=-1)
+
+    return native_distances, substructures
+
 def load_scores(scores, native_distances, substructures, thresh, convert_to_binary=True, **kwargs):
     
     mean_substructure_distances=[]
@@ -100,7 +114,6 @@ def load_scores(scores, native_distances, substructures, thresh, convert_to_bina
         mean_substructure_distances.append(np.nanmean(x[np.where(x)]))
     mean_substructure_distances=np.array(mean_substructure_distances)
     mean_substructure_distances = kwargs.get('mean_substructure_distances', mean_substructure_distances)
-    print(mean_substructure_distances)
     if convert_to_binary:
         data = scores/mean_substructure_distances
         barcodes=[]
@@ -140,9 +153,9 @@ def pairwise_l1_distance(binary_strings):
     
     return distance_matrix
 
-def plot_substructure_fes(fes_result, save_file, **kwargs):
+def plot_substructure_fes(fes_result, save_file, uncertainty=False, **kwargs):
     fe_dict, features = fes_result
-    labels = kwargs.get('labels', 'abcdefghijklmnopqrstuvwxyz')
+    labels = kwargs.get('labels', 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ')
     ymax = kwargs.get('ymax', float('inf'))
 
     # Subset fe_dict and features to only include substructures with free energy <= ymax
@@ -166,7 +179,13 @@ def plot_substructure_fes(fes_result, save_file, **kwargs):
 
     fig, ax = plt.subplots()
     for i, sub in enumerate(bin_subs):
-        ax.scatter(n_subs[i]+jitter[i], subset_dict['f_i'][i], color='tab:blue')
+        if uncertainty:
+            ax.errorbar(
+                n_subs[i]+jitter[i], subset_dict['f_i'][i], yerr=subset_dict['df_i'][i],
+                fmt='o', color='tab:blue', capsize=3, elinewidth=1, markersize=5
+            )
+        else:
+            ax.scatter(n_subs[i]+jitter[i], subset_dict['f_i'][i], color='tab:blue')
         label = ''.join(labels[i] for i in range(len(sub)) if sub[i] == '1')
         if subset_dict['f_i'][i] <= ymax:
             if label:
@@ -225,13 +244,12 @@ def create_substructure_PML(PML_path, substructures, labels=None):
 
 def visualize_substructures(native_distances, substructures, dist_cutoff, min_seq_separation, labels=None, onlylower=False, savepath=None):
     if not labels:
-        alphabet = 'abcdefghijklmnopqrstuvwxyz'
+        alphabet = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
     else:
         alphabet = labels
-    print(alphabet)
     native_contacts = (native_distances < dist_cutoff).astype(int)
     n_subs = substructures.shape[2]
-    fig, ax = plt.subplots(figsize=(10, 10), facecolor='none')
+    fig, ax = plt.subplots(figsize=(20, 20), facecolor='none')
     colors=cm.get_cmap('jet')
     color_map = [(1, 1, 1, 1)]
 
@@ -272,22 +290,23 @@ def visualize_substructures(native_distances, substructures, dist_cutoff, min_se
         ax.spines['right'].set_visible(False)
 
     cax = ax.imshow(substructure_map, cmap=cmap)
+
     # Add grey border line around non-np.nan values
     for i in range(substructure_map.shape[0]):
         for j in range(substructure_map.shape[1]):
             if not np.isnan(substructure_map[i, j]):
-                rect = plt.Rectangle((j - 0.5, i - 0.5), 1, 1, fill=False, edgecolor='lightgrey', linewidth=.05)
+                rect = plt.Rectangle((j - 0.5, i - 0.5), 1, 1, fill=False, edgecolor='lightgrey', linewidth=0.)
                 ax.add_patch(rect)
     for i in range(substructure_map.shape[0]):
         for j in range(substructure_map.shape[1]):
             if not np.isnan(substructure_map[i, j]):
-                rect = plt.Rectangle((j - 0.5, i - 0.5), 1, 1, fill=False, edgecolor='lightgrey', linewidth=.05)
+                rect = plt.Rectangle((j - 0.5, i - 0.5), 1, 1, fill=False, edgecolor='lightgrey', linewidth=0.)
                 ax.add_patch(rect)
             if (i == j) and onlylower:
                 # Add top and right border for cells where i == j
                 ax.plot([j - 0.5, j + 0.5], [i - 0.5, i - 0.5], color='black', linewidth=ax.spines['bottom'].get_linewidth())  # Top border
                 ax.plot([j + 0.5, j + 0.5], [i - 0.5, i + 0.5], color='black', linewidth=ax.spines['left'].get_linewidth())  # Right border
-    
+
     # Add text annotations
     for subs_idx in range(n_subs):
         sub = substructures[:, :, subs_idx]
@@ -300,8 +319,7 @@ def visualize_substructures(native_distances, substructures, dist_cutoff, min_se
             path_effects.Stroke(linewidth=3, foreground='white'),
             path_effects.Normal()
         ])
-        print(alphabet[subs_idx])
-
+    
     # Set x-ticks and y-ticks to be 1-indexed
     ax.set_xticks(np.arange(0, substructure_map.shape[1], 10))
     ax.set_yticks(np.arange(0, substructure_map.shape[0], 10))
