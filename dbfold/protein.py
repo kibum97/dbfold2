@@ -126,12 +126,70 @@ class Protein:
         score_arr = np.vstack(tot_score_list)
         self.score = score_arr
     
+    def compute_score2(self):
+        # substructure to pair
+        pair_list = []
+        for s in range(self.substructures.shape[2]):
+            sub = self.substructures[:,:,s]
+            temp_list = []
+            for i in range(sub.shape[0]):
+                for j in range(i,sub.shape[1]):
+                    if (sub[i,j] == 1.0) or (sub[j,i] == 1.0):
+                        temp_list.append([i,j])
+            pair_list.append(temp_list)
+        # compute score
+        tot_score_list = []
+        for xtc in self.xtc_list:
+            traj = md.load(xtc,top=self.native)
+            traj = traj[traj.time >= self.eq_step]
+            traj = traj[traj.time <= self.log_df.index.get_level_values(2).max()]
+            traj = traj.atom_slice(traj.top.select('name CA'))
+            #for step in remove_list:
+            #    print(f'Step {step} removed')
+            #    traj = traj[traj.time != step]
+            score_list = []
+            for pair in pair_list:
+                score_list.append(np.mean(md.compute_distances(traj,pair) < self.dist_cutoff/10,axis=1))
+            score_array = np.stack(score_list).T
+            tot_score_list.append(score_array)
+        score_arr = np.vstack(tot_score_list)
+        self.score = score_arr
+
+    def compute_pair_wise_distances(self):
+        # substructure to pair
+        pair_list = []
+        for s in range(self.substructures.shape[2]):
+            sub = self.substructures[:,:,s]
+            temp_list = []
+            for i in range(sub.shape[0]):
+                for j in range(i,sub.shape[1]):
+                    if (sub[i,j] == 1.0) or (sub[j,i] == 1.0):
+                        temp_list.append([i,j])
+            pair_list.append(temp_list)
+        # compute score
+        tot_score_list = []
+        for xtc in self.xtc_list:
+            traj = md.load(xtc,top=self.native)
+            traj = traj[traj.time >= self.eq_step]
+            traj = traj[traj.time <= self.log_df.index.get_level_values(2).max()]
+            traj = traj.atom_slice(traj.top.select('name CA'))
+            #for step in remove_list:
+            #    print(f'Step {step} removed')
+            #    traj = traj[traj.time != step]
+            score_list = []
+            for pair in pair_list:
+                score_list.append(md.compute_distances(traj,pair))
+            score_array = np.stack(score_list).T*10
+            tot_score_list.append(score_array)
+        score_arr = np.vstack(tot_score_list)
+
     def convert_score2subs(self,f=1.7,mean_substructure_distances=None):
         if mean_substructure_distances:
             self.subs = subs.load_scores(self.score, self.native_distances, self.substructures, f, mean_substructure_distances=mean_substructure_distances)
         else:
             self.subs = subs.load_scores(self.score, self.native_distances, self.substructures, f)
         return self.subs
+       
 
     def compute_features(self,f,save=None):
         """
@@ -157,7 +215,7 @@ class Protein:
             np.save(feature_array,save)
         return feature_array
 
-    def compute_fes(self,features,temperature,ftype='discrete',nbins=30,n_bootstrap=None):
+    def compute_fes(self,features,temperature,ftype='discrete',nbins=30,n_bootstrap=None,uncertainty_method="analytical"):
         self.log_df['feat'] = features
         #self.log_df['mbar'] = self.mbar
         if ftype == 'discrete':
@@ -180,7 +238,6 @@ class Protein:
             self.fes.generate_fes(self.log_df['energy'].values.reshape(nconditions,-1)/temperature,self.log_df['feat'].values,fes_type="histogram",histogram_parameters=histogram_parameters,n_bootstraps=n_bootstrap)
         else:
             self.fes.generate_fes(self.log_df['energy'].values.reshape(nconditions,-1)/temperature,self.log_df['feat'].values,fes_type="histogram",histogram_parameters=histogram_parameters)
-        uncertainty_method = "analytical"#"bootstrap"
         bin_center_i = [self.fes.histogram_data["bin_label"][key] for key in self.fes.histogram_data["nonzero_bins"]]
         results = self.fes.get_fes(
             bin_center_i, reference_point="from-lowest", uncertainty_method=uncertainty_method
@@ -202,7 +259,7 @@ class Protein:
         saving_traj : mdtraj.Trajectory
             Trajectory of snapshots
         """
-        saving_snaps = self.log_df.loc[indices].index.values
+        saving_snaps = self.log_df.iloc[indices].index.values
         saving_dict = defaultdict(list)
         saving_traj = []
         for snap in saving_snaps:
@@ -214,6 +271,13 @@ class Protein:
             saving_traj.append(traj)
         saving_traj = md.join(saving_traj)
         return saving_traj
+    
+    def save_sanpshot_from_index(self, index):
+        saving_snap = self.log_df.iloc[[index]].index.values[0]
+        temperature, setpoint, step = saving_snap
+        traj = md.load(f'{self.datadir}/{self.pdbroot}_{temperature:.3f}_{int(setpoint)}.xtc',top=self.native)
+        traj = traj[np.where(np.isin(traj.time, step))[0]]
+        return traj
     
     def merge_traj_from_indices_nous(self,indices):
         """

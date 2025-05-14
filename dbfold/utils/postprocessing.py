@@ -96,13 +96,15 @@ def pdbs_to_xtcs(trajdir):
     pool.join()
     return
 
-def logfiles_to_dataframe(trajdir):
+def logfiles_to_dataframe(trajdir, outname=None, correction=0):
     temperature_re = re.compile(r"(?<=_)\d+\.\d+")
     replica_re = re.compile(r"\d+(?=\.log|\.xtc)")
     time_re = re.compile(r"(?<=\.)[0-9]+")
     title_re = re.compile(r"equil/(.+?)/MCPU")
 
     print("Processing", trajdir)
+    if outname is None:
+        outname = f'{trajdir}/logfiles_as_dataframe.pkl'
     gather = collections.defaultdict(list)
     gather_replica = collections.defaultdict(list)
     logfiles = natsort.natsorted(glob.glob(
@@ -117,7 +119,7 @@ def logfiles_to_dataframe(trajdir):
             for line in f:
                 if line.startswith('STEP '):
                     items = line.split()
-                    gather['step'].append(float(items[1]))
+                    gather['step'].append(float(items[1]) + correction)
                     gather['energy'].append(float(items[2]))
                     gather['contacts'].append(float(items[3]))
                     gather['rmsd'].append(float(items[4]))
@@ -128,7 +130,7 @@ def logfiles_to_dataframe(trajdir):
                     gather['replica'].append(replica)
                 elif line.startswith('RPLC '):
                     items = line.split()
-                    gather_replica['step'].append(float(items[1]))
+                    gather_replica['step'].append(float(items[1]) + correction)
                     accept = int(items[-4][:-1])
                     reject = int(items[-1])
                     if accept + reject == 0:
@@ -154,7 +156,6 @@ def logfiles_to_dataframe(trajdir):
     dataframe = dataframe.set_index(['temperature', 'replica', 'step'])
     dataframe2 = dataframe2.set_index(['temperature', 'replica', 'step'])
     dataframe = pd.merge(dataframe, dataframe2, left_index=True, right_index=True)
-    outname = '{}/logfiles_as_dataframe.pkl'.format(trajdir)
     dataframe.to_pickle(outname)
     print(outname, "written to file")
     return dataframe
@@ -257,3 +258,30 @@ def compute_contacts(traj, mode='distances', min_seq_separation=2, sqaureform=Tr
         else:
             result = {'pair':pairs, 'contacts':contacts}
             return result
+        
+def find_lowest_energy_pdb(filedir, verbose=False):
+    e_min_files = glob.glob(f"{filedir}/*Emin.pdb")
+    if len(e_min_files) == 0:
+        print("No Emin files found in", filedir)
+        return None
+    elif len(e_min_files) == 1:
+        return e_min_files[0]
+    else:
+        log_files = natsort.natsorted(glob.glob(f"{filedir}/*log"))
+        min_energies = []
+        for log_file in log_files:
+            if verbose:
+                print(os.path.basename(log_file))
+            f = open(log_file)
+            for line in f.readlines():
+                if line.startswith("Emin:"):
+                    min_energies.append(float(line[5:15]))
+                    if verbose:
+                        print(float(line[5:15]))
+        min_log = log_files[min_energies.index(min(min_energies))]
+        replica = min_log.split("_")[-1].replace(".log","")
+        print(f"Emin pdb file is from {replica} replica")
+        for e_min_file in e_min_files:
+            if e_min_file.endswith(f"_{replica}_Emin.pdb"):
+                print(f"Emin pdb file is {e_min_file}")
+                return e_min_file

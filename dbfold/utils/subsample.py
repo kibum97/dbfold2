@@ -33,6 +33,7 @@ def subsample_with_weights(log_df,sample_size=100):
         Subsampled DataFrame.
     """
     weights = log_df['weights'].values
+    weights = np.nan_to_num(weights, nan=0.0)  # replaces NaN with 0
     normalized_weights = weights / np.sum(weights)  # Normalize weights
     indices = np.random.choice(range(len(log_df)), size=sample_size, replace=False, p=normalized_weights)
     subsampled_df = log_df.iloc[indices]

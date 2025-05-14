@@ -129,8 +129,12 @@ def load_scores(scores, native_distances, substructures, thresh, convert_to_bina
 
     return scores
 
-def dec2bin(decimal_number):
-    return bin(decimal_number)[2:]
+def dec2bin(decimal_number,n_subs=None):
+    if n_subs is not None:
+        max_len = n_subs
+        return bin(decimal_number)[2:].zfill(max_len)
+    else:
+        return bin(decimal_number)[2:]
 
 def bin2dec(binary_number):
     return int(binary_number, 2)
@@ -165,15 +169,16 @@ def plot_substructure_fes(fes_result, save_file, uncertainty=False, **kwargs):
         if fe_dict['f_i'][i] <= ymax:
             subset_features.append(feat)
             subset_dict['f_i'].append(fe_dict['f_i'][i])
-            subset_dict['df_i'].append(fe_dict['df_i'][i])
+            if uncertainty:
+                subset_dict['df_i'].append(fe_dict['df_i'][i])
        
-    max_len = len(dec2bin(max(subset_features)))
+    max_len = len(dec2bin(max(features)))
     bin_subs = [dec2bin(sub).zfill(max_len) for sub in subset_features]
     len_subs = [bin_sub.count('1') for bin_sub in bin_subs]
     min_len = min(len_subs)
     max_len = max(len_subs)
     n_subs = [sum(int(bit) for bit in bin_sub) for bin_sub in bin_subs]
-    jitter = 0.05 * np.random.randn(len(bin_subs))
+    jitter = 0.1 * np.random.randn(len(bin_subs))
 
     pdist_matrix = pairwise_l1_distance(bin_subs)
 
@@ -208,7 +213,7 @@ def plot_substructure_fes(fes_result, save_file, uncertainty=False, **kwargs):
     plt.ylabel('Free energy (kT)')
     plt.tight_layout()
     plt.savefig(save_file)
-    plt.show()
+    plt.close()
 
 def create_substructure_PML(PML_path, substructures, labels=None):
     if not labels:
