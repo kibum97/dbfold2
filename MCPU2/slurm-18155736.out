@@ -1,0 +1,10 @@
+Preset CMake variables:
+
+  CMAKE_TOOLCHAIN_FILE="/n/home01/kibumpark/pkg/vcpkg/scripts/buildsystems/vcpkg.cmake"
+
+Preset environment variables:
+
+  VCPKG_ROOT="/n/home01/kibumpark/pkg/vcpkg"
+
+-- Running vcpkg install
+slurmstepd: error: *** JOB 18155736 ON holy7c24612 CANCELLED AT 2025-06-05T14:46:44 ***

@@ -1,0 +1,78 @@
+{
+	"configurations" : 
+	[
+		{
+			"directories" : 
+			[
+				{
+					"build" : ".",
+					"jsonFile" : "directory-.-Debug-f5ebdc15457944623624.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.10"
+					},
+					"projectIndex" : 0,
+					"source" : ".",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2
+					]
+				}
+			],
+			"name" : "Debug",
+			"projects" : 
+			[
+				{
+					"directoryIndexes" : 
+					[
+						0
+					],
+					"name" : "MCPU2",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2
+					]
+				}
+			],
+			"targets" : 
+			[
+				{
+					"directoryIndex" : 0,
+					"id" : "MCPU2::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-MCPU2-Debug-fbc9dec0204ae05cde81.json",
+					"name" : "MCPU2",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "eigen_vector_benchmark::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-eigen_vector_benchmark-Debug-c43a2ce2d1e206c88534.json",
+					"name" : "eigen_vector_benchmark",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "pairwise_distance_benchmark::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-pairwise_distance_benchmark-Debug-dd7808d8e812d16ef9c4.json",
+					"name" : "pairwise_distance_benchmark",
+					"projectIndex" : 0
+				}
+			]
+		}
+	],
+	"kind" : "codemodel",
+	"paths" : 
+	{
+		"build" : "/n/home01/kibumpark/pkg/dbfold2/MCPU2/build",
+		"source" : "/n/home01/kibumpark/pkg/dbfold2/MCPU2"
+	},
+	"version" : 
+	{
+		"major" : 2,
+		"minor" : 7
+	}
+}

@@ -1,0 +1,34 @@
+Package: vcpkg-cmake-config
+Version: 2024-05-23
+Architecture: x64-linux
+Multi-Arch: same
+Abi: b76b12d429f346bf14cd03f7de22e2a36602b158a8a3e2dbe375e5f414a59745
+Status: install ok installed
+
+Package: vcpkg-cmake
+Version: 2024-04-23
+Architecture: x64-linux
+Multi-Arch: same
+Abi: 31491a29c9b956a18e432537358b6994d6860a2d6a2dec9ac364a03299f0ad92
+Status: install ok installed
+
+Package: fmt
+Version: 11.0.2
+Port-Version: 1
+Depends: vcpkg-cmake, vcpkg-cmake-config
+Architecture: x64-linux
+Multi-Arch: same
+Abi: db813b1bd8b4e8729a4486154aa54dcdceb3a67a839e81123864ed10854c4cbc
+Description: {fmt} is an open-source formatting library providing a fast and safe alternative to C stdio and C++ iostreams.
+Status: install ok installed
+
+Package: yaml-cpp
+Version: 0.8.0
+Port-Version: 1
+Depends: vcpkg-cmake, vcpkg-cmake-config
+Architecture: x64-linux
+Multi-Arch: same
+Abi: b9d0929ee82ec91673cf684f89474b11d9be963f9fc8c77bb21fa344136a0aa0
+Description: yaml-cpp is a YAML parser and emitter in C++ matching the YAML 1.2 spec.
+Status: install ok installed
+

@@ -3,11 +3,21 @@ import glob
 import natsort
 from dbfold.utils import *
 import yaml
-from math import ceil
+from math import ceil, floor
 from jinja2 import Template
 import mdtraj as md
+THREE_TO_ONE = {
+    'ALA': 'A', 'ARG': 'R', 'ASN': 'N', 'ASP': 'D',
+    'CYS': 'C', 'GLN': 'Q', 'GLU': 'E', 'GLY': 'G',
+    'HIS': 'H', 'ILE': 'I', 'LEU': 'L', 'LYS': 'K',
+    'MET': 'M', 'PHE': 'F', 'PRO': 'P', 'SER': 'S',
+    'THR': 'T', 'TRP': 'W', 'TYR': 'Y', 'VAL': 'V',
+    'LNK': 'X'
+}
 import numpy as np
 import subprocess
+import re
+import shutil
 import warnings
 
 script_path = os.path.dirname(os.path.abspath(__file__))
@@ -44,7 +54,7 @@ class Simulation:
         new_dist = []
         new_pair = []
         for i, p in enumerate(pair):
-            if abs(p[0] - p[1]) < 8:
+            if abs(p[0] - p[1]) >= 8:
                 new_pair.append(p)
                 new_dist.append(dist[0, i] * 10)
         contact_count = np.sum(np.array(new_dist) < cutoff)
@@ -55,14 +65,20 @@ class Simulation:
     
     def compute_protein_parameters(self, recompute=False):
         # Check if the protein parameter file already exists
-        if os.path.exists(os.path.join(self.sim_path,f'{self.pdbroot}.sec_str')):
+        if os.path.exists(os.path.join(self.sim_path,f'{self.pdbroot}.sec_str')) and not recompute:
             print(f'Protein parameter files already exist. Skipping computation. If you want to recompute, please set recompute=True')
             return 0
         else:
             native = md.load(self.native_pdb)
             n_residues = native.n_residues
             # FASTA
-            self.fasta = native.topology.to_fasta()[0]
+            aa_list = []
+            for res in native.top.residues:
+                # Use the .get() method on the dictionary.
+                # It tries to find the residue name and returns 'X' if it's not found.
+                one_letter_code = THREE_TO_ONE.get(res.name, 'X')
+                aa_list.append(one_letter_code)
+            self.fasta = ''.join(aa_list)
             with open(os.path.join(self.sim_path,f'{self.pdbroot}.fasta'), 'w') as f:
                 f.write(f'>{self.pdbroot}\n')
                 for i in range(0, len(self.fasta), 80):
@@ -89,11 +105,13 @@ class Simulation:
     def set_native_structure(self, native_pdb):
         self.native_pdb = native_pdb
 
-    def set_umbrella_sampling(self, umbrella_max, replica_steps, umbrella_bias=0.02, umbrella_spacing=10, max_exchange=75):
+    def set_umbrella_sampling(self, umbrella_max, replica_steps, umbrella_bias=0.02, umbrella_spacing=10, max_exchange=75, contact_distance_cutoff=6):
         if self.umbrella:
             self.umbrella_bias = umbrella_bias
             self.umbrella_max = umbrella_max
             self.umbrella_spacing = umbrella_spacing
+        elif not hasattr(self, 'contact_distance_cutoff'):
+            self.count_contacts_rounded(contact_distance_cutoff)
         else:
             raise ValueError('Umbrella sampling is not enabled. Please set umbrella=True when initializing the Simulation class.')
         if not self.temperature_replica:
@@ -127,6 +145,45 @@ class Simulation:
     def set_constraint(self, k_constraint, constraint_file):
         self.k_constraint = k_constraint
         self.constraint_file = constraint_file
+    
+    def set_movable_region(self, movable_region, overwrite=False):
+        # movable_region is a list of residue pairs (start, end)
+        if not hasattr(self, 'move_constraint'):
+            self.move_constraint = True
+        self.movable_region_file = self.sim_path + '/movable.txt' 
+
+        movable_residues = []
+        protein = md.load(self.native_pdb)
+        for region in movable_region:
+            for res in range(region[0], region[1]+1):
+                if res < protein.n_residues:
+                    movable_residues.append(res)
+        
+        fixed_pairs = []
+        for i in range(protein.n_residues):
+            for j in range(i + 8, protein.n_residues):
+                if i not in movable_residues and j not in movable_residues:
+                    fixed_pairs.append((i, j))
+
+        ca_traj = protein.atom_slice(protein.topology.select('name CA'))
+        dist, pair = md.compute_contacts(ca_traj, contacts=fixed_pairs, scheme='ca')
+        n_contacts_fixed = np.sum(np.array(dist)*10 < self.contact_distance_cutoff)
+        n_contacts_fixed = floor(n_contacts_fixed / 10) * 10
+        
+        self.umbrella_min = n_contacts_fixed
+        print(f'Movable region set. Number of contacts in fixed region is {n_contacts_fixed}.')
+
+        if os.path.exists(self.movable_region_file) and not overwrite:
+            print(f'Movable region file {self.movable_region_file} already exists. If you want to overwrite, please set overwrite=True')
+            return 0
+        else:
+            with open(self.movable_region_file, 'w') as f:
+                for region in movable_region:
+                    f.write(f"{region[0]} {region[1]}\n")
+            
+
+    def set_yang_move_probability(self, probability):
+        self.yang_move_probability = probability
 
     def set_slurm_resources(
             self,
@@ -145,7 +202,9 @@ class Simulation:
         self.email = email
 
     def generate_config(self, config_path, checkpoint=None):
-        self.node_per_temperature = (self.umbrella_max//self.umbrella_spacing if self.umbrella else 1) + 1
+        if not hasattr(self, 'umbrella_min'):
+            self.umbrella_min = 0
+        self.node_per_temperature = ((self.umbrella_max - self.umbrella_min)//self.umbrella_spacing if self.umbrella else 1) + 1
         self.number_of_replicas = self.node_per_temperature * (self.num_temperature if self.temperature_replica else 1)
         if not hasattr(self, 'template_pdb'):
             with open(os.path.join(self.sim_path,f'nothing.template'),'w') as f:
@@ -180,9 +239,13 @@ class Simulation:
             'constraint': self.constraint,
             'conatraint_file': self.constraint_file if hasattr(self, 'constraint_file') else None,
             'k_constraint': self.k_constraint if hasattr(self, 'k_constraint') else None,
+            # movable region
+            'move_constraint': self.move_constraint if hasattr(self, 'move_constraint') else None,
+            'movable_region_file': self.movable_region_file if hasattr(self, 'movable_region_file') else None,
             # MCPU configuration
             'protein_dependent_param': self.protein_parameter_path,
-            'mcpu_config_path': os.path.join(self.mcpu_path, 'config_files'),            
+            'mcpu_config_path': os.path.join(self.mcpu_path, 'config_files'),
+            'yang_move_probability' : self.yang_move_probability if hasattr(self, 'yang_move_probability') else 0.5,           
             'use_cluster': self.use_cluster_move if hasattr(self, 'use_cluster_move') else None,
             'max_cluster_move_steps': self.max_cluster_move_steps if hasattr(self, 'max_cluster_move_steps') else None,
         }
@@ -218,6 +281,46 @@ class Simulation:
         self.submission_script = bash_path
         return 0
     
+    def create_checkpoint(self, traj_directory, checkpoint_directory):
+        self.checkpoint_directory = checkpoint_directory
+        # Check if the directory exists
+        if not os.path.exists(traj_directory):
+            raise ValueError(f'The directory {traj_directory} does not exist.')
+        # Check if the checkpoint directory exists
+        if not os.path.exists(checkpoint_directory):
+            os.makedirs(checkpoint_directory, exist_ok=True)
+        # Get maximum montecarlo steps performed
+        max_mc_step = self.get_max_mc_step(traj_directory)
+        print(f'Maximum montecarlo step is {max_mc_step}')
+        # Process and create checkpoint files based on log files
+        log_files = glob.glob(os.path.join(traj_directory, '*.log'))
+        print(f'Found {len(log_files)} log files in {traj_directory}')
+        for log_file in log_files:
+            if self.umbrella:
+                match = re.match(r'^\.?/?(.+)_T_([0-9\.]+)_([0-9]+)\.log$', os.path.basename(log_file))
+                protein, temperature, replica = match.groups()
+                checkpoint_file = os.path.join(traj_directory, f"{protein}_{temperature}_{replica}.{max_mc_step}")
+            else:
+                match = re.match(r'^\.?/?(.+)_T_([0-9\.]+)\.log$', os.path.basename(log_file))
+                protein, temperature = match.groups()
+                checkpoint_file = os.path.join(traj_directory, f"{protein}_{temperature}.{max_mc_step}")
+            with open(log_file, 'r') as file:
+                for line in file:
+                    if 'myrank' in line:
+                        parts = line.split(',')
+                        myrank = parts[0].split(':')[-1].strip()
+                        break
+                else:
+                    print(f"No 'myrank' found in {log_file}")
+                    continue
+            output_file = os.path.join(checkpoint_directory, f"{myrank}.pdb")
+
+            if os.path.exists(checkpoint_file):
+                shutil.copy(checkpoint_file, output_file)
+            else:
+                print(f"Input file does not exist: {checkpoint_file}")
+        return 0
+
     def print_config(self):
         with open(self.config_path, 'r') as f:
             print(f.read())
@@ -234,4 +337,20 @@ class Simulation:
 
     def submit_slurm(self):
         return os.system(f'sbatch {self.submission_script}')
+    
+    def get_max_mc_step(self, directory):
+        pattern = re.compile(r'^.*\.(\d+)$')  
+        max_step = None
+        for filename in os.listdir(directory):
+            match = pattern.match(filename)
+            if match:
+                mc_step = int(match.group(1))
+                if max_step is None or mc_step > max_step:
+                    max_step = mc_step
+        return max_step
+    
+    def compile_executable(self):
+        compile_script = os.path.join(self.mcpu_path, 'src_mpi_umbrella/compile_mpi.sh')
+        subprocess.run(['bash', compile_script], cwd=os.path.join(self.mcpu_path, 'src_mpi_umbrella/'), check=True)
+        return 0
     

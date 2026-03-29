@@ -1,6 +1,6 @@
 native_protein_data:
-  NATIVE_FILE: /n/home01/kibumpark/pkg/dbfold2/examples/chignolin/1uao.pdb
-  STRUCTURE_FILE: /n/home01/kibumpark/pkg/dbfold2/examples/chignolin/1uao.pdb
+  NATIVE_FILE: /n/home01/kibumpark/pkg/dbfold2/examples/chignolin/1uao_processed.pdb
+  STRUCTURE_FILE: /n/home01/kibumpark/pkg/dbfold2/examples/chignolin/1uao_processed.pdb
   NATIVE_DIRECTORY: None
   TEMPLATE_FILE: /n/home01/kibumpark/pkg/dbfold2/examples/chignolin/1uao/nothing.template
   ALIGNMENT_FILE: 1lfb
@@ -21,6 +21,7 @@ potential_parameters:
 contact_definition:
   SKIP_LOCAL_CONTACT_RANGE: 4
   SKIP_BB_CONTACT_RANGE: 1000
+  NATIVE_CA_CA_CUTOFF: 6.0
 
 monte_carlo_parameters:
   CONSTRAINT_RMSD: -1
@@ -31,7 +32,7 @@ parameter_files:
   SECONDARY_STRUCTURE_FILE: /n/home01/kibumpark/pkg/dbfold2/examples/chignolin/1uao/1uao.sec_str
   AMINO_DATA_FILE: /n/home01/kibumpark/pkg/dbfold2/MCPU2/config_files/amino_torsion.data
   ROTAMER_DATA_FILE: /n/home01/kibumpark/pkg/dbfold2/MCPU2/config_files/bbind02.May.lib
-  ATOM_TYPE_FILE: /n/home01/kibumpark/pkg/dbfold2/MCPU2/config_files/twenty_res_typing
+  ATOM_TYPE_FILE: /n/home01/kibumpark/pkg/dbfold2/MCPU2/config_files/atom_radii.txt
   HELICITY_DATA: /n/home01/kibumpark/pkg/dbfold2/MCPU2/config_files/T0130.seq
   HYDROGEN_BONDING_DATA: /n/home01/kibumpark/pkg/dbfold2/MCPU2/config_files/hydrogen_jPL3h.data
   HYDROGEN_BOND_FILE: /n/home01/kibumpark/pkg/dbfold2/MCPU2/config_files/jPL3h.energy

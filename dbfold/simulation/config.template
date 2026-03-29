@@ -9,7 +9,6 @@ ALIGNMENT_FILE                  1lfb
 PDB_OUT_FILE                    {{ output_path }}
 PROTEIN_NAME                    p1afvA
 !!
-!!
 !! POTENTIAL PARAMETERS
 !!
 NO_NEW_CLASHES                  1
@@ -28,7 +27,6 @@ SKIP_LOCAL_CONTACT_RANGE        4
 SKIP_BB_CONTACT_RANGE           1000
 !!
 !! MONTE-CARLO PARAMETERS
-!!
 !!
 MC_STEPS                        {{ montecarlo_steps }}
 MC_ANNEAL_STEPS                 200000000000000
@@ -52,7 +50,7 @@ MC_STEP_SIZE                    2.0
 SIDECHAIN_MOVES                 1
 SIDECHAIN_NOISE                 10
 USE_GLOBAL_BB_MOVES             0
-YANG_MOVE                       0.5
+YANG_MOVE                       {{ yang_move_probability }}
 YANG_SCALE                      30
 USE_CLUSTER                     {{ use_cluster | default(0, true) }}
 MAX_CLUSTERSTEP                 {{ max_cluster_move_steps | default(0, true) }}
@@ -85,6 +83,14 @@ K_CONSTRAINT    {{ k_constraint }}
 !!   MC simulation will not let RMSD exceed set value
 !!   A negative value means this feature is inactive
 CONSTRAINT_RMSD                 -1
+
+{% if move_constraint %}
+!!
+!! MOVABLE_RESIDUES !!
+!!
+MOVABLE_RESIDUES {{movable_region_file}}
+{% endif %}
+
 
 !!
 !! PARAMETER FILES

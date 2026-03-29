@@ -6,7 +6,6 @@
                 "${workspaceFolder}/**",
                 "/usr/include/eigen3",
                 "${workspaceFolder}/MCPU2/include",
-                "${workspaceFolder}/MCPU2/include/ff"
             ],
             "defines": [],
             "compilerPath": null,

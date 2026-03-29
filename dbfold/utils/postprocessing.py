@@ -285,3 +285,4 @@ def find_lowest_energy_pdb(filedir, verbose=False):
             if e_min_file.endswith(f"_{replica}_Emin.pdb"):
                 print(f"Emin pdb file is {e_min_file}")
                 return e_min_file
+            

@@ -50,7 +50,8 @@ void SetProgramOptions(const std::string &cfg_file) {
     // Read contact definition
     SKIP_LOCAL_CONTACT_RANGE = config["contact_definition"]["SKIP_LOCAL_CONTACT_RANGE"].as<int>();
     SKIP_BB_CONTACT_RANGE = config["contact_definition"]["SKIP_BB_CONTACT_RANGE"].as<int>();
-
+    contact_calpha_cutoff = config["contact_definition"]["NATIVE_CA_CA_CUTOFF"].as<float>();
+    
     // Read Monte-Carlo parameters
     rmsd_constraint = config["monte_carlo_parameters"]["CONSTRAINT_RMSD"].as<float>();
 

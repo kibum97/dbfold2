@@ -22,8 +22,8 @@ def clusterings(coords, thresh, min_clustersize=1):
     db = DBSCAN(eps=thresh, min_samples=min_clustersize,metric='minkowski',p=1).fit(coords)
     return db.labels_
 
-def compute_contacts(traj, mode='distances', min_seq_separation=2, squareform=True, **kwargs):
-    distances, pairs = md.compute_contacts(traj, scheme='ca')
+def compute_contacts(traj, mode='distances', min_seq_separation=2, squareform=True, scheme='ca', **kwargs):
+    distances, pairs = md.compute_contacts(traj, scheme=scheme)
     filter_idx = [i for i,pair in enumerate(pairs) if pair[1] - pair[0] > min_seq_separation]
     distances = distances[:,filter_idx]
     pairs = pairs[filter_idx]
@@ -48,7 +48,7 @@ def compute_contacts(traj, mode='distances', min_seq_separation=2, squareform=Tr
             return result
     
 
-def generate_substructures(native_file, d_cutoff, min_seq_separation, contact_sep_thresh, min_clustersize,atom_type='CA', verbose=False):
+def generate_substructures(native_file, d_cutoff, min_seq_separation, contact_sep_thresh, min_clustersize, scheme='ca', verbose=False):
     """
     Generates substructures based on contact distances in a trajectory.
 
@@ -66,8 +66,8 @@ def generate_substructures(native_file, d_cutoff, min_seq_separation, contact_se
     """
     # Compute pairwise distances and contacts of native structure
     traj = md.load(native_file)
-    native_distances = compute_contacts(traj, mode='distances', min_seq_separation = min_seq_separation)[0]
-    native_contacts_dict = compute_contacts(traj, mode='contacts', min_seq_separation = min_seq_separation, dist_cutoff = d_cutoff, squareform=False)
+    native_distances = compute_contacts(traj, mode='distances', min_seq_separation = min_seq_separation, scheme=scheme)[0]
+    native_contacts_dict = compute_contacts(traj, mode='contacts', min_seq_separation = min_seq_separation, scheme=scheme, dist_cutoff = d_cutoff, squareform=False)
     native_contacts = native_contacts_dict['contacts']
     native_pairs = native_contacts_dict['pair']
     positions = native_pairs[native_contacts[0] == 1]

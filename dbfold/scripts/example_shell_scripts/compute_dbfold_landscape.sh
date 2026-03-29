@@ -17,8 +17,8 @@ mamba activate dbfold2
 
 cd /n/home01/kibumpark/group_folder/p19__Actin/Analysis/
 
-python /n/home01/kibumpark/group_folder/p19__Actin/dbfold2/dbfold/scripts/compute_dbfold_landscape.py \
---pdbroots ACTB_cryo \
+python /n/home01/kibumpark/group_folder/p19.7__Actin_linker_simulations/scripts/compute_dbfold_landscape.py \
+--pdbroots acta_l \
 --eq_step 600000000 \
 --substrcutre_dict /n/home01/kibumpark/group_folder/p19__Actin/Analysis/substructures/ACTB_substructures_definition_v2.pkl \
 --basedir /n/home01/kibumpark/group_folder/p19__Actin/ \
@@ -26,7 +26,7 @@ python /n/home01/kibumpark/group_folder/p19__Actin/dbfold2/dbfold/scripts/comput
 --savedir /n/home01/kibumpark/group_folder/p19__Actin/Analysis/finer_def_figures/ \
 --cache
 
-python /n/home01/kibumpark/group_folder/p19__Actin/dbfold2/dbfold/scripts/compute_dbfold_landscape.py \
+python /n/home01/kibumpark/group_folder/p19.7__Actin_linker_simulations/scripts/compute_dbfold_landscape.py \
 --pdbroots ACTA_cryo \
 --eq_step 600000000 \
 --substrcutre_dict /n/home01/kibumpark/group_folder/p19__Actin/Analysis/substructures/ACTA_substructures_definition_v2.pkl \

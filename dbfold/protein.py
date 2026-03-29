@@ -272,7 +272,7 @@ class Protein:
         saving_traj = md.join(saving_traj)
         return saving_traj
     
-    def save_sanpshot_from_index(self, index):
+    def save_snapshot_from_index(self, index):
         saving_snap = self.log_df.iloc[[index]].index.values[0]
         temperature, setpoint, step = saving_snap
         traj = md.load(f'{self.datadir}/{self.pdbroot}_{temperature:.3f}_{int(setpoint)}.xtc',top=self.native)
@@ -324,7 +324,7 @@ class Protein:
         if indices is not None:
             contacts = contacts[indices]
             weights = weights[indices]
-        self.contacts = contacts
+        #self.contacts = contacts
         weights = weights / weights.sum()
         self.contacts_frequency = np.average(contacts, axis=0, weights=weights)
         self.contacts_pairs = pairs
@@ -391,3 +391,17 @@ class Protein:
         else:
             plt.show()
             plt.close()
+
+    def save_resampled_traj(self, sample_index):
+        saving_snaps = self.log_df.iloc[sample_index].index.values
+        saving_dict = defaultdict(list)
+        saving_traj = []
+        for snap in saving_snaps:
+            temperature, setpoint, step = snap
+            saving_dict[f'{temperature:.3f}_{int(setpoint)}'].append(step)
+        for key, value in saving_dict.items():
+            traj = md.load(f'{self.datadir}/{self.pdbroot}_{key}.xtc',top=self.native)
+            index = np.array([np.where(traj.time == step)[0][0] for step in value])
+            saving_traj.append(traj[index])
+        resampled_traj = md.join(saving_traj)
+        return resampled_traj

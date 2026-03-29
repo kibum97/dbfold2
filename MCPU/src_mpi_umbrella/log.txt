@@ -1,0 +1,294 @@
+mpicc -O3 -Wall -DDEBUG  -c init.c -o init.o
+In file included from atom.h:3,
+                 from init.h:4,
+                 from init.c:7:
+globals.h:61:1: warning: useless storage class specifier in empty declaration
+   61 | };
+      | ^
+globals.h:235:1: warning: useless storage class specifier in empty declaration
+  235 | };
+      | ^
+globals.h:250:1: warning: useless storage class specifier in empty declaration
+  250 | };
+      | ^
+globals.h:261:1: warning: useless storage class specifier in empty declaration
+  261 | };
+      | ^
+init.c: In function ‘InitializeProtein’:
+init.c:127:58: warning: ‘/*’ within comment [-Wcomment]
+  127 |     fprintf(STATUS, "  file:\t\t%s   \n", native_file);  /*Set up arrays for native file, minimized
+init.c:151:5: error: too many arguments to function ‘ReadNative’; expected 0, have 3
+  151 |     ReadNative(native_file, native,
+      |     ^~~~~~~~~~ ~~~~~~~~~~~
+init.h:35:6: note: declared here
+   35 | void ReadNative();
+      |      ^~~~~~~~~~
+init.c:167:5: error: ‘buf_in’ undeclared (first use in this function)
+  167 |     buf_in  = (float *)calloc(3 * natoms, sizeof(float));
+      |     ^~~~~~
+init.c:167:5: note: each undeclared identifier is reported only once for each function it appears in
+init.c:168:5: error: ‘buf_out’ undeclared (first use in this function)
+  168 |     buf_out = (float *)calloc(3 * natoms, sizeof(float));
+      |     ^~~~~~~
+init.c:172:5: error: implicit declaration of function ‘get_template’ [-Wimplicit-function-declaration]
+  172 |     get_template();
+      |     ^~~~~~~~~~~~
+init.c:189:5: error: implicit declaration of function ‘CenterProtein’ [-Wimplicit-function-declaration]
+  189 |     CenterProtein(&native, natoms);
+      |     ^~~~~~~~~~~~~
+init.c:237:5: error: implicit declaration of function ‘initialize_torsion’; did you mean ‘InitializeProtein’? [-Wimplicit-function-declaration]
+  237 |     initialize_torsion();
+      |     ^~~~~~~~~~~~~~~~~~
+      |     InitializeProtein
+init.c:238:5: error: implicit declaration of function ‘initialize_sct’ [-Wimplicit-function-declaration]
+  238 |     initialize_sct();
+      |     ^~~~~~~~~~~~~~
+init.c:239:5: error: implicit declaration of function ‘initialize_aromatic’; did you mean ‘InitializeProtein’? [-Wimplicit-function-declaration]
+  239 |     initialize_aromatic();
+      |     ^~~~~~~~~~~~~~~~~~~
+      |     InitializeProtein
+init.c:240:5: error: implicit declaration of function ‘initialize_secstr’ [-Wimplicit-function-declaration]
+  240 |     initialize_secstr();
+      |     ^~~~~~~~~~~~~~~~~
+init.c:241:5: error: implicit declaration of function ‘read_cluster’ [-Wimplicit-function-declaration]
+  241 |     read_cluster();
+      |     ^~~~~~~~~~~~
+init.c:244:9: error: ‘hbond_pair’ undeclared (first use in this function)
+  244 |         hbond_pair = (struct pair *)calloc(natoms * natoms, sizeof(struct pair));
+      |         ^~~~~~~~~~
+init.c:256:5: error: implicit declaration of function ‘Contacts’ [-Wimplicit-function-declaration]
+  256 |     Contacts();
+      |     ^~~~~~~~
+init.c:277:5: error: implicit declaration of function ‘TypeContacts’ [-Wimplicit-function-declaration]
+  277 |     TypeContacts();
+      |     ^~~~~~~~~~~~
+init.c: In function ‘SetHardCore’:
+init.c:321:24: error: ‘radii’ undeclared (first use in this function)
+  321 |                 rad1 = radii[TypeAtom(atom_type_list[k].atom_name, atom_type_list[k].res_name)];
+      |                        ^~~~~
+init.c:321:30: error: implicit declaration of function ‘TypeAtom’ [-Wimplicit-function-declaration]
+  321 |                 rad1 = radii[TypeAtom(atom_type_list[k].atom_name, atom_type_list[k].res_name)];
+      |                              ^~~~~~~~
+init.c: In function ‘SetContactDistance’:
+init.c:353:24: error: ‘radii’ undeclared (first use in this function)
+  353 |                 rad1 = radii[TypeAtom(atom_type_list[k].atom_name, atom_type_list[k].res_name)];
+      |                        ^~~~~
+init.c:365:13: error: ‘beta’ undeclared (first use in this function)
+  365 |             beta                     = 0.;
+      |             ^~~~
+init.c: In function ‘SetRadii’:
+init.c:392:5: error: ‘radii’ undeclared (first use in this function)
+  392 |     radii = (Float *)calloc(13, sizeof(Float));
+      |     ^~~~~
+init.c: At top level:
+init.c:414:6: error: conflicting types for ‘ReadNative’; have ‘void(char *, struct atom *, int *)’
+  414 | void ReadNative(char *file_name, struct atom *protein, int *Natoms) {
+      |      ^~~~~~~~~~
+init.h:35:6: note: previous declaration of ‘ReadNative’ with type ‘void(void)’
+   35 | void ReadNative();
+      |      ^~~~~~~~~~
+init.c: In function ‘ReadNative’:
+init.c:424:9: error: implicit declaration of function ‘ParsePDBLine’ [-Wimplicit-function-declaration]
+  424 |         ParsePDBLine(line, protein, Natoms);
+      |         ^~~~~~~~~~~~
+init.c: In function ‘GetResidueInfo’:
+init.c:443:53: error: implicit declaration of function ‘GetAminoNumber’ [-Wimplicit-function-declaration]
+  443 |             Residue[Chain[i].res_num].amino_num   = GetAminoNumber(Chain[i].res);
+      |                                                     ^~~~~~~~~~~~~~
+init.c: In function ‘GetPhiPsi’:
+init.c:490:43: error: implicit declaration of function ‘Phi’ [-Wimplicit-function-declaration]
+  490 |             Residue[i].phi = PI / 180.0 * Phi(Residue[i], Residue[i - 1], Chain);
+      |                                           ^~~
+init.c:494:43: error: implicit declaration of function ‘Psi’ [-Wimplicit-function-declaration]
+  494 |             Residue[i].psi = PI / 180.0 * Psi(Residue[i], Residue[i + 1], Chain);
+      |                                           ^~~
+init.c: In function ‘GetChi’:
+init.c:510:17: error: implicit declaration of function ‘CalculateTorsion’ [-Wimplicit-function-declaration]
+  510 |                 CalculateTorsion(native, sidechain_torsion[i][j][0], sidechain_torsion[i][j][1],
+      |                 ^~~~~~~~~~~~~~~~
+init.c: In function ‘ReadAvgChis’:
+init.c:533:60: warning: format ‘%f’ expects argument of type ‘float *’, but argument 5 has type ‘Float *’ {aka ‘double *’} [-Wformat=]
+  533 |         sscanf(line, "%s %*d%*d%*d%*d %*d%*d %f%*f%*f%*f  %f%f %f%f %f%f %f%f", name, &value, &X,
+      |                                                           ~^                                  ~~
+      |                                                            |                                  |
+      |                                                            float *                            Float * {aka double *}
+      |                                                           %lf
+init.c:533:65: warning: format ‘%f’ expects argument of type ‘float *’, but argument 7 has type ‘Float *’ {aka ‘double *’} [-Wformat=]
+  533 |         sscanf(line, "%s %*d%*d%*d%*d %*d%*d %f%*f%*f%*f  %f%f %f%f %f%f %f%f", name, &value, &X,
+      |                                                                ~^
+      |                                                                 |
+      |                                                                 float *
+      |                                                                %lf
+  534 |                &sX, &Y, &sY, &Z, &sZ, &W, &sW);
+      |                     ~~                                           
+      |                     |
+      |                     Float * {aka double *}
+init.c:533:70: warning: format ‘%f’ expects argument of type ‘float *’, but argument 9 has type ‘Float *’ {aka ‘double *’} [-Wformat=]
+  533 |         sscanf(line, "%s %*d%*d%*d%*d %*d%*d %f%*f%*f%*f  %f%f %f%f %f%f %f%f", name, &value, &X,
+      |                                                                     ~^
+      |                                                                      |
+      |                                                                      float *
+      |                                                                     %lf
+  534 |                &sX, &Y, &sY, &Z, &sZ, &W, &sW);
+      |                              ~~                                       
+      |                              |
+      |                              Float * {aka double *}
+init.c:533:75: warning: format ‘%f’ expects argument of type ‘float *’, but argument 11 has type ‘Float *’ {aka ‘double *’} [-Wformat=]
+  533 |         sscanf(line, "%s %*d%*d%*d%*d %*d%*d %f%*f%*f%*f  %f%f %f%f %f%f %f%f", name, &value, &X,
+      |                                                                          ~^
+      |                                                                           |
+      |                                                                           float *
+      |                                                                          %lf
+  534 |                &sX, &Y, &sY, &Z, &sZ, &W, &sW);
+      |                                       ~~                                   
+      |                                       |
+      |                                       Float * {aka double *}
+init.c: In function ‘InitializeData’:
+init.c:645:9: error: ‘debug_contacts’ undeclared (first use in this function); did you mean ‘delta_contacts’?
+  645 |         debug_contacts = (unsigned char **)calloc(natoms, sizeof(unsigned char *));
+      |         ^~~~~~~~~~~~~~
+      |         delta_contacts
+init.c:648:9: error: ‘debug_dcontacts’ undeclared (first use in this function); did you mean ‘delta_contacts’?
+  648 |         debug_dcontacts = (unsigned char **)calloc(natoms, sizeof(unsigned char *));
+      |         ^~~~~~~~~~~~~~~
+      |         delta_contacts
+init.c:651:9: error: ‘debug_clashes’ undeclared (first use in this function); did you mean ‘delta_nclashes’?
+  651 |         debug_clashes = (unsigned char **)calloc(natoms, sizeof(unsigned char *));
+      |         ^~~~~~~~~~~~~
+      |         delta_nclashes
+init.c: In function ‘DetermineTriplets’:
+init.c:680:5: error: ‘total_triplets’ undeclared (first use in this function)
+  680 |     total_triplets = 0;
+      |     ^~~~~~~~~~~~~~
+init.c: In function ‘InitializeBackboneRotationData’:
+init.c:715:5: error: ‘yang_rotated_atoms’ undeclared (first use in this function); did you mean ‘all_rotated_atoms’?
+  715 |     yang_rotated_atoms = (short *)calloc(natoms, sizeof(short));
+      |     ^~~~~~~~~~~~~~~~~~
+      |     all_rotated_atoms
+init.c:716:5: error: ‘yang_not_rotated’ undeclared (first use in this function); did you mean ‘loop_not_rotated’?
+  716 |     yang_not_rotated   = (char *)calloc(natoms, sizeof(char));
+      |     ^~~~~~~~~~~~~~~~
+      |     loop_not_rotated
+init.c:718:19: error: assignment to ‘int **’ from incompatible pointer type ‘short int **’ [-Wincompatible-pointer-types]
+  718 |     rotate_natoms = (short **)calloc(2, sizeof(short *));
+      |                   ^
+init.c:724:26: error: assignment to ‘int *’ from incompatible pointer type ‘short int *’ [-Wincompatible-pointer-types]
+  724 |         rotate_natoms[i] = (short *)calloc(nresidues, sizeof(short));
+      |                          ^
+init.c:777:47: error: ‘total_triplets’ undeclared (first use in this function)
+  777 |     loop_rotate_natoms     = (short **)calloc(total_triplets, sizeof(short *));
+      |                                               ^~~~~~~~~~~~~~
+init.c:778:5: error: ‘loop_int_rotate_natoms’ undeclared (first use in this function); did you mean ‘loop_rotate_natoms’?
+  778 |     loop_int_rotate_natoms = (short **)calloc(total_triplets, sizeof(short *));
+      |     ^~~~~~~~~~~~~~~~~~~~~~
+      |     loop_rotate_natoms
+init.c:780:5: error: ‘loop_int_rotate_atoms’ undeclared (first use in this function); did you mean ‘loop_rotate_atoms’?
+  780 |     loop_int_rotate_atoms  = (short ***)calloc(total_triplets, sizeof(short **));
+      |     ^~~~~~~~~~~~~~~~~~~~~
+      |     loop_rotate_atoms
+init.c:784:35: error: assignment to ‘int *’ from incompatible pointer type ‘short int *’ [-Wincompatible-pointer-types]
+  784 |         loop_rotate_natoms[i]     = (short *)calloc(6, sizeof(short));
+      |                                   ^
+init.c: In function ‘InitializeSidechainRotationData’:
+init.c:935:23: error: assignment to ‘int ***’ from incompatible pointer type ‘short int ***’ [-Wincompatible-pointer-types]
+  935 |     sidechain_torsion = (short ***)calloc(nresidues, sizeof(short **));
+      |                       ^
+init.c:937:30: error: assignment to ‘int **’ from incompatible pointer type ‘short int **’ [-Wincompatible-pointer-types]
+  937 |         sidechain_torsion[i] =
+      |                              ^
+init.c:940:37: error: assignment to ‘int *’ from incompatible pointer type ‘short int *’ [-Wincompatible-pointer-types]
+  940 |             sidechain_torsion[i][j] = (short *)calloc(4, sizeof(short));
+      |                                     ^
+init.c:943:5: error: ‘sct_E’ undeclared (first use in this function)
+  943 |     sct_E = (short *****)calloc(nresidues, sizeof(short ****));
+      |     ^~~~~
+init.c:1004:29: error: assignment to ‘int **’ from incompatible pointer type ‘short int **’ [-Wincompatible-pointer-types]
+ 1004 |     rotate_sidechain_natoms = (short **)calloc(nresidues, sizeof(short *));
+      |                             ^
+init.c:1006:36: error: assignment to ‘int *’ from incompatible pointer type ‘short int *’ [-Wincompatible-pointer-types]
+ 1006 |         rotate_sidechain_natoms[i] = (short *)calloc(native_residue[i].ntorsions, sizeof(short));
+      |                                    ^
+init.c: In function ‘CheckCorrelation’:
+init.c:1191:18: error: implicit declaration of function ‘IsSidechainAtom’ [-Wimplicit-function-declaration]
+ 1191 |             if (!IsSidechainAtom(Protein[i].atomname) && !IsSidechainAtom(Protein[j].atomname) &&
+      |                  ^~~~~~~~~~~~~~~
+init.c: At top level:
+init.c:1203:6: error: conflicting types for ‘SetProgramOptions’; have ‘void(int,  char **)’
+ 1203 | void SetProgramOptions(int argc, char *argv[]) {
+      |      ^~~~~~~~~~~~~~~~~
+init.h:29:6: note: previous declaration of ‘SetProgramOptions’ with type ‘void(void)’
+   29 | void SetProgramOptions();
+      |      ^~~~~~~~~~~~~~~~~
+init.c: In function ‘SetProgramOptions’:
+init.c:1216:9: error: ‘myrank’ undeclared (first use in this function)
+ 1216 |     if (myrank == 0) {
+      |         ^~~~~~
+init.c:1227:5: error: ‘ierr’ undeclared (first use in this function)
+ 1227 |     ierr = MPI_Bcast(&MPI_STOP, 1, MPI_INT, 0, mpi_world_comm);
+      |     ^~~~
+init.c:1227:48: error: ‘mpi_world_comm’ undeclared (first use in this function)
+ 1227 |     ierr = MPI_Bcast(&MPI_STOP, 1, MPI_INT, 0, mpi_world_comm);
+      |                                                ^~~~~~~~~~~~~~
+init.c:1405:17: error: ‘USE_CLUSTER’ undeclared (first use in this function)
+ 1405 |                 USE_CLUSTER = value;  // note that by default, this value is set to 0 in backbone.h,
+      |                 ^~~~~~~~~~~
+init.c:1409:17: error: ‘MAX_CLUSTERSTEP’ undeclared (first use in this function)
+ 1409 |                 MAX_CLUSTERSTEP = value;  // note that by default, this value is set to 0 in
+      |                 ^~~~~~~~~~~~~~~
+init.c:1414:17: error: ‘CLUSTER_MOVE’ undeclared (first use in this function); did you mean ‘CLUSTER_NOISE’?
+ 1414 |                 CLUSTER_MOVE = value;          // note that by default, this value is set to 0.33 in
+      |                 ^~~~~~~~~~~~
+      |                 CLUSTER_NOISE
+init.c:1454:9: error: ‘nprocs’ undeclared (first use in this function)
+ 1454 |     if (nprocs % NODES_PER_TEMP != 0) {
+      |         ^~~~~~
+init.c:1498:5: error: ‘Tnode’ undeclared (first use in this function)
+ 1498 |     Tnode = (float *)calloc(nprocs, sizeof(float));
+      |     ^~~~~
+init.c:1499:5: error: ‘Enode’ undeclared (first use in this function)
+ 1499 |     Enode = (float *)calloc(nprocs, sizeof(float));
+      |     ^~~~~
+init.c:1500:5: error: ‘Cnode’ undeclared (first use in this function)
+ 1500 |     Cnode = (int *)calloc(nprocs, sizeof(int));  // number of contacts setpoints
+      |     ^~~~~
+init.c:1501:5: error: ‘Nnode’ undeclared (first use in this function)
+ 1501 |     Nnode = (int *)calloc(nprocs, sizeof(int));
+      |     ^~~~~
+init.c:1517:5: error: ‘number_of_contacts_setpoint’ undeclared (first use in this function); did you mean ‘number_of_contacts_max’?
+ 1517 |     number_of_contacts_setpoint = Cnode[myrank];  /// same with setpoint
+      |     ^~~~~~~~~~~~~~~~~~~~~~~~~~~
+      |     number_of_contacts_max
+init.c:1542:5: error: ‘replica_index’ undeclared (first use in this function)
+ 1542 |     replica_index = (int *)calloc(nprocs, sizeof(int));
+      |     ^~~~~~~~~~~~~
+init.c:1557:5: error: ‘accepted_replica’ undeclared (first use in this function)
+ 1557 |     accepted_replica  = (int *)calloc(nprocs, sizeof(int));
+      |     ^~~~~~~~~~~~~~~~
+init.c:1558:5: error: ‘rejected_replica’ undeclared (first use in this function)
+ 1558 |     rejected_replica  = (int *)calloc(nprocs, sizeof(int));
+      |     ^~~~~~~~~~~~~~~~
+init.c:1559:5: error: ‘attempted_replica’ undeclared (first use in this function)
+ 1559 |     attempted_replica = (int *)calloc(nprocs, sizeof(int));
+      |     ^~~~~~~~~~~~~~~~~
+init.c:1587:9: error: ‘LATTICE_SIZE’ undeclared (first use in this function); did you mean ‘LATTICE_UTIL_H’?
+ 1587 |         LATTICE_SIZE = 1.0 / 5.25;
+      |         ^~~~~~~~~~~~
+      |         LATTICE_UTIL_H
+init.c:1590:5: error: ‘MATRIX_SIZE’ undeclared (first use in this function)
+ 1590 |     MATRIX_SIZE      = 20;
+      |     ^~~~~~~~~~~
+init.c:1591:5: error: ‘HALF_MATRIX_SIZE’ undeclared (first use in this function)
+ 1591 |     HALF_MATRIX_SIZE = MATRIX_SIZE / 2;
+      |     ^~~~~~~~~~~~~~~~
+init.c:1597:9: error: implicit declaration of function ‘Read_constraints’ [-Wimplicit-function-declaration]
+ 1597 |         Read_constraints();
+      |         ^~~~~~~~~~~~~~~~
+In file included from globals.h:4:
+define.h: At top level:
+define.h:71:14: warning: ‘ATOMNAME’ defined but not used [-Wunused-variable]
+   71 | static char *ATOMNAME[NUM_ATOMNAMES] = {
+      |              ^~~~~~~~
+define.h:68:14: warning: ‘at_types’ defined but not used [-Wunused-variable]
+   68 | static char *at_types[NSMOGTYPES] = {"CA", "C3", "C2", "CP", "CC", "OC", "OB",
+      |              ^~~~~~~~
+make: *** [Makefile:29: init.o] Error 1

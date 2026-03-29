@@ -18,8 +18,8 @@ def main(args):
 
     for pdbroot in args.pdbroots:
         # Define the native file and data directory
-        native_file = f'{args.basedir}/{pdbroot}/in_pdbs/{pdbroot}.pdb'
-        datadir = f'{args.basedir}/{pdbroot}/MCPU_run/'
+        native_file = f'{args.basedir}/in_pdb/{pdbroot}.pdb'
+        datadir = f'{args.basedir}/MCPU_run/'
 
         # Initialize the Protein object
         prot = protein.Protein(native_file, pdbroot, args.homedir, args.savedir, datadir)
@@ -32,7 +32,6 @@ def main(args):
         if args.max_step is not None:
             prot.log_df = prot.log_df[prot.log_df.index.get_level_values(2) < args.max_step]
         prot.get_xtc_list()
-        prot.dist_cutoff = args.dist_cutoff
 
         # Create the MBAR and FES objects
         prot.create_fes(k_bias=0.02, recompute=True,solver_protocol="robust")
@@ -91,7 +90,6 @@ if __name__ == "__main__":
     )
 
     args = parser.parse_args()
-    args.substructre_dict = os.path.abspath(args.substrcutre_dict)
     args.basedir = os.path.abspath(args.basedir)
     args.homedir = os.path.abspath(args.homedir)
     args.savedir = os.path.abspath(args.savedir)

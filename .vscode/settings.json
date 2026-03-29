@@ -73,8 +73,9 @@
         "condition_variable": "cpp",
         "mutex": "cpp",
         "unordered_set": "cpp",
-        "core": "cpp"
+        "core": "cpp",
+        "dense": "cpp"
     },
     "cmake.sourceDirectory": "/n/home01/kibumpark/pkg/dbfold2/MCPU2",
-    "C_Cpp.default.compilerPath": "/usr/bin/g++"
+    "C_Cpp.default.compilerPath": "/usr/bin//gcc"
 }

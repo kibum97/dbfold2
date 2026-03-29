@@ -1,0 +1,2 @@
+vector.c:30:18: error: implicit declaration of function ‘Tiny’ [-Wimplicit-function-declaration]
+vector.c:142:5: error: ‘rot_mat’ undeclared (first use in this function)

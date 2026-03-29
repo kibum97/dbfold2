@@ -1,0 +1,39 @@
+name: dbfold2
+channels:
+  - nvidia           # for CUDA toolkit
+  - pytorch          # for PyTorch GPU builds
+  - conda-forge      # for scientific packages
+  - defaults         # fallback
+
+dependencies:
+  # Python version
+  - python=3.10
+
+  # Core CUDA support
+  - cuda-toolkit=12.4.1    # installs nvcc, libcudart, and other CUDA libraries
+
+  # Scientific stack
+  - numpy>=1.24,<2.0
+  - scipy
+  - pandas
+  - matplotlib
+  - seaborn
+  - scikit-learn
+
+  # Protein simulation / analysis tools
+  - mdtraj
+  - openmm
+  - biopython
+
+  # Utility tools
+  - pip
+  - tqdm
+  - ipython
+  - jupyterlab
+
+  # Pip-based installs
+  - pip:
+      - FastMBAR              # installs latest version from PyPI
+      - torch==2.4.1+cu124 --index-url https://download.pytorch.org/whl/cu124
+      - torchvision==0.19.1+cu124 --index-url https://download.pytorch.org/whl/cu124
+      - torchaudio==2.3.0+cu124 --index-url https://download.pytorch.org/whl/cu124
