@@ -1,0 +1,889 @@
+error: too many errors emitted, stopping now [clang-diagnostic-error]
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/align.c:5:5: error: use of undeclared identifier 'Float'; did you mean 'float'? [clang-diagnostic-error]
+    5 |     Float temp;
+      |     ^~~~~
+      |     float
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/align.c:6:5: error: use of undeclared identifier 'Float'; did you mean 'float'? [clang-diagnostic-error]
+    6 |     Float rad1, rad2;
+      |     ^~~~~
+      |     float
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/align.c:8:10: error: use of undeclared identifier 'USE_GO_POTENTIAL' [clang-diagnostic-error]
+    8 |     if (!USE_GO_POTENTIAL) {
+      |          ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/align.c:9:9: error: use of undeclared identifier 'align_hard_core' [clang-diagnostic-error]
+    9 |         align_hard_core = (Float **)calloc(MAX_TYPES, sizeof(Float *));
+      |         ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/align.c:9:28: error: expected expression [clang-diagnostic-error]
+    9 |         align_hard_core = (Float **)calloc(MAX_TYPES, sizeof(Float *));
+      |                            ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/align.c:9:28: error: use of undeclared identifier 'Float'; did you mean 'float'? [clang-diagnostic-error]
+    9 |         align_hard_core = (Float **)calloc(MAX_TYPES, sizeof(Float *));
+      |                            ^~~~~
+      |                            float
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/align.c:10:25: error: use of undeclared identifier 'MAX_TYPES' [clang-diagnostic-error]
+   10 |         for (i = 0; i < MAX_TYPES; i++)
+      |                         ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/align.c:11:13: error: use of undeclared identifier 'align_hard_core' [clang-diagnostic-error]
+   11 |             align_hard_core[i] = (Float *)calloc(MAX_TYPES, sizeof(Float));
+      |             ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/align.c:11:35: error: expected expression [clang-diagnostic-error]
+   11 |             align_hard_core[i] = (Float *)calloc(MAX_TYPES, sizeof(Float));
+      |                                   ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/align.c:11:35: error: use of undeclared identifier 'Float'; did you mean 'float'? [clang-diagnostic-error]
+   11 |             align_hard_core[i] = (Float *)calloc(MAX_TYPES, sizeof(Float));
+      |                                   ^~~~~
+      |                                   float
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/align.c:13:25: error: use of undeclared identifier 'MAX_TYPES' [clang-diagnostic-error]
+   13 |         for (i = 0; i < MAX_TYPES; i++)
+      |                         ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/align.c:14:29: error: use of undeclared identifier 'MAX_TYPES' [clang-diagnostic-error]
+   14 |             for (j = 0; j < MAX_TYPES; j++) {
+      |                             ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/align.c:15:33: error: use of undeclared identifier 'natom_type_list' [clang-diagnostic-error]
+   15 |                 for (k = 0; k < natom_type_list; ++k)
+      |                                 ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/align.c:16:30: error: use of undeclared identifier 'atom_type_list' [clang-diagnostic-error]
+   16 |                     if (i == atom_type_list[k].type_num)
+      |                              ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/align.c:18:24: error: use of undeclared identifier 'radii' [clang-diagnostic-error]
+   18 |                 rad1 = radii[TypeAtom(atom_type_list[k].atom_name, atom_type_list[k].res_name)];
+      |                        ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/align.c:18:30: error: call to undeclared function 'TypeAtom'; ISO C99 and later do not support implicit function declarations [clang-diagnostic-implicit-function-declaration]
+   18 |                 rad1 = radii[TypeAtom(atom_type_list[k].atom_name, atom_type_list[k].res_name)];
+      |                              ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/align.c:18:39: error: use of undeclared identifier 'atom_type_list' [clang-diagnostic-error]
+   18 |                 rad1 = radii[TypeAtom(atom_type_list[k].atom_name, atom_type_list[k].res_name)];
+      |                                       ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/align.c:18:68: error: use of undeclared identifier 'atom_type_list' [clang-diagnostic-error]
+   18 |                 rad1 = radii[TypeAtom(atom_type_list[k].atom_name, atom_type_list[k].res_name)];
+      |                                                                    ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/align.c:19:33: error: use of undeclared identifier 'natom_type_list' [clang-diagnostic-error]
+   19 |                 for (k = 0; k < natom_type_list; ++k)
+      |                                 ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/constraint.c:6:40: error: use of undeclared identifier 'MAXFRAG' [clang-diagnostic-error]
+    6 |     struct fragments constraint_seqptr[MAXFRAG];
+      |                                        ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/constraint.c:7:43: error: use of undeclared identifier 'MAXFRAG' [clang-diagnostic-error]
+    7 |     struct fragments constraint_structptr[MAXFRAG];
+      |                                           ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/constraint.c:9:5: error: use of undeclared identifier 'FILE' [clang-diagnostic-error]
+    9 |     FILE *fp    = fopen(rmsd_constraint_file, "r");
+      |     ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/constraint.c:9:11: error: use of undeclared identifier 'fp' [clang-diagnostic-error]
+    9 |     FILE *fp    = fopen(rmsd_constraint_file, "r");
+      |           ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/constraint.c:9:19: error: call to undeclared function 'fopen'; ISO C99 and later do not support implicit function declarations [clang-diagnostic-implicit-function-declaration]
+    9 |     FILE *fp    = fopen(rmsd_constraint_file, "r");
+      |                   ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/constraint.c:9:25: error: use of undeclared identifier 'rmsd_constraint_file' [clang-diagnostic-error]
+    9 |     FILE *fp    = fopen(rmsd_constraint_file, "r");
+      |                         ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/constraint.c:11:9: error: use of undeclared identifier 'fp' [clang-diagnostic-error]
+   11 |     if (fp == NULL) {
+      |         ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/constraint.c:11:15: error: use of undeclared identifier 'NULL' [clang-diagnostic-error]
+   11 |     if (fp == NULL) {
+      |               ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/constraint.c:12:9: error: call to undeclared function 'fprintf'; ISO C99 and later do not support implicit function declarations [clang-diagnostic-implicit-function-declaration]
+   12 |         fprintf(STATUS, "Could not open file %s \n", rmsd_constraint_file);
+      |         ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/constraint.c:12:17: error: use of undeclared identifier 'STATUS' [clang-diagnostic-error]
+   12 |         fprintf(STATUS, "Could not open file %s \n", rmsd_constraint_file);
+      |                 ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/constraint.c:12:54: error: use of undeclared identifier 'rmsd_constraint_file' [clang-diagnostic-error]
+   12 |         fprintf(STATUS, "Could not open file %s \n", rmsd_constraint_file);
+      |                                                      ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/constraint.c:13:9: error: call to undeclared library function 'exit' with type 'void (int) __attribute__((noreturn))'; ISO C99 and later do not support implicit function declarations [clang-diagnostic-implicit-function-declaration]
+   13 |         exit(1);
+      |         ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/constraint.c:13:9: note: include the header <stdlib.h> or explicitly provide a declaration for 'exit'
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/constraint.c:15:9: error: call to undeclared function 'fprintf'; ISO C99 and later do not support implicit function declarations [clang-diagnostic-implicit-function-declaration]
+   15 |         fprintf(STATUS, "Successfully opened constraint file %s \n", rmsd_constraint_file);
+      |         ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/constraint.c:15:17: error: use of undeclared identifier 'STATUS' [clang-diagnostic-error]
+   15 |         fprintf(STATUS, "Successfully opened constraint file %s \n", rmsd_constraint_file);
+      |                 ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/constraint.c:15:70: error: use of undeclared identifier 'rmsd_constraint_file' [clang-diagnostic-error]
+   15 |         fprintf(STATUS, "Successfully opened constraint file %s \n", rmsd_constraint_file);
+      |                                                                      ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/constraint.c:16:9: error: call to undeclared function 'fflush'; ISO C99 and later do not support implicit function declarations [clang-diagnostic-implicit-function-declaration]
+   16 |         fflush(STATUS);
+      |         ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/constraint.c:16:16: error: use of undeclared identifier 'STATUS' [clang-diagnostic-error]
+   16 |         fflush(STATUS);
+      |                ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/constraint.c:18:12: error: call to undeclared function 'fgets'; ISO C99 and later do not support implicit function declarations [clang-diagnostic-implicit-function-declaration]
+   18 |     while (fgets(str, 1000, fp) != NULL) {
+      |            ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/constraint.c:18:29: error: use of undeclared identifier 'fp' [clang-diagnostic-error]
+   18 |     while (fgets(str, 1000, fp) != NULL) {
+      |                             ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/debug.c:9:21: error: use of undeclared identifier 'natoms' [clang-diagnostic-error]
+    9 |     for (i = 0; i < natoms; i++)
+      |                     ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/debug.c:10:29: error: use of undeclared identifier 'natoms' [clang-diagnostic-error]
+   10 |         for (j = i + 1; j < natoms; j++)
+      |                             ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/debug.c:11:17: error: use of undeclared identifier 'data' [clang-diagnostic-error]
+   11 |             if (data[i][j].clashes != debug_clashes[i][j])
+      |                 ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/debug.c:11:39: error: use of undeclared identifier 'debug_clashes' [clang-diagnostic-error]
+   11 |             if (data[i][j].clashes != debug_clashes[i][j])
+      |                                       ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/debug.c:12:17: error: call to undeclared function 'fprintf'; ISO C99 and later do not support implicit function declarations [clang-diagnostic-implicit-function-declaration]
+   12 |                 fprintf(STATUS, "CLASH_MISMATCH\t(%d, %d)\t%d\t%d\n", i, j, data[i][j].clashes,
+      |                 ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/debug.c:12:25: error: use of undeclared identifier 'STATUS' [clang-diagnostic-error]
+   12 |                 fprintf(STATUS, "CLASH_MISMATCH\t(%d, %d)\t%d\t%d\n", i, j, data[i][j].clashes,
+      |                         ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/debug.c:12:77: error: use of undeclared identifier 'data' [clang-diagnostic-error]
+   12 |                 fprintf(STATUS, "CLASH_MISMATCH\t(%d, %d)\t%d\t%d\n", i, j, data[i][j].clashes,
+      |                                                                             ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/debug.c:13:25: error: use of undeclared identifier 'debug_clashes' [clang-diagnostic-error]
+   13 |                         debug_clashes[i][j]);
+      |                         ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/debug.c:14:21: error: use of undeclared identifier 'natoms' [clang-diagnostic-error]
+   14 |     for (i = 0; i < natoms; i++)
+      |                     ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/debug.c:15:29: error: use of undeclared identifier 'natoms' [clang-diagnostic-error]
+   15 |         for (j = i + 1; j < natoms; j++)
+      |                             ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/debug.c:16:17: error: use of undeclared identifier 'data' [clang-diagnostic-error]
+   16 |             if (data[i][j].contacts != debug_contacts[i][j]) {
+      |                 ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/debug.c:16:40: error: subscript of pointer to function type 'void ()' [clang-diagnostic-error]
+   16 |             if (data[i][j].contacts != debug_contacts[i][j]) {
+      |                                        ^~~~~~~~~~~~~~
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/debug.c:16:40: error: use of undeclared identifier 'debug_contacts'; did you mean 'DebugContacts'? [clang-diagnostic-error]
+   16 |             if (data[i][j].contacts != debug_contacts[i][j]) {
+      |                                        ^~~~~~~~~~~~~~
+      |                                        DebugContacts
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/debug.h:6:6: note: 'DebugContacts' declared here
+    6 | void DebugContacts();
+      |      ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/debug.c:17:25: error: use of undeclared identifier 'STATUS' [clang-diagnostic-error]
+   17 |                 fprintf(STATUS, "CONTACT_MISMATCH\t(%d, %d)\t%d\t%d", i, j, data[i][j].contacts,
+      |                         ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/debug.c:17:77: error: use of undeclared identifier 'data' [clang-diagnostic-error]
+   17 |                 fprintf(STATUS, "CONTACT_MISMATCH\t(%d, %d)\t%d\t%d", i, j, data[i][j].contacts,
+      |                                                                             ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/debug.c:18:25: error: subscript of pointer to function type 'void ()' [clang-diagnostic-error]
+   18 |                         debug_contacts[i][j]);
+      |                         ^~~~~~~~~~~~~~
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/debug.c:18:25: error: use of undeclared identifier 'debug_contacts'; did you mean 'DebugContacts'? [clang-diagnostic-error]
+   18 |                         debug_contacts[i][j]);
+      |                         ^~~~~~~~~~~~~~
+      |                         DebugContacts
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/debug.h:6:6: note: 'DebugContacts' declared here
+    6 | void DebugContacts();
+      |      ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/debug.c:19:33: error: use of undeclared identifier 'total_pairs' [clang-diagnostic-error]
+   19 |                 for (k = 0; k < total_pairs; k++)
+      |                                 ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/debug.c:20:25: error: use of undeclared identifier 'ab' [clang-diagnostic-error]
+   20 |                     if (ab[k].a == i && ab[k].b == j) {
+      |                         ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/energy.c:4:5: error: call to undeclared function 'TypeContacts'; ISO C99 and later do not support implicit function declarations [clang-diagnostic-implicit-function-declaration]
+    4 |     TypeContacts();
+      |     ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/energy.c:5:5: error: use of undeclared identifier 'E_pot' [clang-diagnostic-error]
+    5 |     E_pot   = FullAtomEnergy();
+      |     ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/energy.c:6:5: error: use of undeclared identifier 'E_tor' [clang-diagnostic-error]
+    6 |     E_tor   = torsionenergy();
+      |     ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/energy.c:7:5: error: use of undeclared identifier 'E_sct' [clang-diagnostic-error]
+    7 |     E_sct   = sctenergy();
+      |     ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/energy.c:8:5: error: use of undeclared identifier 'E_aro' [clang-diagnostic-error]
+    8 |     E_aro   = aromaticenergy();
+      |     ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/energy.c:9:5: error: use of undeclared identifier 'E_hbond' [clang-diagnostic-error]
+    9 |     E_hbond = HydrogenBonds();
+      |     ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/energy.c:11:9: error: call to undeclared library function 'strcmp' with type 'int (const char *, const char *)'; ISO C99 and later do not support implicit function declarations [clang-diagnostic-implicit-function-declaration]
+   11 |     if (strcmp(constraint_file, "None") != 0) {                            // AB
+      |         ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/energy.c:11:9: note: include the header <string.h> or explicitly provide a declaration for 'strcmp'
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/energy.c:11:16: error: use of undeclared identifier 'constraint_file' [clang-diagnostic-error]
+   11 |     if (strcmp(constraint_file, "None") != 0) {                            // AB
+      |                ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/energy.c:12:9: error: use of undeclared identifier 'E_constraint' [clang-diagnostic-error]
+   12 |         E_constraint = Compute_constraint_energy(native_residue, native);  // AB
+      |         ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/energy.c:12:24: error: call to undeclared function 'Compute_constraint_energy'; ISO C99 and later do not support implicit function declarations [clang-diagnostic-implicit-function-declaration]
+   12 |         E_constraint = Compute_constraint_energy(native_residue, native);  // AB
+      |                        ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/energy.c:12:50: error: use of undeclared identifier 'native_residue' [clang-diagnostic-error]
+   12 |         E_constraint = Compute_constraint_energy(native_residue, native);  // AB
+      |                                                  ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/energy.c:12:66: error: use of undeclared identifier 'native' [clang-diagnostic-error]
+   12 |         E_constraint = Compute_constraint_energy(native_residue, native);  // AB
+      |                                                                  ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/energy.c:13:23: error: use of undeclared identifier 'rmsd_constraint_file' [clang-diagnostic-error]
+   13 |     } else if (strcmp(rmsd_constraint_file, "None") != 0) {
+      |                       ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/energy.h:4:1: error: unknown type name 'Float'; did you mean 'float'? [clang-diagnostic-error]
+    4 | Float FullAtomEnergy();
+      | ^~~~~
+      | float
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/energy.h:6:1: error: unknown type name 'Float'; did you mean 'float'? [clang-diagnostic-error]
+    6 | Float HydrogenBonds();
+      | ^~~~~
+      | float
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/energy.h:7:1: error: unknown type name 'Float'; did you mean 'float'? [clang-diagnostic-error]
+    7 | Float torsionenergy();
+      | ^~~~~
+      | float
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/energy.h:8:1: error: unknown type name 'Float'; did you mean 'float'? [clang-diagnostic-error]
+    8 | Float sctenergy();
+      | ^~~~~
+      | float
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/energy.h:11:1: error: unknown type name 'Float'; did you mean 'float'? [clang-diagnostic-error]
+   11 | Float aromaticenergy();
+      | ^~~~~
+      | float
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/energy.h:13:1: error: unknown type name 'Float'; did you mean 'float'? [clang-diagnostic-error]
+   13 | Float Rgenergy();
+      | ^~~~~
+      | float
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/fold.c:11:21: error: use of undeclared identifier 'MATRIX_SIZE' [clang-diagnostic-error]
+   11 |     for (i = 0; i < MATRIX_SIZE; i++)
+      |                     ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/fold.c:12:25: error: use of undeclared identifier 'MATRIX_SIZE' [clang-diagnostic-error]
+   12 |         for (j = 0; j < MATRIX_SIZE; j++)
+      |                         ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/fold.c:13:29: error: use of undeclared identifier 'MATRIX_SIZE' [clang-diagnostic-error]
+   13 |             for (k = 0; k < MATRIX_SIZE; k++)
+      |                             ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/fold.c:14:17: error: use of undeclared identifier 'the_matrix' [clang-diagnostic-error]
+   14 |                 the_matrix[i][j][k].natoms = 0;
+      |                 ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/fold.c:16:21: error: use of undeclared identifier 'natoms' [clang-diagnostic-error]
+   16 |     for (i = 0; i < natoms; i++) {
+      |                     ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/fold.c:17:9: error: call to undeclared function 'FindLatticeCoordinates'; ISO C99 and later do not support implicit function declarations [clang-diagnostic-implicit-function-declaration]
+   17 |         FindLatticeCoordinates(&native[i]);
+      |         ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/fold.c:17:33: error: use of undeclared identifier 'native' [clang-diagnostic-error]
+   17 |         FindLatticeCoordinates(&native[i]);
+      |                                 ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/fold.c:19:21: error: use of undeclared identifier 'the_matrix' [clang-diagnostic-error]
+   19 |         the_cell = &the_matrix[native[i].X][native[i].Y][native[i].Z];
+      |                     ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/fold.c:19:32: error: use of undeclared identifier 'native' [clang-diagnostic-error]
+   19 |         the_cell = &the_matrix[native[i].X][native[i].Y][native[i].Z];
+      |                                ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/fold.c:19:45: error: use of undeclared identifier 'native' [clang-diagnostic-error]
+   19 |         the_cell = &the_matrix[native[i].X][native[i].Y][native[i].Z];
+      |                                             ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/fold.c:19:58: error: use of undeclared identifier 'native' [clang-diagnostic-error]
+   19 |         the_cell = &the_matrix[native[i].X][native[i].Y][native[i].Z];
+      |                                                          ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/fold.c:20:17: error: incomplete definition of type 'struct cell' [clang-diagnostic-error]
+   20 |         the_cell->atom_list[(the_cell->natoms)++] = i;
+      |         ~~~~~~~~^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/fold.c:9:12: note: forward declaration of 'struct cell'
+    9 |     struct cell *the_cell;
+      |            ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/fold.c:20:38: error: incomplete definition of type 'struct cell' [clang-diagnostic-error]
+   20 |         the_cell->atom_list[(the_cell->natoms)++] = i;
+      |                              ~~~~~~~~^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/fold.c:9:12: note: forward declaration of 'struct cell'
+    9 |     struct cell *the_cell;
+      |            ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/fold.c:42:5: error: use of undeclared identifier 'disulfide_pairs' [clang-diagnostic-error]
+   42 |     disulfide_pairs        = (int *)calloc(N_constraints, sizeof(int));
+      |     ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/fold.c:42:37: error: call to undeclared library function 'calloc' with type 'void *(unsigned long, unsigned long)'; ISO C99 and later do not support implicit function declarations [clang-diagnostic-implicit-function-declaration]
+   42 |     disulfide_pairs        = (int *)calloc(N_constraints, sizeof(int));
+      |                                     ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/fold.c:42:37: note: include the header <stdlib.h> or explicitly provide a declaration for 'calloc'
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/fold.c:42:44: error: use of undeclared identifier 'N_constraints'; did you mean 'E_constraint_now'? [clang-diagnostic-error]
+   42 |     disulfide_pairs        = (int *)calloc(N_constraints, sizeof(int));
+      |                                            ^~~~~~~~~~~~~
+      |                                            E_constraint_now
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/fold.c:41:11: note: 'E_constraint_now' declared here
+   41 |     float E_constraint_now = 0.0;  // AB
+      |           ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/fold.c:56:22: error: variable has incomplete type 'struct alignment' [clang-diagnostic-error]
+   56 |     struct alignment align;
+      |                      ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/fold.c:56:12: note: forward declaration of 'struct alignment'
+   56 |     struct alignment align;
+      |            ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/fold.c:61:29: error: use of undeclared identifier 'nresidues' [clang-diagnostic-error]
+   61 |     align.seqptr[1].x2    = nresidues;
+      |                             ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/fold.c:62:29: error: use of undeclared identifier 'nresidues' [clang-diagnostic-error]
+   62 |     align.structptr[1].x2 = nresidues;
+      |                             ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/getrms.c:4:38: error: use of undeclared identifier 'MAXSEQUENCE' [clang-diagnostic-error]
+    4 | float getrms(struct backbone struct1[MAXSEQUENCE], struct backbone struct2[MAXSEQUENCE],
+      |                                      ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/getrms.c:4:76: error: use of undeclared identifier 'MAXSEQUENCE' [clang-diagnostic-error]
+    4 | float getrms(struct backbone struct1[MAXSEQUENCE], struct backbone struct2[MAXSEQUENCE],
+      |                                                                            ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/getrms.c:32:14: error: call to undeclared library function 'sqrt' with type 'double (double)'; ISO C99 and later do not support implicit function declarations [clang-diagnostic-implicit-function-declaration]
+   32 |     lowest = sqrt(lowest / algnlength);
+      |              ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/getrms.c:32:14: note: include the header <math.h> or explicitly provide a declaration for 'sqrt'
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/getrms.c:36:53: error: use of undeclared identifier 'MAXSEQUENCE' [clang-diagnostic-error]
+   36 | int kearsley(float a[5][5], struct backbone struct1[MAXSEQUENCE],
+      |                                                     ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/getrms.c:37:38: error: use of undeclared identifier 'MAXSEQUENCE' [clang-diagnostic-error]
+   37 |              struct backbone struct2[MAXSEQUENCE], struct alignment algn) {
+      |                                      ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/getrms.c:39:19: error: variable has incomplete type 'struct vector' [clang-diagnostic-error]
+   39 |     struct vector centroid1, centroid2;
+      |                   ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/getrms.h:22:12: note: forward declaration of 'struct vector'
+   22 |     struct vector N;
+      |            ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/getrms.c:39:30: error: variable has incomplete type 'struct vector' [clang-diagnostic-error]
+   39 |     struct vector centroid1, centroid2;
+      |                              ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/getrms.h:22:12: note: forward declaration of 'struct vector'
+   22 |     struct vector N;
+      |            ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/getrms.c:178:23: error: call to undeclared library function 'fabs' with type 'double (double)'; ISO C99 and later do not support implicit function declarations [clang-diagnostic-implicit-function-declaration]
+  178 |                 sm += fabs(a[ip][iq]);
+      |                       ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/getrms.c:178:23: note: include the header <math.h> or explicitly provide a declaration for 'fabs'
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/getrms.h:16:29: error: use of undeclared identifier 'MAXFRAG' [clang-diagnostic-error]
+   16 |     struct fragments seqptr[MAXFRAG];
+      |                             ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/getrms.h:17:32: error: use of undeclared identifier 'MAXFRAG' [clang-diagnostic-error]
+   17 |     struct fragments structptr[MAXFRAG];
+      |                                ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/getrms.h:22:19: error: field has incomplete type 'struct vector' [clang-diagnostic-error]
+   22 |     struct vector N;
+      |                   ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/getrms.h:22:12: note: forward declaration of 'struct vector'
+   22 |     struct vector N;
+      |            ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/getrms.h:23:19: error: field has incomplete type 'struct vector' [clang-diagnostic-error]
+   23 |     struct vector CA;
+      |                   ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/getrms.h:22:12: note: forward declaration of 'struct vector'
+   22 |     struct vector N;
+      |            ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/getrms.h:24:19: error: field has incomplete type 'struct vector' [clang-diagnostic-error]
+   24 |     struct vector C;
+      |                   ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/getrms.h:22:12: note: forward declaration of 'struct vector'
+   22 |     struct vector N;
+      |            ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/getrms.h:25:19: error: field has incomplete type 'struct vector' [clang-diagnostic-error]
+   25 |     struct vector CB;
+      |                   ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/getrms.h:22:12: note: forward declaration of 'struct vector'
+   22 |     struct vector N;
+      |            ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/getrms.h:26:19: error: field has incomplete type 'struct vector' [clang-diagnostic-error]
+   26 |     struct vector O;
+      |                   ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/getrms.h:22:12: note: forward declaration of 'struct vector'
+   22 |     struct vector N;
+      |            ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/getrms.h:29:38: error: use of undeclared identifier 'MAXSEQUENCE' [clang-diagnostic-error]
+   29 | float getrms(struct backbone struct1[MAXSEQUENCE], struct backbone struct2[MAXSEQUENCE],
+      |                                      ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/getrms.h:29:76: error: use of undeclared identifier 'MAXSEQUENCE' [clang-diagnostic-error]
+   29 | float getrms(struct backbone struct1[MAXSEQUENCE], struct backbone struct2[MAXSEQUENCE],
+      |                                                                            ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/getrms.h:31:55: error: use of undeclared identifier 'MAXSEQUENCE' [clang-diagnostic-error]
+   31 | int   kearsley(float a[5][5], struct backbone struct1[MAXSEQUENCE],
+      |                                                       ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/getrms.h:32:40: error: use of undeclared identifier 'MAXSEQUENCE' [clang-diagnostic-error]
+   32 |                struct backbone struct2[MAXSEQUENCE], struct alignment algn);
+      |                                        ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/hbonds.c:8:29: error: use of undeclared identifier 'nresidues' [clang-diagnostic-error]
+    8 |     for (res_n = 1; res_n < nresidues - 1; res_n++)
+      |                             ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/hbonds.c:9:33: error: use of undeclared identifier 'nresidues' [clang-diagnostic-error]
+    9 |         for (res_o = 1; res_o < nresidues - 1; res_o++) {
+      |                                 ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/hbonds.c:10:17: error: use of undeclared identifier 'native_residue' [clang-diagnostic-error]
+   10 |             i = native_residue[res_n].N;
+      |                 ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/hbonds.c:11:17: error: use of undeclared identifier 'native_residue' [clang-diagnostic-error]
+   11 |             j = native_residue[res_o].O;
+      |                 ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/hbonds.c:12:17: error: use of undeclared identifier 'data' [clang-diagnostic-error]
+   12 |             if (data[i][j].check_hbond) {
+      |                 ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/hbonds.c:13:17: error: use of undeclared identifier 'data' [clang-diagnostic-error]
+   13 |                 data[i][j].hbond = data[j][i].hbond = CheckHBond(i, j);
+      |                 ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/hbonds.c:13:36: error: use of undeclared identifier 'data' [clang-diagnostic-error]
+   13 |                 data[i][j].hbond = data[j][i].hbond = CheckHBond(i, j);
+      |                                    ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/hbonds.c:14:21: error: use of undeclared identifier 'd_memory' [clang-diagnostic-error]
+   14 |                 if (d_memory < HB_INNER * HB_INNER)
+      |                     ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/hbonds.c:14:32: error: use of undeclared identifier 'HB_INNER' [clang-diagnostic-error]
+   14 |                 if (d_memory < HB_INNER * HB_INNER)
+      |                                ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/hbonds.c:14:43: error: use of undeclared identifier 'HB_INNER' [clang-diagnostic-error]
+   14 |                 if (d_memory < HB_INNER * HB_INNER)
+      |                                           ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/hbonds.c:15:21: error: use of undeclared identifier 'data' [clang-diagnostic-error]
+   15 |                     data[i][j].closehb = data[j][i].closehb = 0;
+      |                     ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/hbonds.c:15:42: error: use of undeclared identifier 'data' [clang-diagnostic-error]
+   15 |                     data[i][j].closehb = data[j][i].closehb = 0;
+      |                                          ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/hbonds.c:16:27: error: use of undeclared identifier 'd_memory' [clang-diagnostic-error]
+   16 |                 else if ((d_memory > HB_INNER * HB_INNER) && (d_memory < HB_CUTOFF * HB_CUTOFF))
+      |                           ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/hbonds.c:16:38: error: use of undeclared identifier 'HB_INNER' [clang-diagnostic-error]
+   16 |                 else if ((d_memory > HB_INNER * HB_INNER) && (d_memory < HB_CUTOFF * HB_CUTOFF))
+      |                                      ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/hbonds.c:16:49: error: use of undeclared identifier 'HB_INNER' [clang-diagnostic-error]
+   16 |                 else if ((d_memory > HB_INNER * HB_INNER) && (d_memory < HB_CUTOFF * HB_CUTOFF))
+      |                                                 ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/hbonds.c:16:63: error: use of undeclared identifier 'd_memory' [clang-diagnostic-error]
+   16 |                 else if ((d_memory > HB_INNER * HB_INNER) && (d_memory < HB_CUTOFF * HB_CUTOFF))
+      |                                                               ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/hbonds.c:16:74: error: use of undeclared identifier 'HB_CUTOFF' [clang-diagnostic-error]
+   16 |                 else if ((d_memory > HB_INNER * HB_INNER) && (d_memory < HB_CUTOFF * HB_CUTOFF))
+      |                                                                          ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/hbonds.c:16:86: error: use of undeclared identifier 'HB_CUTOFF' [clang-diagnostic-error]
+   16 |                 else if ((d_memory > HB_INNER * HB_INNER) && (d_memory < HB_CUTOFF * HB_CUTOFF))
+      |                                                                                      ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/hbonds.c:17:21: error: use of undeclared identifier 'data' [clang-diagnostic-error]
+   17 |                     data[i][j].closehb = data[j][i].closehb = 1;
+      |                     ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/in_out.c:19:74: error: use of undeclared identifier 'MSAR' [clang-diagnostic-error]
+   19 |                        double r_c[5][3], double r_o[5][3], double r_s[5][MSAR][3], int stt_res,
+      |                                                                          ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/in_out.c:35:10: error: use of undeclared identifier 'fpdb' [clang-diagnostic-error]
+   35 |     if ((fpdb = fopen(pdb_name, "r")) == NULL) {
+      |          ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/in_out.c:35:17: error: call to undeclared function 'fopen'; ISO C99 and later do not support implicit function declarations [clang-diagnostic-implicit-function-declaration]
+   35 |     if ((fpdb = fopen(pdb_name, "r")) == NULL) {
+      |                 ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/in_out.c:35:42: error: use of undeclared identifier 'NULL' [clang-diagnostic-error]
+   35 |     if ((fpdb = fopen(pdb_name, "r")) == NULL) {
+      |                                          ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/in_out.c:36:9: error: call to undeclared function 'fprintf'; ISO C99 and later do not support implicit function declarations [clang-diagnostic-implicit-function-declaration]
+   36 |         fprintf(STATUS, "ERROR: Can't open the file: %s!\n", pdb_name);
+      |         ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/in_out.c:36:17: error: use of undeclared identifier 'STATUS' [clang-diagnostic-error]
+   36 |         fprintf(STATUS, "ERROR: Can't open the file: %s!\n", pdb_name);
+      |                 ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/in_out.c:37:9: error: call to undeclared library function 'exit' with type 'void (int) __attribute__((noreturn))'; ISO C99 and later do not support implicit function declarations [clang-diagnostic-implicit-function-declaration]
+   37 |         exit(1);
+      |         ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/in_out.c:37:9: note: include the header <stdlib.h> or explicitly provide a declaration for 'exit'
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/in_out.c:63:9: error: call to undeclared function 'fscanf'; ISO C99 and later do not support implicit function declarations [clang-diagnostic-implicit-function-declaration]
+   63 |         fscanf(fpdb, "%*s%*s %s%s %*s  %d%lf%lf%lf", atmname, resname, &res_no, &x, &y, &z);
+      |         ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/in_out.c:63:16: error: use of undeclared identifier 'fpdb' [clang-diagnostic-error]
+   63 |         fscanf(fpdb, "%*s%*s %s%s %*s  %d%lf%lf%lf", atmname, resname, &res_no, &x, &y, &z);
+      |                ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/in_out.c:65:13: error: call to undeclared function 'fclose'; ISO C99 and later do not support implicit function declarations [clang-diagnostic-implicit-function-declaration]
+   65 |             fclose(fpdb);
+      |             ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/in_out.c:65:20: error: use of undeclared identifier 'fpdb' [clang-diagnostic-error]
+   65 |             fclose(fpdb);
+      |                    ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/in_out.c:70:13: error: call to undeclared library function 'strcpy' with type 'char *(char *, const char *)'; ISO C99 and later do not support implicit function declarations [clang-diagnostic-implicit-function-declaration]
+   70 |             strcpy(res_name[ir], resname);
+      |             ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/in_out.c:70:13: note: include the header <string.h> or explicitly provide a declaration for 'strcpy'
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/in_out.c:71:17: error: call to undeclared library function 'strcmp' with type 'int (const char *, const char *)'; ISO C99 and later do not support implicit function declarations [clang-diagnostic-implicit-function-declaration]
+   71 |             if (strcmp(atmname, "N") == 0) {
+      |                 ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/in_out.c:71:17: note: include the header <string.h> or explicitly provide a declaration for 'strcmp'
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/in_out.c:103:75: error: use of undeclared identifier 'MSAR' [clang-diagnostic-error]
+  103 |                         double r_c[5][3], double r_o[5][3], double r_s[5][MSAR][3], int stt_res,
+      |                                                                           ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/in_out.c:118:10: error: use of undeclared identifier 'fpdb' [clang-diagnostic-error]
+  118 |     if ((fpdb = fopen(pdb_name, "w")) == NULL) {
+      |          ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/in_out.c:118:17: error: call to undeclared function 'fopen'; ISO C99 and later do not support implicit function declarations [clang-diagnostic-implicit-function-declaration]
+  118 |     if ((fpdb = fopen(pdb_name, "w")) == NULL) {
+      |                 ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/in_out.c:118:42: error: use of undeclared identifier 'NULL' [clang-diagnostic-error]
+  118 |     if ((fpdb = fopen(pdb_name, "w")) == NULL) {
+      |                                          ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/in_out.c:119:9: error: call to undeclared function 'fprintf'; ISO C99 and later do not support implicit function declarations [clang-diagnostic-implicit-function-declaration]
+  119 |         fprintf(STATUS, "ERROR: Can't open the file: %s!\n", pdb_name);
+      |         ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/in_out.c:119:17: error: use of undeclared identifier 'STATUS' [clang-diagnostic-error]
+  119 |         fprintf(STATUS, "ERROR: Can't open the file: %s!\n", pdb_name);
+      |                 ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/in_out.h:11:1: error: unknown type name 'FILE' [clang-diagnostic-error]
+   11 | FILE *fpdb;
+      | ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/loop.c:10:5: error: use of undeclared identifier 'FILE' [clang-diagnostic-error]
+   10 |     FILE *fp        = fopen(movable_region_file, "r");
+      |     ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/loop.c:10:11: error: use of undeclared identifier 'fp' [clang-diagnostic-error]
+   10 |     FILE *fp        = fopen(movable_region_file, "r");
+      |           ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/loop.c:10:23: error: call to undeclared function 'fopen'; ISO C99 and later do not support implicit function declarations [clang-diagnostic-implicit-function-declaration]
+   10 |     FILE *fp        = fopen(movable_region_file, "r");
+      |                       ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/loop.c:10:29: error: use of undeclared identifier 'movable_region_file' [clang-diagnostic-error]
+   10 |     FILE *fp        = fopen(movable_region_file, "r");
+      |                             ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/loop.c:11:9: error: use of undeclared identifier 'fp' [clang-diagnostic-error]
+   11 |     if (fp == NULL) {
+      |         ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/loop.c:11:15: error: use of undeclared identifier 'NULL' [clang-diagnostic-error]
+   11 |     if (fp == NULL) {
+      |               ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/loop.c:12:9: error: call to undeclared function 'fprintf'; ISO C99 and later do not support implicit function declarations [clang-diagnostic-implicit-function-declaration]
+   12 |         fprintf(STATUS, "Could not open file %s \n", movable_region_file);
+      |         ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/loop.c:12:17: error: use of undeclared identifier 'STATUS' [clang-diagnostic-error]
+   12 |         fprintf(STATUS, "Could not open file %s \n", movable_region_file);
+      |                 ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/loop.c:12:54: error: use of undeclared identifier 'movable_region_file' [clang-diagnostic-error]
+   12 |         fprintf(STATUS, "Could not open file %s \n", movable_region_file);
+      |                                                      ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/loop.c:13:9: error: call to undeclared library function 'exit' with type 'void (int) __attribute__((noreturn))'; ISO C99 and later do not support implicit function declarations [clang-diagnostic-implicit-function-declaration]
+   13 |         exit(1);
+      |         ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/loop.c:13:9: note: include the header <stdlib.h> or explicitly provide a declaration for 'exit'
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/loop.c:15:9: error: call to undeclared function 'fprintf'; ISO C99 and later do not support implicit function declarations [clang-diagnostic-implicit-function-declaration]
+   15 |         fprintf(STATUS, "Successfully opened movable region file %s \n", movable_region_file);
+      |         ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/loop.c:15:17: error: use of undeclared identifier 'STATUS' [clang-diagnostic-error]
+   15 |         fprintf(STATUS, "Successfully opened movable region file %s \n", movable_region_file);
+      |                 ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/loop.c:15:74: error: use of undeclared identifier 'movable_region_file' [clang-diagnostic-error]
+   15 |         fprintf(STATUS, "Successfully opened movable region file %s \n", movable_region_file);
+      |                                                                          ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/loop.c:16:9: error: call to undeclared function 'fflush'; ISO C99 and later do not support implicit function declarations [clang-diagnostic-implicit-function-declaration]
+   16 |         fflush(STATUS);
+      |         ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/loop.c:16:16: error: use of undeclared identifier 'STATUS' [clang-diagnostic-error]
+   16 |         fflush(STATUS);
+      |                ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/loop.c:18:12: error: call to undeclared function 'fgets'; ISO C99 and later do not support implicit function declarations [clang-diagnostic-implicit-function-declaration]
+   18 |     while (fgets(str, 1000, fp) != NULL) {
+      |            ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/loop.c:18:29: error: use of undeclared identifier 'fp' [clang-diagnostic-error]
+   18 |     while (fgets(str, 1000, fp) != NULL) {
+      |                             ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/loop.c:18:36: error: use of undeclared identifier 'NULL' [clang-diagnostic-error]
+   18 |     while (fgets(str, 1000, fp) != NULL) {
+      |                                    ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/pdb_util.c:4:10: error: use of undeclared identifier 'DATA' [clang-diagnostic-error]
+    4 |     if ((DATA = fopen(filename, "w")) == NULL) {
+      |          ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/pdb_util.c:4:17: error: call to undeclared function 'fopen'; ISO C99 and later do not support implicit function declarations [clang-diagnostic-implicit-function-declaration]
+    4 |     if ((DATA = fopen(filename, "w")) == NULL) {
+      |                 ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/pdb_util.c:4:42: error: use of undeclared identifier 'NULL' [clang-diagnostic-error]
+    4 |     if ((DATA = fopen(filename, "w")) == NULL) {
+      |                                          ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/pdb_util.c:5:9: error: call to undeclared function 'fprintf'; ISO C99 and later do not support implicit function declarations [clang-diagnostic-implicit-function-declaration]
+    5 |         fprintf(STATUS, "ERROR: Can't open the file: %s!\n", filename);
+      |         ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/pdb_util.c:5:17: error: use of undeclared identifier 'STATUS' [clang-diagnostic-error]
+    5 |         fprintf(STATUS, "ERROR: Can't open the file: %s!\n", filename);
+      |                 ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/pdb_util.c:6:9: error: call to undeclared library function 'exit' with type 'void (int) __attribute__((noreturn))'; ISO C99 and later do not support implicit function declarations [clang-diagnostic-implicit-function-declaration]
+    6 |         exit(1);
+      |         ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/pdb_util.c:6:9: note: include the header <stdlib.h> or explicitly provide a declaration for 'exit'
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/pdb_util.c:9:5: error: call to undeclared function 'fprintf'; ISO C99 and later do not support implicit function declarations [clang-diagnostic-implicit-function-declaration]
+    9 |     fprintf(DATA,
+      |     ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/pdb_util.c:9:13: error: use of undeclared identifier 'DATA' [clang-diagnostic-error]
+    9 |     fprintf(DATA,
+      |             ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/pdb_util.c:12:13: error: use of undeclared identifier 'E' [clang-diagnostic-error]
+   12 |             E, E_pot, E_hbond, E_tor, E_sct, E_aro, E_constraint);
+      |             ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/pdb_util.c:12:16: error: use of undeclared identifier 'E_pot' [clang-diagnostic-error]
+   12 |             E, E_pot, E_hbond, E_tor, E_sct, E_aro, E_constraint);
+      |                ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/pdb_util.c:12:23: error: use of undeclared identifier 'E_hbond' [clang-diagnostic-error]
+   12 |             E, E_pot, E_hbond, E_tor, E_sct, E_aro, E_constraint);
+      |                       ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/pdb_util.c:12:32: error: use of undeclared identifier 'E_tor' [clang-diagnostic-error]
+   12 |             E, E_pot, E_hbond, E_tor, E_sct, E_aro, E_constraint);
+      |                                ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/pdb_util.c:12:39: error: use of undeclared identifier 'E_sct' [clang-diagnostic-error]
+   12 |             E, E_pot, E_hbond, E_tor, E_sct, E_aro, E_constraint);
+      |                                       ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/pdb_util.c:12:46: error: use of undeclared identifier 'E_aro' [clang-diagnostic-error]
+   12 |             E, E_pot, E_hbond, E_tor, E_sct, E_aro, E_constraint);
+      |                                              ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/pdb_util.c:12:53: error: use of undeclared identifier 'E_constraint' [clang-diagnostic-error]
+   12 |             E, E_pot, E_hbond, E_tor, E_sct, E_aro, E_constraint);
+      |                                                     ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/pdb_util.c:14:21: error: use of undeclared identifier 'natoms' [clang-diagnostic-error]
+   14 |     for (i = 0; i < natoms; i++)
+      |                     ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/pdb_util.c:15:13: error: call to undeclared library function 'strcmp' with type 'int (const char *, const char *)'; ISO C99 and later do not support implicit function declarations [clang-diagnostic-implicit-function-declaration]
+   15 |         if (strcmp(native[i].atomname, "CB") || strcmp(native[i].res, "GLY"))
+      |             ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/pdb_util.c:15:13: note: include the header <string.h> or explicitly provide a declaration for 'strcmp'
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/pdb_util.c:15:20: error: use of undeclared identifier 'native' [clang-diagnostic-error]
+   15 |         if (strcmp(native[i].atomname, "CB") || strcmp(native[i].res, "GLY"))
+      |                    ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/pdb_util.c:15:56: error: use of undeclared identifier 'native' [clang-diagnostic-error]
+   15 |         if (strcmp(native[i].atomname, "CB") || strcmp(native[i].res, "GLY"))
+      |                                                        ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/protein_util.c:4:6: error: conflicting types for 'CenterProtein' [clang-diagnostic-error]
+    4 | void CenterProtein(struct atom **protein, int num_atoms) {
+      |      ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/protein_util.h:12:7: note: previous declaration is here
+   12 | void  CenterProtein(struct atom **, int);
+      |       ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/protein_util.c:6:19: error: variable has incomplete type 'struct vector' [clang-diagnostic-error]
+    6 |     struct vector center_of_mass;
+      |                   ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/protein_util.c:6:12: note: forward declaration of 'struct vector'
+    6 |     struct vector center_of_mass;
+      |            ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/protein_util.c:8:5: error: call to undeclared function 'Zero'; ISO C99 and later do not support implicit function declarations [clang-diagnostic-implicit-function-declaration]
+    8 |     Zero(&center_of_mass);
+      |     ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/protein_util.c:10:9: error: call to undeclared function 'Add'; ISO C99 and later do not support implicit function declarations [clang-diagnostic-implicit-function-declaration]
+   10 |         Add((*protein)[i].xyz, &center_of_mass);
+      |         ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/protein_util.c:10:23: error: subscript of pointer to incomplete type 'struct atom' [clang-diagnostic-error]
+   10 |         Add((*protein)[i].xyz, &center_of_mass);
+      |             ~~~~~~~~~~^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/protein_util.c:4:27: note: forward declaration of 'struct atom'
+    4 | void CenterProtein(struct atom **protein, int num_atoms) {
+      |                           ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/protein_util.c:11:5: error: call to undeclared function 'Scale'; ISO C99 and later do not support implicit function declarations [clang-diagnostic-implicit-function-declaration]
+   11 |     Scale(1 / (Float)num_atoms, &center_of_mass);
+      |     ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/protein_util.c:11:15: error: reference to overloaded function could not be resolved; did you mean to call it? [clang-diagnostic-error]
+   11 |     Scale(1 / (Float)num_atoms, &center_of_mass);
+      |               ^~~~~~~
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/protein_util.c:11:16: error: use of undeclared identifier 'Float'; did you mean 'float'? [clang-diagnostic-error]
+   11 |     Scale(1 / (Float)num_atoms, &center_of_mass);
+      |                ^~~~~
+      |                float
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/protein_util.c:11:22: error: expected ')' [clang-diagnostic-error]
+   11 |     Scale(1 / (Float)num_atoms, &center_of_mass);
+      |                      ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/protein_util.c:11:10: note: to match this '('
+   11 |     Scale(1 / (Float)num_atoms, &center_of_mass);
+      |          ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/protein_util.c:12:5: error: call to undeclared function 'Inverse'; ISO C99 and later do not support implicit function declarations [clang-diagnostic-implicit-function-declaration]
+   12 |     Inverse(&center_of_mass);
+      |     ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/protein_util.h:7:1: error: unknown type name 'Float'; did you mean 'float'? [clang-diagnostic-error]
+    7 | Float Phi(struct residue, struct residue, struct atom *);
+      | ^~~~~
+      | float
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/protein_util.h:8:1: error: unknown type name 'Float'; did you mean 'float'? [clang-diagnostic-error]
+    8 | Float Psi(struct residue, struct residue, struct atom *);
+      | ^~~~~
+      | float
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/protein_util.h:9:1: error: unknown type name 'Float'; did you mean 'float'? [clang-diagnostic-error]
+    9 | Float CalculateTorsion(struct atom *, int, int, int, int, Float);
+      | ^~~~~
+      | float
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/protein_util.h:9:59: error: type specifier missing, defaults to 'int'; ISO C99 and later do not support implicit int [clang-diagnostic-implicit-int]
+    9 | Float CalculateTorsion(struct atom *, int, int, int, int, Float);
+      |                                                           ^
+      |                                                           int
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/protein_util.h:11:1: error: unknown type name 'Float'; did you mean 'float'? [clang-diagnostic-error]
+   11 | Float RadiusOfGyration(struct atom *protein, int num_atoms);
+      | ^~~~~
+      | float
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/protein_util.h:13:47: error: unknown type name 'Float'; did you mean 'float'? [clang-diagnostic-error]
+   13 | void  dRms(struct atom *, struct atom *, int, Float *, Float *);
+      |                                               ^~~~~
+      |                                               float
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/protein_util.h:13:56: error: unknown type name 'Float'; did you mean 'float'? [clang-diagnostic-error]
+   13 | void  dRms(struct atom *, struct atom *, int, Float *, Float *);
+      |                                                        ^~~~~
+      |                                                        float
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/protein_util.h:14:49: error: unknown type name 'Float'; did you mean 'float'? [clang-diagnostic-error]
+   14 | void  SSdRms(struct atom *, struct atom *, int, Float *, Float *, int, int);
+      |                                                 ^~~~~
+      |                                                 float
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/protein_util.h:14:58: error: unknown type name 'Float'; did you mean 'float'? [clang-diagnostic-error]
+   14 | void  SSdRms(struct atom *, struct atom *, int, Float *, Float *, int, int);
+      |                                                          ^~~~~
+      |                                                          float
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/sturm.c:23:13: error: call to undeclared function 'fprintf'; ISO C99 and later do not support implicit function declarations [clang-diagnostic-implicit-function-declaration]
+   23 |             fprintf(STATUS, "coefficients in Sturm solver\n");
+      |             ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/sturm.c:23:21: error: use of undeclared identifier 'STATUS' [clang-diagnostic-error]
+   23 |             fprintf(STATUS, "coefficients in Sturm solver\n");
+      |                     ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/sturm.c:24:21: error: use of undeclared identifier 'STATUS' [clang-diagnostic-error]
+   24 |             fprintf(STATUS, "%d %lf\n", i, sseq[0].coef[i]);
+      |                     ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/sturm.c:34:9: error: call to undeclared function 'fprintf'; ISO C99 and later do not support implicit function declarations [clang-diagnostic-implicit-function-declaration]
+   34 |         fprintf(STATUS, "Sturm sequence for:\n");
+      |         ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/sturm.c:34:17: error: use of undeclared identifier 'STATUS' [clang-diagnostic-error]
+   34 |         fprintf(STATUS, "Sturm sequence for:\n");
+      |                 ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/sturm.c:36:21: error: use of undeclared identifier 'STATUS' [clang-diagnostic-error]
+   36 |             fprintf(STATUS, "%lf ", sseq[0].coef[i]);
+      |                     ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/sturm.c:37:17: error: use of undeclared identifier 'STATUS' [clang-diagnostic-error]
+   37 |         fprintf(STATUS, "\n\n");
+      |                 ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/sturm.c:40:25: error: use of undeclared identifier 'STATUS' [clang-diagnostic-error]
+   40 |                 fprintf(STATUS, "%lf ", sseq[i].coef[j]);
+      |                         ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/sturm.c:41:21: error: use of undeclared identifier 'STATUS' [clang-diagnostic-error]
+   41 |             fprintf(STATUS, "\n");
+      |                     ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/sturm.c:43:17: error: use of undeclared identifier 'STATUS' [clang-diagnostic-error]
+   43 |         fprintf(STATUS, "\n");
+      |                 ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/sturm.c:59:9: error: call to undeclared function 'fprintf'; ISO C99 and later do not support implicit function declarations [clang-diagnostic-implicit-function-declaration]
+   59 |         fprintf(STATUS, "Number of real roots: %d\n", nroots);
+      |         ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/sturm.c:59:17: error: use of undeclared identifier 'STATUS' [clang-diagnostic-error]
+   59 |         fprintf(STATUS, "Number of real roots: %d\n", nroots);
+      |                 ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/sturm.c:73:17: error: use of undeclared identifier 'STATUS' [clang-diagnostic-error]
+   73 |         fprintf(STATUS, "solve: unable to bracket all negative roots\n");
+      |                 ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/sturm.c:85:17: error: use of undeclared identifier 'STATUS' [clang-diagnostic-error]
+   85 |         fprintf(STATUS, "solve: unable to bracket all positive roots\n");
+      |                 ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/sturm.c:104:21: error: use of undeclared identifier 'STATUS' [clang-diagnostic-error]
+  104 |             fprintf(STATUS, "\n1 distinct real root at x = %f\n", roots[0]);
+      |                     ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/sturm.c:106:21: error: use of undeclared identifier 'STATUS' [clang-diagnostic-error]
+  106 |             fprintf(STATUS, "\n%d distinct real roots for x: \n", nroots);
+      |                     ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/sturm.c:109:25: error: use of undeclared identifier 'STATUS' [clang-diagnostic-error]
+  109 |                 fprintf(STATUS, "%f\n", roots[i]);
+      |                         ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/sturm.c:135:18: error: call to undeclared library function 'exp' with type 'double (double)'; ISO C99 and later do not support implicit function declarations [clang-diagnostic-implicit-function-declaration]
+  135 |         exp_x1 = exp(ax);
+      |                  ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/sturm.c:135:18: note: include the header <math.h> or explicitly provide a declaration for 'exp'
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/sturm.c:168:22: error: call to undeclared library function 'fabs' with type 'double (double)'; ISO C99 and later do not support implicit function declarations [clang-diagnostic-implicit-function-declaration]
+  168 |     while (k >= 0 && fabs(r->coef[k]) < SMALL_ENOUGH) {
+      |                      ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/sturm.c:168:22: note: include the header <math.h> or explicitly provide a declaration for 'fabs'
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/triplet_closure.c:1:10: error: 'triplet_closure.h' file not found [clang-diagnostic-error]
+    1 | #include "triplet_closure.h"
+      |          ^~~~~~~~~~~~~~~~~~~
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/update.c:12:21: error: use of undeclared identifier 'all_rotated_natoms' [clang-diagnostic-error]
+   12 |     for (i = 0; i < all_rotated_natoms; i++) {
+      |                     ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/update.c:13:26: error: use of undeclared identifier 'all_rotated_atoms' [clang-diagnostic-error]
+   13 |         N              = all_rotated_atoms[i];
+      |                          ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/update.c:14:9: error: use of undeclared identifier 'temp_atom' [clang-diagnostic-error]
+   14 |         temp_atom      = &native[N];
+      |         ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/update.c:14:27: error: use of undeclared identifier 'native' [clang-diagnostic-error]
+   14 |         temp_atom      = &native[N];
+      |                           ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/update.c:15:9: error: use of undeclared identifier 'temp_prev_atom' [clang-diagnostic-error]
+   15 |         temp_prev_atom = &prev_native[N];
+      |         ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/update.c:15:27: error: use of undeclared identifier 'prev_native' [clang-diagnostic-error]
+   15 |         temp_prev_atom = &prev_native[N];
+      |                           ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/update.c:18:21: error: use of undeclared identifier 'temp_prev_atom' [clang-diagnostic-error]
+   18 |         while (N != temp_prev_atom->matrix->atom_list[j])
+      |                     ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/update.c:21:26: error: use of undeclared identifier 'temp_prev_atom' [clang-diagnostic-error]
+   21 |         for (k = j; k < (temp_prev_atom->matrix->natoms - 1); k++)
+      |                          ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/update.c:22:13: error: use of undeclared identifier 'temp_prev_atom' [clang-diagnostic-error]
+   22 |             temp_prev_atom->matrix->atom_list[k] = temp_prev_atom->matrix->atom_list[k + 1];
+      |             ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/update.c:22:52: error: use of undeclared identifier 'temp_prev_atom' [clang-diagnostic-error]
+   22 |             temp_prev_atom->matrix->atom_list[k] = temp_prev_atom->matrix->atom_list[k + 1];
+      |                                                    ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/update.c:23:9: error: use of undeclared identifier 'temp_prev_atom' [clang-diagnostic-error]
+   23 |         temp_prev_atom->matrix->natoms--;
+      |         ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/update.c:25:13: error: use of undeclared identifier 'temp_atom' [clang-diagnostic-error]
+   25 |         if (temp_atom->matrix->natoms) {
+      |             ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/update.c:27:24: error: use of undeclared identifier 'temp_atom' [clang-diagnostic-error]
+   27 |             while (j < temp_atom->matrix->natoms && N > temp_atom->matrix->atom_list[j])
+      |                        ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/update.c:27:57: error: use of undeclared identifier 'temp_atom' [clang-diagnostic-error]
+   27 |             while (j < temp_atom->matrix->natoms && N > temp_atom->matrix->atom_list[j])
+      |                                                         ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/update.c:29:22: error: use of undeclared identifier 'temp_atom' [clang-diagnostic-error]
+   29 |             if (j != temp_atom->matrix->natoms) {
+      |                      ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/update.c:30:51: error: use of undeclared identifier 'temp_atom' [clang-diagnostic-error]
+   30 |                 temp                            = temp_atom->matrix->atom_list[j];
+      |                                                   ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/update.c:31:17: error: use of undeclared identifier 'temp_atom' [clang-diagnostic-error]
+   31 |                 temp_atom->matrix->atom_list[j] = N;
+      |                 ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/update.c:32:38: error: use of undeclared identifier 'temp_atom' [clang-diagnostic-error]
+   32 |                 for (k = j + 1; k < (temp_atom->matrix->natoms); k++) {
+      |                                      ^
+/n/home01/kibumpark/pkg/dbfold2/MCPU/src_mpi_umbrella/update.c:33:55: error: use of undeclared identifier 'temp_atom' [clang-diagnostic-error]
+   33 |                     temp1                           = temp_atom->matrix->atom_list[k];
+      |                                                       ^
+/n/sw/helmod-rocky8/apps/Core/gcc/15.2.0-fasrc01/lib64/gcc/x86_64-pc-linux-gnu/15.2.0/include/adxintrin.h:36:10: error: use of unknown builtin '__builtin_ia32_sbb_u32' [clang-diagnostic-implicit-function-declaration]
+   36 |   return __builtin_ia32_sbb_u32 (__CF, __X, __Y, __P);
+      |          ^
+/n/sw/helmod-rocky8/apps/Core/gcc/15.2.0-fasrc01/lib64/gcc/x86_64-pc-linux-gnu/15.2.0/include/adxintrin.h:61:10: error: use of unknown builtin '__builtin_ia32_sbb_u64' [clang-diagnostic-implicit-function-declaration]
+   61 |   return __builtin_ia32_sbb_u64 (__CF, __X, __Y, __P);
+      |          ^
+/n/sw/helmod-rocky8/apps/Core/gcc/15.2.0-fasrc01/lib64/gcc/x86_64-pc-linux-gnu/15.2.0/include/cetintrin.h:42:33: error: too few arguments to function call, expected 1, have 0 [clang-diagnostic-error]
+   42 |   return __builtin_ia32_rdsspq ();
+      |          ~~~~~~~~~~~~~~~~~~~~~  ^
+/n/sw/helmod-rocky8/apps/Core/gcc/15.2.0-fasrc01/lib64/gcc/x86_64-pc-linux-gnu/15.2.0/include/hresetintrin.h:41:3: error: use of unknown builtin '__builtin_ia32_hreset' [clang-diagnostic-implicit-function-declaration]
+   41 |   __builtin_ia32_hreset (__EAX);
+      |   ^
+/n/sw/helmod-rocky8/apps/Core/gcc/15.2.0-fasrc01/lib64/gcc/x86_64-pc-linux-gnu/15.2.0/include/ia32intrin.h:41:10: error: use of unknown builtin '__builtin_ia32_bsrsi' [clang-diagnostic-implicit-function-declaration]
+   41 |   return __builtin_ia32_bsrsi (__X);
+      |          ^
+/n/sw/helmod-rocky8/apps/Core/gcc/15.2.0-fasrc01/lib64/gcc/x86_64-pc-linux-gnu/15.2.0/include/ia32intrin.h:112:1: error: definition of builtin function '__rdtsc' [clang-diagnostic-error]
+  112 | __rdtsc (void)
+      | ^
+/n/sw/helmod-rocky8/apps/Core/gcc/15.2.0-fasrc01/lib64/gcc/x86_64-pc-linux-gnu/15.2.0/include/ia32intrin.h:134:10: error: use of unknown builtin '__builtin_ia32_rolqi' [clang-diagnostic-implicit-function-declaration]
+  134 |   return __builtin_ia32_rolqi (__X, __C);
+      |          ^
+/n/sw/helmod-rocky8/apps/Core/gcc/15.2.0-fasrc01/lib64/gcc/x86_64-pc-linux-gnu/15.2.0/include/ia32intrin.h:142:10: error: use of unknown builtin '__builtin_ia32_rolhi' [clang-diagnostic-implicit-function-declaration]
+  142 |   return __builtin_ia32_rolhi (__X, __C);
+      |          ^
+/n/sw/helmod-rocky8/apps/Core/gcc/15.2.0-fasrc01/lib64/gcc/x86_64-pc-linux-gnu/15.2.0/include/ia32intrin.h:159:10: error: use of unknown builtin '__builtin_ia32_rorqi' [clang-diagnostic-implicit-function-declaration]
+  159 |   return __builtin_ia32_rorqi (__X, __C);
+      |          ^
+/n/sw/helmod-rocky8/apps/Core/gcc/15.2.0-fasrc01/lib64/gcc/x86_64-pc-linux-gnu/15.2.0/include/ia32intrin.h:167:10: error: use of unknown builtin '__builtin_ia32_rorhi' [clang-diagnostic-implicit-function-declaration]
+  167 |   return __builtin_ia32_rorhi (__X, __C);
+      |          ^
+/n/sw/helmod-rocky8/apps/Core/gcc/15.2.0-fasrc01/lib64/gcc/x86_64-pc-linux-gnu/15.2.0/include/ia32intrin.h:201:10: error: use of unknown builtin '__builtin_ia32_bsrdi' [clang-diagnostic-implicit-function-declaration]
+  201 |   return __builtin_ia32_bsrdi (__X);
+      |          ^
+/n/sw/helmod-rocky8/apps/Core/gcc/15.2.0-fasrc01/lib64/gcc/x86_64-pc-linux-gnu/15.2.0/include/mmintrin.h:79:18: error: use of unknown builtin '__builtin_ia32_vec_init_v2si' [clang-diagnostic-implicit-function-declaration]
+   79 |   return (__m64) __builtin_ia32_vec_init_v2si (__i, 0);
+      |                  ^
+/n/sw/helmod-rocky8/apps/Core/gcc/15.2.0-fasrc01/lib64/gcc/x86_64-pc-linux-gnu/15.2.0/include/movdirintrin.h:41:3: error: use of unknown builtin '__builtin_ia32_directstoreu_u32' [clang-diagnostic-implicit-function-declaration]
+   41 |   __builtin_ia32_directstoreu_u32 ((unsigned int *)__P, __A);
+      |   ^
+/n/sw/helmod-rocky8/apps/Core/gcc/15.2.0-fasrc01/lib64/gcc/x86_64-pc-linux-gnu/15.2.0/include/movdirintrin.h:48:3: error: use of unknown builtin '__builtin_ia32_directstoreu_u64' [clang-diagnostic-implicit-function-declaration]
+   48 |   __builtin_ia32_directstoreu_u64 ((unsigned long long *)__P, __A);
+      |   ^
+/n/sw/helmod-rocky8/apps/Core/gcc/15.2.0-fasrc01/lib64/gcc/x86_64-pc-linux-gnu/15.2.0/include/rdseedintrin.h:42:10: error: use of unknown builtin '__builtin_ia32_rdseed_hi_step' [clang-diagnostic-implicit-function-declaration]
+   42 |   return __builtin_ia32_rdseed_hi_step (__p);
+      |          ^
+/n/sw/helmod-rocky8/apps/Core/gcc/15.2.0-fasrc01/lib64/gcc/x86_64-pc-linux-gnu/15.2.0/include/rdseedintrin.h:49:10: error: use of unknown builtin '__builtin_ia32_rdseed_si_step' [clang-diagnostic-implicit-function-declaration]
+   49 |   return __builtin_ia32_rdseed_si_step (__p);
+      |          ^
+/n/sw/helmod-rocky8/apps/Core/gcc/15.2.0-fasrc01/lib64/gcc/x86_64-pc-linux-gnu/15.2.0/include/rdseedintrin.h:57:10: error: use of unknown builtin '__builtin_ia32_rdseed_di_step' [clang-diagnostic-implicit-function-declaration]
+   57 |   return __builtin_ia32_rdseed_di_step (__p);
+      |          ^
+/n/sw/helmod-rocky8/apps/Core/gcc/15.2.0-fasrc01/lib64/gcc/x86_64-pc-linux-gnu/15.2.0/include/waitpkgintrin.h:48:41: error: too few arguments to function call, expected 3, have 2 [clang-diagnostic-error]
+   48 |   return __builtin_ia32_umwait (__A, __B);
+      |          ~~~~~~~~~~~~~~~~~~~~~          ^
+/n/sw/helmod-rocky8/apps/Core/gcc/15.2.0-fasrc01/lib64/gcc/x86_64-pc-linux-gnu/15.2.0/include/waitpkgintrin.h:55:41: error: too few arguments to function call, expected 3, have 2 [clang-diagnostic-error]
+   55 |   return __builtin_ia32_tpause (__A, __B);
+      |          ~~~~~~~~~~~~~~~~~~~~~          ^

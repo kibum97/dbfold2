@@ -1,294 +1,169 @@
-mpicc -O3 -Wall -DDEBUG  -c init.c -o init.o
-In file included from atom.h:3,
-                 from init.h:4,
-                 from init.c:7:
-globals.h:61:1: warning: useless storage class specifier in empty declaration
-   61 | };
-      | ^
-globals.h:235:1: warning: useless storage class specifier in empty declaration
-  235 | };
-      | ^
-globals.h:250:1: warning: useless storage class specifier in empty declaration
-  250 | };
-      | ^
-globals.h:261:1: warning: useless storage class specifier in empty declaration
-  261 | };
-      | ^
-init.c: In function ‘InitializeProtein’:
-init.c:127:58: warning: ‘/*’ within comment [-Wcomment]
-  127 |     fprintf(STATUS, "  file:\t\t%s   \n", native_file);  /*Set up arrays for native file, minimized
-init.c:151:5: error: too many arguments to function ‘ReadNative’; expected 0, have 3
-  151 |     ReadNative(native_file, native,
-      |     ^~~~~~~~~~ ~~~~~~~~~~~
-init.h:35:6: note: declared here
-   35 | void ReadNative();
-      |      ^~~~~~~~~~
-init.c:167:5: error: ‘buf_in’ undeclared (first use in this function)
-  167 |     buf_in  = (float *)calloc(3 * natoms, sizeof(float));
-      |     ^~~~~~
-init.c:167:5: note: each undeclared identifier is reported only once for each function it appears in
-init.c:168:5: error: ‘buf_out’ undeclared (first use in this function)
-  168 |     buf_out = (float *)calloc(3 * natoms, sizeof(float));
-      |     ^~~~~~~
-init.c:172:5: error: implicit declaration of function ‘get_template’ [-Wimplicit-function-declaration]
-  172 |     get_template();
-      |     ^~~~~~~~~~~~
-init.c:189:5: error: implicit declaration of function ‘CenterProtein’ [-Wimplicit-function-declaration]
-  189 |     CenterProtein(&native, natoms);
-      |     ^~~~~~~~~~~~~
-init.c:237:5: error: implicit declaration of function ‘initialize_torsion’; did you mean ‘InitializeProtein’? [-Wimplicit-function-declaration]
-  237 |     initialize_torsion();
-      |     ^~~~~~~~~~~~~~~~~~
-      |     InitializeProtein
-init.c:238:5: error: implicit declaration of function ‘initialize_sct’ [-Wimplicit-function-declaration]
-  238 |     initialize_sct();
-      |     ^~~~~~~~~~~~~~
-init.c:239:5: error: implicit declaration of function ‘initialize_aromatic’; did you mean ‘InitializeProtein’? [-Wimplicit-function-declaration]
-  239 |     initialize_aromatic();
-      |     ^~~~~~~~~~~~~~~~~~~
-      |     InitializeProtein
-init.c:240:5: error: implicit declaration of function ‘initialize_secstr’ [-Wimplicit-function-declaration]
-  240 |     initialize_secstr();
-      |     ^~~~~~~~~~~~~~~~~
-init.c:241:5: error: implicit declaration of function ‘read_cluster’ [-Wimplicit-function-declaration]
-  241 |     read_cluster();
-      |     ^~~~~~~~~~~~
-init.c:244:9: error: ‘hbond_pair’ undeclared (first use in this function)
-  244 |         hbond_pair = (struct pair *)calloc(natoms * natoms, sizeof(struct pair));
-      |         ^~~~~~~~~~
-init.c:256:5: error: implicit declaration of function ‘Contacts’ [-Wimplicit-function-declaration]
-  256 |     Contacts();
-      |     ^~~~~~~~
-init.c:277:5: error: implicit declaration of function ‘TypeContacts’ [-Wimplicit-function-declaration]
-  277 |     TypeContacts();
-      |     ^~~~~~~~~~~~
-init.c: In function ‘SetHardCore’:
-init.c:321:24: error: ‘radii’ undeclared (first use in this function)
-  321 |                 rad1 = radii[TypeAtom(atom_type_list[k].atom_name, atom_type_list[k].res_name)];
-      |                        ^~~~~
-init.c:321:30: error: implicit declaration of function ‘TypeAtom’ [-Wimplicit-function-declaration]
-  321 |                 rad1 = radii[TypeAtom(atom_type_list[k].atom_name, atom_type_list[k].res_name)];
-      |                              ^~~~~~~~
-init.c: In function ‘SetContactDistance’:
-init.c:353:24: error: ‘radii’ undeclared (first use in this function)
-  353 |                 rad1 = radii[TypeAtom(atom_type_list[k].atom_name, atom_type_list[k].res_name)];
-      |                        ^~~~~
-init.c:365:13: error: ‘beta’ undeclared (first use in this function)
-  365 |             beta                     = 0.;
-      |             ^~~~
-init.c: In function ‘SetRadii’:
-init.c:392:5: error: ‘radii’ undeclared (first use in this function)
-  392 |     radii = (Float *)calloc(13, sizeof(Float));
-      |     ^~~~~
-init.c: At top level:
-init.c:414:6: error: conflicting types for ‘ReadNative’; have ‘void(char *, struct atom *, int *)’
-  414 | void ReadNative(char *file_name, struct atom *protein, int *Natoms) {
-      |      ^~~~~~~~~~
-init.h:35:6: note: previous declaration of ‘ReadNative’ with type ‘void(void)’
-   35 | void ReadNative();
-      |      ^~~~~~~~~~
-init.c: In function ‘ReadNative’:
-init.c:424:9: error: implicit declaration of function ‘ParsePDBLine’ [-Wimplicit-function-declaration]
-  424 |         ParsePDBLine(line, protein, Natoms);
-      |         ^~~~~~~~~~~~
-init.c: In function ‘GetResidueInfo’:
-init.c:443:53: error: implicit declaration of function ‘GetAminoNumber’ [-Wimplicit-function-declaration]
-  443 |             Residue[Chain[i].res_num].amino_num   = GetAminoNumber(Chain[i].res);
-      |                                                     ^~~~~~~~~~~~~~
-init.c: In function ‘GetPhiPsi’:
-init.c:490:43: error: implicit declaration of function ‘Phi’ [-Wimplicit-function-declaration]
-  490 |             Residue[i].phi = PI / 180.0 * Phi(Residue[i], Residue[i - 1], Chain);
-      |                                           ^~~
-init.c:494:43: error: implicit declaration of function ‘Psi’ [-Wimplicit-function-declaration]
-  494 |             Residue[i].psi = PI / 180.0 * Psi(Residue[i], Residue[i + 1], Chain);
-      |                                           ^~~
-init.c: In function ‘GetChi’:
-init.c:510:17: error: implicit declaration of function ‘CalculateTorsion’ [-Wimplicit-function-declaration]
-  510 |                 CalculateTorsion(native, sidechain_torsion[i][j][0], sidechain_torsion[i][j][1],
-      |                 ^~~~~~~~~~~~~~~~
-init.c: In function ‘ReadAvgChis’:
-init.c:533:60: warning: format ‘%f’ expects argument of type ‘float *’, but argument 5 has type ‘Float *’ {aka ‘double *’} [-Wformat=]
-  533 |         sscanf(line, "%s %*d%*d%*d%*d %*d%*d %f%*f%*f%*f  %f%f %f%f %f%f %f%f", name, &value, &X,
-      |                                                           ~^                                  ~~
-      |                                                            |                                  |
-      |                                                            float *                            Float * {aka double *}
-      |                                                           %lf
-init.c:533:65: warning: format ‘%f’ expects argument of type ‘float *’, but argument 7 has type ‘Float *’ {aka ‘double *’} [-Wformat=]
-  533 |         sscanf(line, "%s %*d%*d%*d%*d %*d%*d %f%*f%*f%*f  %f%f %f%f %f%f %f%f", name, &value, &X,
-      |                                                                ~^
-      |                                                                 |
-      |                                                                 float *
-      |                                                                %lf
-  534 |                &sX, &Y, &sY, &Z, &sZ, &W, &sW);
-      |                     ~~                                           
-      |                     |
-      |                     Float * {aka double *}
-init.c:533:70: warning: format ‘%f’ expects argument of type ‘float *’, but argument 9 has type ‘Float *’ {aka ‘double *’} [-Wformat=]
-  533 |         sscanf(line, "%s %*d%*d%*d%*d %*d%*d %f%*f%*f%*f  %f%f %f%f %f%f %f%f", name, &value, &X,
-      |                                                                     ~^
-      |                                                                      |
-      |                                                                      float *
-      |                                                                     %lf
-  534 |                &sX, &Y, &sY, &Z, &sZ, &W, &sW);
-      |                              ~~                                       
-      |                              |
-      |                              Float * {aka double *}
-init.c:533:75: warning: format ‘%f’ expects argument of type ‘float *’, but argument 11 has type ‘Float *’ {aka ‘double *’} [-Wformat=]
-  533 |         sscanf(line, "%s %*d%*d%*d%*d %*d%*d %f%*f%*f%*f  %f%f %f%f %f%f %f%f", name, &value, &X,
-      |                                                                          ~^
-      |                                                                           |
-      |                                                                           float *
-      |                                                                          %lf
-  534 |                &sX, &Y, &sY, &Z, &sZ, &W, &sW);
-      |                                       ~~                                   
-      |                                       |
-      |                                       Float * {aka double *}
-init.c: In function ‘InitializeData’:
-init.c:645:9: error: ‘debug_contacts’ undeclared (first use in this function); did you mean ‘delta_contacts’?
-  645 |         debug_contacts = (unsigned char **)calloc(natoms, sizeof(unsigned char *));
-      |         ^~~~~~~~~~~~~~
-      |         delta_contacts
-init.c:648:9: error: ‘debug_dcontacts’ undeclared (first use in this function); did you mean ‘delta_contacts’?
-  648 |         debug_dcontacts = (unsigned char **)calloc(natoms, sizeof(unsigned char *));
-      |         ^~~~~~~~~~~~~~~
-      |         delta_contacts
-init.c:651:9: error: ‘debug_clashes’ undeclared (first use in this function); did you mean ‘delta_nclashes’?
-  651 |         debug_clashes = (unsigned char **)calloc(natoms, sizeof(unsigned char *));
-      |         ^~~~~~~~~~~~~
-      |         delta_nclashes
-init.c: In function ‘DetermineTriplets’:
-init.c:680:5: error: ‘total_triplets’ undeclared (first use in this function)
-  680 |     total_triplets = 0;
-      |     ^~~~~~~~~~~~~~
-init.c: In function ‘InitializeBackboneRotationData’:
-init.c:715:5: error: ‘yang_rotated_atoms’ undeclared (first use in this function); did you mean ‘all_rotated_atoms’?
-  715 |     yang_rotated_atoms = (short *)calloc(natoms, sizeof(short));
-      |     ^~~~~~~~~~~~~~~~~~
-      |     all_rotated_atoms
-init.c:716:5: error: ‘yang_not_rotated’ undeclared (first use in this function); did you mean ‘loop_not_rotated’?
-  716 |     yang_not_rotated   = (char *)calloc(natoms, sizeof(char));
-      |     ^~~~~~~~~~~~~~~~
-      |     loop_not_rotated
-init.c:718:19: error: assignment to ‘int **’ from incompatible pointer type ‘short int **’ [-Wincompatible-pointer-types]
-  718 |     rotate_natoms = (short **)calloc(2, sizeof(short *));
-      |                   ^
-init.c:724:26: error: assignment to ‘int *’ from incompatible pointer type ‘short int *’ [-Wincompatible-pointer-types]
-  724 |         rotate_natoms[i] = (short *)calloc(nresidues, sizeof(short));
-      |                          ^
-init.c:777:47: error: ‘total_triplets’ undeclared (first use in this function)
-  777 |     loop_rotate_natoms     = (short **)calloc(total_triplets, sizeof(short *));
-      |                                               ^~~~~~~~~~~~~~
-init.c:778:5: error: ‘loop_int_rotate_natoms’ undeclared (first use in this function); did you mean ‘loop_rotate_natoms’?
-  778 |     loop_int_rotate_natoms = (short **)calloc(total_triplets, sizeof(short *));
-      |     ^~~~~~~~~~~~~~~~~~~~~~
-      |     loop_rotate_natoms
-init.c:780:5: error: ‘loop_int_rotate_atoms’ undeclared (first use in this function); did you mean ‘loop_rotate_atoms’?
-  780 |     loop_int_rotate_atoms  = (short ***)calloc(total_triplets, sizeof(short **));
-      |     ^~~~~~~~~~~~~~~~~~~~~
-      |     loop_rotate_atoms
-init.c:784:35: error: assignment to ‘int *’ from incompatible pointer type ‘short int *’ [-Wincompatible-pointer-types]
-  784 |         loop_rotate_natoms[i]     = (short *)calloc(6, sizeof(short));
-      |                                   ^
-init.c: In function ‘InitializeSidechainRotationData’:
-init.c:935:23: error: assignment to ‘int ***’ from incompatible pointer type ‘short int ***’ [-Wincompatible-pointer-types]
-  935 |     sidechain_torsion = (short ***)calloc(nresidues, sizeof(short **));
-      |                       ^
-init.c:937:30: error: assignment to ‘int **’ from incompatible pointer type ‘short int **’ [-Wincompatible-pointer-types]
-  937 |         sidechain_torsion[i] =
-      |                              ^
-init.c:940:37: error: assignment to ‘int *’ from incompatible pointer type ‘short int *’ [-Wincompatible-pointer-types]
-  940 |             sidechain_torsion[i][j] = (short *)calloc(4, sizeof(short));
-      |                                     ^
-init.c:943:5: error: ‘sct_E’ undeclared (first use in this function)
-  943 |     sct_E = (short *****)calloc(nresidues, sizeof(short ****));
-      |     ^~~~~
-init.c:1004:29: error: assignment to ‘int **’ from incompatible pointer type ‘short int **’ [-Wincompatible-pointer-types]
- 1004 |     rotate_sidechain_natoms = (short **)calloc(nresidues, sizeof(short *));
-      |                             ^
-init.c:1006:36: error: assignment to ‘int *’ from incompatible pointer type ‘short int *’ [-Wincompatible-pointer-types]
- 1006 |         rotate_sidechain_natoms[i] = (short *)calloc(native_residue[i].ntorsions, sizeof(short));
-      |                                    ^
-init.c: In function ‘CheckCorrelation’:
-init.c:1191:18: error: implicit declaration of function ‘IsSidechainAtom’ [-Wimplicit-function-declaration]
- 1191 |             if (!IsSidechainAtom(Protein[i].atomname) && !IsSidechainAtom(Protein[j].atomname) &&
-      |                  ^~~~~~~~~~~~~~~
-init.c: At top level:
-init.c:1203:6: error: conflicting types for ‘SetProgramOptions’; have ‘void(int,  char **)’
- 1203 | void SetProgramOptions(int argc, char *argv[]) {
-      |      ^~~~~~~~~~~~~~~~~
-init.h:29:6: note: previous declaration of ‘SetProgramOptions’ with type ‘void(void)’
-   29 | void SetProgramOptions();
-      |      ^~~~~~~~~~~~~~~~~
-init.c: In function ‘SetProgramOptions’:
-init.c:1216:9: error: ‘myrank’ undeclared (first use in this function)
- 1216 |     if (myrank == 0) {
-      |         ^~~~~~
-init.c:1227:5: error: ‘ierr’ undeclared (first use in this function)
- 1227 |     ierr = MPI_Bcast(&MPI_STOP, 1, MPI_INT, 0, mpi_world_comm);
-      |     ^~~~
-init.c:1227:48: error: ‘mpi_world_comm’ undeclared (first use in this function)
- 1227 |     ierr = MPI_Bcast(&MPI_STOP, 1, MPI_INT, 0, mpi_world_comm);
-      |                                                ^~~~~~~~~~~~~~
-init.c:1405:17: error: ‘USE_CLUSTER’ undeclared (first use in this function)
- 1405 |                 USE_CLUSTER = value;  // note that by default, this value is set to 0 in backbone.h,
-      |                 ^~~~~~~~~~~
-init.c:1409:17: error: ‘MAX_CLUSTERSTEP’ undeclared (first use in this function)
- 1409 |                 MAX_CLUSTERSTEP = value;  // note that by default, this value is set to 0 in
-      |                 ^~~~~~~~~~~~~~~
-init.c:1414:17: error: ‘CLUSTER_MOVE’ undeclared (first use in this function); did you mean ‘CLUSTER_NOISE’?
- 1414 |                 CLUSTER_MOVE = value;          // note that by default, this value is set to 0.33 in
-      |                 ^~~~~~~~~~~~
-      |                 CLUSTER_NOISE
-init.c:1454:9: error: ‘nprocs’ undeclared (first use in this function)
- 1454 |     if (nprocs % NODES_PER_TEMP != 0) {
-      |         ^~~~~~
-init.c:1498:5: error: ‘Tnode’ undeclared (first use in this function)
- 1498 |     Tnode = (float *)calloc(nprocs, sizeof(float));
-      |     ^~~~~
-init.c:1499:5: error: ‘Enode’ undeclared (first use in this function)
- 1499 |     Enode = (float *)calloc(nprocs, sizeof(float));
-      |     ^~~~~
-init.c:1500:5: error: ‘Cnode’ undeclared (first use in this function)
- 1500 |     Cnode = (int *)calloc(nprocs, sizeof(int));  // number of contacts setpoints
-      |     ^~~~~
-init.c:1501:5: error: ‘Nnode’ undeclared (first use in this function)
- 1501 |     Nnode = (int *)calloc(nprocs, sizeof(int));
-      |     ^~~~~
-init.c:1517:5: error: ‘number_of_contacts_setpoint’ undeclared (first use in this function); did you mean ‘number_of_contacts_max’?
- 1517 |     number_of_contacts_setpoint = Cnode[myrank];  /// same with setpoint
-      |     ^~~~~~~~~~~~~~~~~~~~~~~~~~~
-      |     number_of_contacts_max
-init.c:1542:5: error: ‘replica_index’ undeclared (first use in this function)
- 1542 |     replica_index = (int *)calloc(nprocs, sizeof(int));
-      |     ^~~~~~~~~~~~~
-init.c:1557:5: error: ‘accepted_replica’ undeclared (first use in this function)
- 1557 |     accepted_replica  = (int *)calloc(nprocs, sizeof(int));
-      |     ^~~~~~~~~~~~~~~~
-init.c:1558:5: error: ‘rejected_replica’ undeclared (first use in this function)
- 1558 |     rejected_replica  = (int *)calloc(nprocs, sizeof(int));
-      |     ^~~~~~~~~~~~~~~~
-init.c:1559:5: error: ‘attempted_replica’ undeclared (first use in this function)
- 1559 |     attempted_replica = (int *)calloc(nprocs, sizeof(int));
-      |     ^~~~~~~~~~~~~~~~~
-init.c:1587:9: error: ‘LATTICE_SIZE’ undeclared (first use in this function); did you mean ‘LATTICE_UTIL_H’?
- 1587 |         LATTICE_SIZE = 1.0 / 5.25;
-      |         ^~~~~~~~~~~~
-      |         LATTICE_UTIL_H
-init.c:1590:5: error: ‘MATRIX_SIZE’ undeclared (first use in this function)
- 1590 |     MATRIX_SIZE      = 20;
-      |     ^~~~~~~~~~~
-init.c:1591:5: error: ‘HALF_MATRIX_SIZE’ undeclared (first use in this function)
- 1591 |     HALF_MATRIX_SIZE = MATRIX_SIZE / 2;
-      |     ^~~~~~~~~~~~~~~~
-init.c:1597:9: error: implicit declaration of function ‘Read_constraints’ [-Wimplicit-function-declaration]
- 1597 |         Read_constraints();
-      |         ^~~~~~~~~~~~~~~~
-In file included from globals.h:4:
-define.h: At top level:
-define.h:71:14: warning: ‘ATOMNAME’ defined but not used [-Wunused-variable]
-   71 | static char *ATOMNAME[NUM_ATOMNAMES] = {
-      |              ^~~~~~~~
-define.h:68:14: warning: ‘at_types’ defined but not used [-Wunused-variable]
-   68 | static char *at_types[NSMOGTYPES] = {"CA", "C3", "C2", "CP", "CC", "OC", "OB",
-      |              ^~~~~~~~
-make: *** [Makefile:29: init.o] Error 1
+mkdir -p build
+mkdir -p bin
+mpicc -O3 -Wall -DDEBUG -Iinclude  -c src/rng.c -o build/rng.o
+mpicc -O3 -Wall -DDEBUG -Iinclude  -c src/vector.c -o build/vector.o
+mpicc -O3 -Wall -DDEBUG -Iinclude  -c src/mu_potential.c -o build/mu_potential.o
+mpicc -O3 -Wall -DDEBUG -Iinclude  -c src/contacts.c -o build/contacts.o
+src/contacts.c: In function ‘check_bb_contacts’:
+src/contacts.c:142:35: warning: variable ‘can’ set but not used [-Wunused-but-set-variable]
+  142 |     double        nit[3], con[3], can[3], hyd[3];  // donor
+      |                                   ^~~
+src/contacts.c:142:27: warning: variable ‘con’ set but not used [-Wunused-but-set-variable]
+  142 |     double        nit[3], con[3], can[3], hyd[3];  // donor
+      |                           ^~~
+In file included from include/tripep_closure.h:6,
+                 from src/contacts.c:3:
+include/sturm.h: At top level:
+include/sturm.h:38:12: warning: ‘modp’ declared ‘static’ but never defined [-Wunused-function]
+   38 | static int modp(poly *u, poly *v, poly *r);
+      |            ^~~~
+mpicc -O3 -Wall -DDEBUG -Iinclude  -c src/jac_local.c -o build/jac_local.o
+In file included from include/tripep_closure.h:6,
+                 from src/jac_local.c:4:
+include/sturm.h:38:12: warning: ‘modp’ declared ‘static’ but never defined [-Wunused-function]
+   38 | static int modp(poly *u, poly *v, poly *r);
+      |            ^~~~
+mpicc -O3 -Wall -DDEBUG -Iinclude  -c src/atom.c -o build/atom.o
+mpicc -O3 -Wall -DDEBUG -Iinclude  -c src/move.c -o build/move.o
+mpicc -O3 -Wall -DDEBUG -Iinclude  -c src/misc_util.c -o build/misc_util.o
+mpicc -O3 -Wall -DDEBUG -Iinclude  -c src/init.c -o build/init.o
+src/init.c: In function ‘InitializeProtein’:
+src/init.c:138:58: warning: ‘/*’ within comment [-Wcomment]
+  138 |     fprintf(STATUS, "  file:\t\t%s   \n", native_file);  /*Set up arrays for native file, minimized
+src/init.c: In function ‘ReadSidechainTorsionData.part.0’:
+src/init.c:611:17: warning: ‘strncpy’ output may be truncated copying 3 bytes from a string of length 249 [-Wstringop-truncation]
+  611 |                 strncpy(name, line, 3);
+      |                 ^~~~~~~~~~~~~~~~~~~~~~
+src/init.c: In function ‘SetProgramOptions’:
+src/init.c:1446:31: warning: ‘%s’ directive writing up to 999 bytes into a region of size 500 [-Wformat-overflow=]
+ 1446 |         sprintf(native_file, "%s/%d.pdb", native_directory, myrank + my_rank_offset);
+      |                               ^~          ~~~~~~~~~~~~~~~~
+src/init.c:1446:9: note: ‘sprintf’ output between 7 and 1016 bytes into a destination of size 500
+ 1446 |         sprintf(native_file, "%s/%d.pdb", native_directory, myrank + my_rank_offset);
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+src/init.c:1460:35: warning: ‘%s’ directive writing up to 999 bytes into a region of size 500 [-Wformat-overflow=]
+ 1460 |             sprintf(native_file, "%s/%d.pdb", native_directory, mod_rank);
+      |                                   ^~          ~~~~~~~~~~~~~~~~
+src/init.c:1460:34: note: directive argument in the range [-2147483647, 2147483647]
+ 1460 |             sprintf(native_file, "%s/%d.pdb", native_directory, mod_rank);
+      |                                  ^~~~~~~~~~~
+src/init.c:1460:13: note: ‘sprintf’ output between 7 and 1016 bytes into a destination of size 500
+ 1460 |             sprintf(native_file, "%s/%d.pdb", native_directory, mod_rank);
+      |             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+src/init.c:1539:34: warning: ‘_T_’ directive writing 3 bytes into a region of size between 1 and 500 [-Wformat-overflow=]
+ 1539 |             sprintf(std_file, "%s_T_%5.3f.log", std_prefix, MC_TEMP);
+      |                                  ^~~
+src/init.c:1539:13: note: ‘sprintf’ output between 13 and 821 bytes into a destination of size 500
+ 1539 |             sprintf(std_file, "%s_T_%5.3f.log", std_prefix, MC_TEMP);
+      |             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+src/init.c:1542:34: warning: ‘_T_’ directive writing 3 bytes into a region of size between 1 and 500 [-Wformat-overflow=]
+ 1542 |             sprintf(std_file, "%s_T_%5.3f_%d.log", std_prefix, MC_TEMP, myrank + my_rank_offset);
+      |                                  ^~~
+src/init.c:1542:13: note: ‘sprintf’ output between 15 and 833 bytes into a destination of size 500
+ 1542 |             sprintf(std_file, "%s_T_%5.3f_%d.log", std_prefix, MC_TEMP, myrank + my_rank_offset);
+      |             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+src/init.c:1533:30: warning: ‘_T_’ directive writing 3 bytes into a region of size between 1 and 500 [-Wformat-overflow=]
+ 1533 |         sprintf(std_file, "%s_T_%5.3f_%d.log", std_prefix, MC_TEMP, number_of_contacts_setpoint);
+      |                              ^~~
+src/init.c:1533:9: note: ‘sprintf’ output between 15 and 833 bytes into a destination of size 500
+ 1533 |         sprintf(std_file, "%s_T_%5.3f_%d.log", std_prefix, MC_TEMP, number_of_contacts_setpoint);
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+src/init.c:1534:9: warning: ‘ls’ may be used uninitialized [-Wmaybe-uninitialized]
+ 1534 |         sprintf(pdb_out_file + ls, "_%5.3f_%d", MC_TEMP, number_of_contacts_setpoint);
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+src/init.c:1223:17: note: ‘ls’ was declared here
+ 1223 |     int  l = 0, ls, MPI_STOP = 0;
+      |                 ^~
+mpicc -O3 -Wall -DDEBUG -Iinclude  -c src/hbonds.c -o build/hbonds.o
+src/hbonds.c: In function ‘FoldHydrogenBonds’:
+src/hbonds.c:67:39: warning: comparison with string literal results in unspecified behavior [-Waddress]
+   67 |         if (native_residue[res_n].res == "LNK") {
+      |                                       ^~
+src/hbonds.c: In function ‘CheckHBond’:
+src/hbonds.c:412:14: warning: variable ‘xxx’ set but not used [-Wunused-but-set-variable]
+  412 |     long int xxx;
+      |              ^~~
+In file included from include/tripep_closure.h:6,
+                 from src/hbonds.c:8:
+include/sturm.h: At top level:
+include/sturm.h:38:12: warning: ‘modp’ declared ‘static’ but never defined [-Wunused-function]
+   38 | static int modp(poly *u, poly *v, poly *r);
+      |            ^~~~
+mpicc -O3 -Wall -DDEBUG -Iinclude  -c src/sturm.c -o build/sturm.o
+mpicc -O3 -Wall -DDEBUG -Iinclude  -c src/lattice_util.c -o build/lattice_util.o
+mpicc -O3 -Wall -DDEBUG -Iinclude  -c src/align.c -o build/align.o
+mpicc -O3 -Wall -DDEBUG -Iinclude  -c src/loop.c -o build/loop.o
+In file included from include/tripep_closure.h:6,
+                 from src/loop.c:12:
+include/sturm.h:38:12: warning: ‘modp’ declared ‘static’ but never defined [-Wunused-function]
+   38 | static int modp(poly *u, poly *v, poly *r);
+      |            ^~~~
+src/loop.c: In function ‘get_template’:
+src/loop.c:888:13: warning: ‘strncpy’ output may be truncated copying 4 bytes from a string of length 249 [-Wstringop-truncation]
+  888 |             strncpy(temp, &(line[22]), 4);
+      |             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+mpicc -O3 -Wall -DDEBUG -Iinclude  -c src/triplet_closure.c -o build/triplet_closure.o
+src/triplet_closure.c: In function ‘test_two_cone_existence_soln’:
+src/triplet_closure.c:499:21: warning: variable ‘t2’ set but not used [-Wunused-but-set-variable]
+  499 |     int s1, s2, t1, t2;
+      |                     ^~
+src/triplet_closure.c:499:17: warning: variable ‘t1’ set but not used [-Wunused-but-set-variable]
+  499 |     int s1, s2, t1, t2;
+      |                 ^~
+src/triplet_closure.c:499:13: warning: variable ‘s2’ set but not used [-Wunused-but-set-variable]
+  499 |     int s1, s2, t1, t2;
+      |             ^~
+src/triplet_closure.c:499:9: warning: variable ‘s1’ set but not used [-Wunused-but-set-variable]
+  499 |     int s1, s2, t1, t2;
+      |         ^~
+In file included from include/tripep_closure.h:6,
+                 from src/triplet_closure.c:1:
+include/sturm.h: At top level:
+include/sturm.h:38:12: warning: ‘modp’ declared ‘static’ but never defined [-Wunused-function]
+   38 | static int modp(poly *u, poly *v, poly *r);
+      |            ^~~~
+mpicc -O3 -Wall -DDEBUG -Iinclude  -c src/getrms.c -o build/getrms.o
+mpicc -O3 -Wall -DDEBUG -Iinclude  -c src/rotate.c -o build/rotate.o
+mpicc -O3 -Wall -DDEBUG -Iinclude  -c src/protein_util.c -o build/protein_util.o
+mpicc -O3 -Wall -DDEBUG -Iinclude  -c src/debug.c -o build/debug.o
+mpicc -O3 -Wall -DDEBUG -Iinclude  -c src/globals.c -o build/globals.o
+mpicc -O3 -Wall -DDEBUG -Iinclude  -c src/update.c -o build/update.o
+mpicc -O3 -Wall -DDEBUG -Iinclude  -c src/pdb_util.c -o build/pdb_util.o
+mpicc -O3 -Wall -DDEBUG -Iinclude  -c src/energy.c -o build/energy.o
+mpicc -O3 -Wall -DDEBUG -Iinclude  -c src/fold.c -o build/fold.o
+src/fold.c: In function ‘Fold’:
+src/fold.c:66:22: warning: variable ‘align’ set but not used [-Wunused-but-set-variable]
+   66 |     struct alignment align;
+      |                      ^~~~~
+src/fold.c:505:44: warning: ‘%ld’ directive writing between 1 and 20 bytes into a region of size between 0 and 499 [-Wformat-overflow=]
+  505 |                 sprintf(temp_filename, "%s.%ld", pdb_out_file, mcstep);
+      |                                            ^~~
+src/fold.c:505:17: note: ‘sprintf’ output between 3 and 521 bytes into a destination of size 500
+  505 |                 sprintf(temp_filename, "%s.%ld", pdb_out_file, mcstep);
+      |                 ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+src/fold.c:541:31: warning: ‘_Emin.pdb’ directive writing 9 bytes into a region of size between 1 and 500 [-Wformat-overflow=]
+  541 |     sprintf(temp_filename, "%s_Emin.pdb", pdb_out_file);
+      |                               ^~~~~~~~~
+src/fold.c:541:5: note: ‘sprintf’ output between 10 and 509 bytes into a destination of size 500
+  541 |     sprintf(temp_filename, "%s_Emin.pdb", pdb_out_file);
+      |     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+src/fold.c:551:31: warning: ‘_RMSDmin.pdb’ directive writing 12 bytes into a region of size between 1 and 500 [-Wformat-overflow=]
+  551 |     sprintf(rmsd_filename, "%s_RMSDmin.pdb", pdb_out_file);
+      |                               ^~~~~~~~~~~~
+src/fold.c:551:5: note: ‘sprintf’ output between 13 and 512 bytes into a destination of size 500
+  551 |     sprintf(rmsd_filename, "%s_RMSDmin.pdb", pdb_out_file);
+      |     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+mpicc -O3 -Wall -DDEBUG -Iinclude  -c src/backbone.c -o build/backbone.o
+mpicc -O3 -Wall -DDEBUG -Iinclude  -c src/constraint.c -o build/constraint.o
+src/constraint.c: In function ‘Compute_constraint_energy’:
+src/constraint.c:156:11: warning: unused variable ‘min_dis’ [-Wunused-variable]
+  156 |     float min_dis;
+      |           ^~~~~~~
+src/constraint.c:155:11: warning: unused variable ‘min_ind’ [-Wunused-variable]
+  155 |     int   min_ind;
+      |           ^~~~~~~
+src/constraint.c:153:11: warning: unused variable ‘sum_of_weights’ [-Wunused-variable]
+  153 |     float sum_of_weights = 0;
+      |           ^~~~~~~~~~~~~~
+mpicc -O3 -Wall -DDEBUG -Iinclude  -c src/in_out.c -o build/in_out.o
+mpicc -O3 -Wall -DDEBUG -Iinclude  -o bin/mcpu build/rng.o build/vector.o build/mu_potential.o build/contacts.o build/jac_local.o build/atom.o build/move.o build/misc_util.o build/init.o build/hbonds.o build/sturm.o build/lattice_util.o build/align.o build/loop.o build/triplet_closure.o build/getrms.o build/rotate.o build/protein_util.o build/debug.o build/globals.o build/update.o build/pdb_util.o build/energy.o build/fold.o build/backbone.o build/constraint.o build/in_out.o -lm
