@@ -1,0 +1,216 @@
+mkdir -p build
+mkdir -p bin
+mpicc -O3 -Wall -DDEBUG -Iinclude  -c src/rng.c -o build/rng.o
+mpicc -O3 -Wall -DDEBUG -Iinclude  -c src/setup.c -o build/setup.o
+mpicc -O3 -Wall -DDEBUG -Iinclude  -c src/vector.c -o build/vector.o
+mpicc -O3 -Wall -DDEBUG -Iinclude  -c src/contacts.c -o build/contacts.o
+src/contacts.c: In function ‘check_bb_contacts’:
+src/contacts.c:122:35: warning: variable ‘can’ set but not used [-Wunused-but-set-variable]
+  122 |     double        nit[3], con[3], can[3], hyd[3];  // donor
+      |                                   ^~~
+src/contacts.c:122:27: warning: variable ‘con’ set but not used [-Wunused-but-set-variable]
+  122 |     double        nit[3], con[3], can[3], hyd[3];  // donor
+      |                           ^~~
+mpicc -O3 -Wall -DDEBUG -Iinclude  -c src/jac_local.c -o build/jac_local.o
+mpicc -O3 -Wall -DDEBUG -Iinclude  -c src/atom.c -o build/atom.o
+mpicc -O3 -Wall -DDEBUG -Iinclude  -c src/move.c -o build/move.o
+src/move.c: In function ‘MakeMove’:
+src/move.c:87:36: warning: passing argument 2 of ‘integloop’ discards ‘const’ qualifier from pointer target type [-Wdiscarded-qualifiers]
+   87 |                     integloop(ctx, top, integrator, sys, sim, step_size, &n_soln);  // See loop.h
+      |                                    ^~~
+In file included from src/move.c:12:
+include/loop.h:8:43: note: expected ‘struct Topology *’ but argument is of type ‘const struct Topology *’
+    8 |     struct Context *ctx, struct Topology *top, struct MCIntegrator *integrator, struct System *sys, struct Simulation *sim,
+      |                          ~~~~~~~~~~~~~~~~~^~~
+src/move.c:163:50: warning: passing argument 2 of ‘torsionenergy’ discards ‘const’ qualifier from pointer target type [-Wdiscarded-qualifiers]
+  163 |                 ctx->dE_tor = torsionenergy(ctx, top, sys) - ctx->prev_E_tor;
+      |                                                  ^~~
+In file included from src/move.c:6:
+include/energy.h:19:22: note: expected ‘struct Topology *’ but argument is of type ‘const struct Topology *’
+   19 |     struct Topology *top,
+      |     ~~~~~~~~~~~~~~~~~^~~
+src/move.c:166:51: warning: passing argument 3 of ‘sctenergy’ discards ‘const’ qualifier from pointer target type [-Wdiscarded-qualifiers]
+  166 |                 ctx->dE_sct = sctenergy(ctx, sys, top) - ctx->prev_E_sct;
+      |                                                   ^~~
+include/energy.h:25:22: note: expected ‘struct Topology *’ but argument is of type ‘const struct Topology *’
+   25 |     struct Topology *top
+      |     ~~~~~~~~~~~~~~~~~^~~
+src/move.c:168:60: warning: passing argument 3 of ‘aromaticenergy’ discards ‘const’ qualifier from pointer target type [-Wdiscarded-qualifiers]
+  168 |             ctx->dE_aro         = aromaticenergy(ctx, sys, top) - ctx->prev_E_aro;
+      |                                                            ^~~
+include/energy.h:36:22: note: expected ‘struct Topology *’ but argument is of type ‘const struct Topology *’
+   36 |     struct Topology *top
+      |     ~~~~~~~~~~~~~~~~~^~~
+mpicc -O3 -Wall -DDEBUG -Iinclude  -c src/misc_util.c -o build/misc_util.o
+mpicc -O3 -Wall -DDEBUG -Iinclude  -c src/init.c -o build/init.o
+src/init.c: In function ‘InitializeProtein’:
+src/init.c:139:58: warning: ‘/*’ within comment [-Wcomment]
+  139 |     fprintf(STATUS, "  file:\t\t%s   \n", native_file);  /*Set up arrays for native file, minimized
+src/init.c: In function ‘ReadSidechainTorsionData.part.0’:
+src/init.c:605:17: warning: ‘strncpy’ output may be truncated copying 3 bytes from a string of length 249 [-Wstringop-truncation]
+  605 |                 strncpy(name, line, 3);
+      |                 ^~~~~~~~~~~~~~~~~~~~~~
+src/init.c: In function ‘InitializeSidechainRotationData’:
+src/init.c:1056:53: warning: argument 1 range [18446744071562067968, 18446744073709551615] exceeds maximum object size 9223372036854775807 [-Walloc-size-larger-than=]
+ 1056 |     integrator->rotate_sidechain_natoms = (short **)calloc(top->nresidues, sizeof(short *));
+      |                                                     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+In file included from include/globals.h:8,
+                 from include/atom.h:3,
+                 from include/init.h:4,
+                 from src/init.c:1:
+/usr/include/stdlib.h:541:14: note: in a call to allocation function ‘calloc’ declared here
+  541 | extern void *calloc (size_t __nmemb, size_t __size)
+      |              ^~~~~~
+src/init.c: In function ‘SetProgramOptions’:
+src/init.c:1478:39: warning: ‘%d’ directive writing between 1 and 11 bytes into a region of size between 0 and 1023 [-Wformat-overflow=]
+ 1478 |         sprintf(sim->native_file, "%s/%d.pdb", sim->native_directory,
+      |                                       ^~
+src/init.c:1478:9: note: ‘sprintf’ output between 7 and 1040 bytes into a destination of size 1024
+ 1478 |         sprintf(sim->native_file, "%s/%d.pdb", sim->native_directory,
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ 1479 |                 sim->myrank + sim->my_rank_offset);
+      |                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+src/init.c:1485:43: warning: ‘%d’ directive writing between 1 and 11 bytes into a region of size between 0 and 1023 [-Wformat-overflow=]
+ 1485 |             sprintf(sim->native_file, "%s/%d.pdb", sim->native_directory, mod_rank);
+      |                                           ^~
+src/init.c:1485:39: note: directive argument in the range [-2147483647, 2147483647]
+ 1485 |             sprintf(sim->native_file, "%s/%d.pdb", sim->native_directory, mod_rank);
+      |                                       ^~~~~~~~~~~
+src/init.c:1485:13: note: ‘sprintf’ output between 7 and 1040 bytes into a destination of size 1024
+ 1485 |             sprintf(sim->native_file, "%s/%d.pdb", sim->native_directory, mod_rank);
+      |             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+src/init.c:1529:39: warning: ‘_T_’ directive writing 3 bytes into a region of size between 1 and 1024 [-Wformat-overflow=]
+ 1529 |             sprintf(sim->std_file, "%s_T_%5.3f.log", sim->std_prefix, integrator->MC_TEMP);
+      |                                       ^~~
+src/init.c:1529:13: note: ‘sprintf’ output between 13 and 1345 bytes into a destination of size 1024
+ 1529 |             sprintf(sim->std_file, "%s_T_%5.3f.log", sim->std_prefix, integrator->MC_TEMP);
+      |             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+src/init.c:1532:39: warning: ‘_T_’ directive writing 3 bytes into a region of size between 1 and 1024 [-Wformat-overflow=]
+ 1532 |             sprintf(sim->std_file, "%s_T_%5.3f_%d.log", sim->std_prefix, integrator->MC_TEMP,
+      |                                       ^~~
+src/init.c:1532:13: note: ‘sprintf’ output between 15 and 1357 bytes into a destination of size 1024
+ 1532 |             sprintf(sim->std_file, "%s_T_%5.3f_%d.log", sim->std_prefix, integrator->MC_TEMP,
+      |             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ 1533 |                     sim->myrank + sim->my_rank_offset);
+      |                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+src/init.c:1521:35: warning: ‘_T_’ directive writing 3 bytes into a region of size between 1 and 1024 [-Wformat-overflow=]
+ 1521 |         sprintf(sim->std_file, "%s_T_%5.3f_%d.log", sim->std_prefix, integrator->MC_TEMP,
+      |                                   ^~~
+src/init.c:1521:9: note: ‘sprintf’ output between 15 and 1357 bytes into a destination of size 1024
+ 1521 |         sprintf(sim->std_file, "%s_T_%5.3f_%d.log", sim->std_prefix, integrator->MC_TEMP,
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ 1522 |                 sim->number_of_contacts_setpoint);
+      |                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+mpicc -O3 -Wall -DDEBUG -Iinclude  -c src/hbonds.c -o build/hbonds.o
+src/hbonds.c: In function ‘FoldHydrogenBonds’:
+src/hbonds.c:72:44: warning: comparison with string literal results in unspecified behavior [-Waddress]
+   72 |         if (ctx->native_residue[res_n].res == "LNK") {
+      |                                            ^~
+src/hbonds.c:90:94: warning: passing argument 3 of ‘CheckHBond’ discards ‘const’ qualifier from pointer target type [-Wdiscarded-qualifiers]
+   90 |                         ctx->data[i][j].hbond = ctx->data[j][i].hbond = CheckHBond(ctx, sys, top, i, j);
+      |                                                                                              ^~~
+In file included from src/hbonds.c:1:
+include/hbonds.h:26:22: note: expected ‘struct Topology *’ but argument is of type ‘const struct Topology *’
+   26 |     struct Topology *top,
+      |     ~~~~~~~~~~~~~~~~~^~~
+src/hbonds.c:144:102: warning: passing argument 3 of ‘CheckHBond’ discards ‘const’ qualifier from pointer target type [-Wdiscarded-qualifiers]
+  144 |                                 ctx->data[i][j].hbond = ctx->data[j][i].hbond = CheckHBond(ctx, sys, top, i, j);
+      |                                                                                                      ^~~
+include/hbonds.h:26:22: note: expected ‘struct Topology *’ but argument is of type ‘const struct Topology *’
+   26 |     struct Topology *top,
+      |     ~~~~~~~~~~~~~~~~~^~~
+src/hbonds.c: In function ‘CheckHBond’:
+src/hbonds.c:410:14: warning: variable ‘xxx’ set but not used [-Wunused-but-set-variable]
+  410 |     long int xxx;
+      |              ^~~
+mpicc -O3 -Wall -DDEBUG -Iinclude  -c src/sturm.c -o build/sturm.o
+src/sturm.c: In function ‘solve_sturm’:
+src/sturm.c:17:22: warning: unused variable ‘j’ [-Wunused-variable]
+   17 |     int    order, i, j, nroots, nchanges, np, atmin, atmax;
+      |                      ^
+mpicc -O3 -Wall -DDEBUG -Iinclude  -c src/lattice_util.c -o build/lattice_util.o
+src/lattice_util.c: In function ‘UpdateLattice’:
+src/lattice_util.c:22:33: warning: passing argument 1 of ‘PerBound’ discards ‘const’ qualifier from pointer target type [-Wdiscarded-qualifiers]
+   22 |         temp_atom->X = PerBound(integrator, (int)(floor(temp_atom->xyz.x * integrator->LATTICE_SIZE)) + integrator->HALF_MATRIX_SIZE);
+      |                                 ^~~~~~~~~~
+In file included from src/lattice_util.c:1:
+include/lattice_util.h:20:26: note: expected ‘struct MCIntegrator *’ but argument is of type ‘const struct MCIntegrator *’
+   20 |     struct MCIntegrator *integrator,
+      |     ~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~
+src/lattice_util.c:23:33: warning: passing argument 1 of ‘PerBound’ discards ‘const’ qualifier from pointer target type [-Wdiscarded-qualifiers]
+   23 |         temp_atom->Y = PerBound(integrator, (int)(floor(temp_atom->xyz.y * integrator->LATTICE_SIZE)) + integrator->HALF_MATRIX_SIZE);
+      |                                 ^~~~~~~~~~
+include/lattice_util.h:20:26: note: expected ‘struct MCIntegrator *’ but argument is of type ‘const struct MCIntegrator *’
+   20 |     struct MCIntegrator *integrator,
+      |     ~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~
+src/lattice_util.c:24:33: warning: passing argument 1 of ‘PerBound’ discards ‘const’ qualifier from pointer target type [-Wdiscarded-qualifiers]
+   24 |         temp_atom->Z = PerBound(integrator, (int)(floor(temp_atom->xyz.z * integrator->LATTICE_SIZE)) + integrator->HALF_MATRIX_SIZE);
+      |                                 ^~~~~~~~~~
+include/lattice_util.h:20:26: note: expected ‘struct MCIntegrator *’ but argument is of type ‘const struct MCIntegrator *’
+   20 |     struct MCIntegrator *integrator,
+      |     ~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~
+mpicc -O3 -Wall -DDEBUG -Iinclude  -c src/align.c -o build/align.o
+mpicc -O3 -Wall -DDEBUG -Iinclude  -c src/loop.c -o build/loop.o
+src/loop.c: In function ‘get_template’:
+src/loop.c:864:13: warning: ‘strncpy’ output may be truncated copying 4 bytes from a string of length 249 [-Wstringop-truncation]
+  864 |             strncpy(temp, &(line[22]), 4);
+      |             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+mpicc -O3 -Wall -DDEBUG -Iinclude  -c src/triplet_closure.c -o build/triplet_closure.o
+src/triplet_closure.c: In function ‘test_two_cone_existence_soln’:
+src/triplet_closure.c:499:21: warning: variable ‘t2’ set but not used [-Wunused-but-set-variable]
+  499 |     int s1, s2, t1, t2;
+      |                     ^~
+src/triplet_closure.c:499:17: warning: variable ‘t1’ set but not used [-Wunused-but-set-variable]
+  499 |     int s1, s2, t1, t2;
+      |                 ^~
+src/triplet_closure.c:499:13: warning: variable ‘s2’ set but not used [-Wunused-but-set-variable]
+  499 |     int s1, s2, t1, t2;
+      |             ^~
+src/triplet_closure.c:499:9: warning: variable ‘s1’ set but not used [-Wunused-but-set-variable]
+  499 |     int s1, s2, t1, t2;
+      |         ^~
+mpicc -O3 -Wall -DDEBUG -Iinclude  -c src/getrms.c -o build/getrms.o
+mpicc -O3 -Wall -DDEBUG -Iinclude  -c src/rotate.c -o build/rotate.o
+mpicc -O3 -Wall -DDEBUG -Iinclude  -c src/protein_util.c -o build/protein_util.o
+mpicc -O3 -Wall -DDEBUG -Iinclude  -c src/main.c -o build/main.o
+mpicc -O3 -Wall -DDEBUG -Iinclude  -c src/debug.c -o build/debug.o
+mpicc -O3 -Wall -DDEBUG -Iinclude  -c src/globals.c -o build/globals.o
+mpicc -O3 -Wall -DDEBUG -Iinclude  -c src/update.c -o build/update.o
+mpicc -O3 -Wall -DDEBUG -Iinclude  -c src/pdb_util.c -o build/pdb_util.o
+mpicc -O3 -Wall -DDEBUG -Iinclude  -c src/energy.c -o build/energy.o
+mpicc -O3 -Wall -DDEBUG -Iinclude  -c src/fold.c -o build/fold.o
+src/fold.c: In function ‘Fold’:
+src/fold.c:76:22: warning: variable ‘align’ set but not used [-Wunused-but-set-variable]
+   76 |     struct alignment align;
+      |                      ^~~~~
+src/fold.c:481:41: warning: ‘%s’ directive writing up to 1023 bytes into a region of size 500 [-Wformat-overflow=]
+  481 |                 sprintf(temp_filename, "%s.%ld", sim->pdb_out_file, ctx->mcstep);
+      |                                         ^~
+src/fold.c:481:17: note: ‘sprintf’ output between 3 and 1045 bytes into a destination of size 500
+  481 |                 sprintf(temp_filename, "%s.%ld", sim->pdb_out_file, ctx->mcstep);
+      |                 ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+src/fold.c:520:29: warning: ‘%s’ directive writing up to 1023 bytes into a region of size 500 [-Wformat-overflow=]
+  520 |     sprintf(temp_filename, "%s_Emin.pdb", sim->pdb_out_file);
+      |                             ^~
+src/fold.c:520:5: note: ‘sprintf’ output between 10 and 1033 bytes into a destination of size 500
+  520 |     sprintf(temp_filename, "%s_Emin.pdb", sim->pdb_out_file);
+      |     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+src/fold.c:530:29: warning: ‘%s’ directive writing up to 1023 bytes into a region of size 500 [-Wformat-overflow=]
+  530 |     sprintf(rmsd_filename, "%s_RMSDmin.pdb", sim->pdb_out_file);
+      |                             ^~
+src/fold.c:530:5: note: ‘sprintf’ output between 13 and 1036 bytes into a destination of size 500
+  530 |     sprintf(rmsd_filename, "%s_RMSDmin.pdb", sim->pdb_out_file);
+      |     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+mpicc -O3 -Wall -DDEBUG -Iinclude  -c src/constraint.c -o build/constraint.o
+src/constraint.c: In function ‘Compute_constraint_energy’:
+src/constraint.c:151:11: warning: unused variable ‘min_dis’ [-Wunused-variable]
+  151 |     float min_dis;
+      |           ^~~~~~~
+src/constraint.c:150:11: warning: unused variable ‘min_ind’ [-Wunused-variable]
+  150 |     int   min_ind;
+      |           ^~~~~~~
+src/constraint.c:148:11: warning: unused variable ‘sum_of_weights’ [-Wunused-variable]
+  148 |     float sum_of_weights = 0;
+      |           ^~~~~~~~~~~~~~
+mpicc -O3 -Wall -DDEBUG -Iinclude  -c src/in_out.c -o build/in_out.o
+mpicc -O3 -Wall -DDEBUG -Iinclude  -o bin/mcpu build/rng.o build/setup.o build/vector.o build/contacts.o build/jac_local.o build/atom.o build/move.o build/misc_util.o build/init.o build/hbonds.o build/sturm.o build/lattice_util.o build/align.o build/loop.o build/triplet_closure.o build/getrms.o build/rotate.o build/protein_util.o build/main.o build/debug.o build/globals.o build/update.o build/pdb_util.o build/energy.o build/fold.o build/constraint.o build/in_out.o -lm
