@@ -25,8 +25,8 @@ void PrintPDB(
     for (i = 0; i < top->natoms; i++)
         if (strcmp(ctx->native[i].atomname, "CB") || strcmp(ctx->native[i].res, "GLY"))
             fprintf(sim->DATA, "ATOM%7d  %-3s %3s  %4d%12.3f%8.3f%8.3f  1.00  0.00\n", i + 1,
-                    ctx->native[i].atomname, ctx->native[i].res, ctx->native[i].res_num + 1, ctx->native[i].xyz.x,
-                    ctx->native[i].xyz.y, ctx->native[i].xyz.z);
+                    ctx->native[i].atomname, ctx->native[i].res, ctx->native[i].res_num + 1, ctx->native[i].xyz.x(),
+                    ctx->native[i].xyz.y(), ctx->native[i].xyz.z());
     fprintf(sim->DATA, "TER\n");
     fprintf(sim->DATA, "END\n");
 
@@ -48,7 +48,7 @@ void PrintReplica(
 
     for (i = 0; i < top->natoms; i++)
         if (strcmp(ctx->native[i].atomname, "CB") || strcmp(ctx->native[i].res, "GLY"))
-            fprintf(sim->DATA, "%7d  %f %f %f\n", i, ctx->native[i].xyz.x, ctx->native[i].xyz.y, ctx->native[i].xyz.z);
+            fprintf(sim->DATA, "%7d  %f %f %f\n", i, ctx->native[i].xyz.x(), ctx->native[i].xyz.y(), ctx->native[i].xyz.z());
     fprintf(sim->DATA, "TER\n");
 
     fclose(sim->DATA);
@@ -69,7 +69,7 @@ int GetReplica(
     }
 
     for (i = 0; i < top->natoms; i++)
-        fscanf(sim->DATA, "%*d  %f%f%f", &ctx->native[i].xyz.x, &ctx->native[i].xyz.y, &ctx->native[i].xyz.z);
+        fscanf(sim->DATA, "%*d  %f%f%f", &ctx->native[i].xyz.x(), &ctx->native[i].xyz.y(), &ctx->native[i].xyz.z());
     fscanf(sim->DATA, "%s", end_line);
     if (strcmp(end_line, "TER") == 0) {
         fclose(sim->DATA);
@@ -97,8 +97,8 @@ void PrintPDB_Emin(
     for (i = 0; i < top->natoms; i++)
         if (strcmp(ctx->native[i].atomname, "CB") || strcmp(ctx->native[i].res, "GLY"))
             fprintf(sim->DATA, "ATOM%7d  %-3s %3s  %4d%12.3f%8.3f%8.3f  1.00  0.00\n", i + 1,
-                    ctx->native[i].atomname, ctx->native[i].res, ctx->native[i].res_num + 1, ctx->native_Emin[i].xyz.x,
-                    ctx->native_Emin[i].xyz.y, ctx->native_Emin[i].xyz.z);
+                    ctx->native[i].atomname, ctx->native[i].res, ctx->native[i].res_num + 1, ctx->native_Emin[i].xyz.x(),
+                    ctx->native_Emin[i].xyz.y(), ctx->native_Emin[i].xyz.z());
     fprintf(sim->DATA, "TER\n");
     fprintf(sim->DATA, "END\n");
 
@@ -123,7 +123,7 @@ void PrintPDB_RMSDmin(
         if (strcmp(ctx->native[i].atomname, "CB") || strcmp(ctx->native[i].res, "GLY"))
             fprintf(sim->DATA, "ATOM%7d  %-3s %3s  %4d%12.3f%8.3f%8.3f  1.00  0.00\n", i + 1,
                     ctx->native[i].atomname, ctx->native[i].res, ctx->native[i].res_num + 1,
-                    ctx->native_RMSDmin[i].xyz.x, ctx->native_RMSDmin[i].xyz.y, ctx->native_RMSDmin[i].xyz.z);
+                    ctx->native_RMSDmin[i].xyz.x(), ctx->native_RMSDmin[i].xyz.y(), ctx->native_RMSDmin[i].xyz.z());
     fprintf(sim->DATA, "TER\n");
     fprintf(sim->DATA, "END\n");
 
@@ -234,7 +234,7 @@ int SMoGType(
 
 int GetSMoGType(
     struct Simulation *sim,
-    char *c) {
+    const char *c) {
     int i;
 
     for (i = 0; i < NSMOGTYPES; i++)
@@ -350,13 +350,13 @@ void ParsePDBLine(
         protein[*Natoms].is_designed = IsDesignedResidue(protein[*Natoms].res_num);
         strncpy(temp, &(line[30]), 8);
         strcpy(&temp[8], "\0");
-        protein[*Natoms].xyz.x = atof(temp);
+        protein[*Natoms].xyz.x() = atof(temp);
         strncpy(temp, &(line[38]), 8);
         strcpy(&temp[8], "\0");
-        protein[*Natoms].xyz.y = atof(temp);
+        protein[*Natoms].xyz.y() = atof(temp);
         strncpy(temp, &(line[46]), 8);
         strcpy(&temp[8], "\0");
-        protein[*Natoms].xyz.z        = atof(temp);
+        protein[*Natoms].xyz.z() = atof(temp);
         protein[*Natoms].is_sidechain = IsSidechainAtom(protein[*Natoms].atomname);
         protein[*Natoms].atomtype     = TypeAtom(protein[*Natoms].atomname, protein[*Natoms].res);
         if (!sys->USE_GO_POTENTIAL)

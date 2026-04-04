@@ -34,7 +34,7 @@ int SMoGType(
     char *atomname, char *residue);
 int GetSMoGType(
     struct Simulation *sim,
-    char *c);
+    const char *c);
 void PrintReplica(
     struct Simulation *sim,
     struct Context *ctx,

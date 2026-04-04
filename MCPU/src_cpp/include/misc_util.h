@@ -3,7 +3,7 @@
 
 #include "define.h"
 
-Float Tiny(Float x);
+float Tiny(float x);
 void  squeeze(char *, int);
 Float GaussianNum();
 

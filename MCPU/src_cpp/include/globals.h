@@ -1,6 +1,25 @@
 #ifndef GLOBALS_H
 #define GLOBALS_H
 
+#include <Eigen/Dense>
+
+namespace MCPU2 {
+    #ifdef USE_SINGLE_PRECISION
+        using Real = float;
+    #else
+        using Real = double;
+    #endif
+
+    using Vec3  = Eigen::Vector3<Real>;
+    using Vec3i = Eigen::Vector3i;
+    using Mat3  = Eigen::Matrix3<Real>;
+
+    // One-letter cast helper to keep math code from getting cluttered
+    template <typename T>
+    inline auto asReal(const T& eigen_obj) { return eigen_obj.template cast<Real>(); }
+}
+
+using namespace MCPU2;
 #define _USE_MATH_DEFINES
 #include <math.h>
 #include <mpi.h>
@@ -16,12 +35,6 @@ static const double rad2deg = 180.0 / M_PI;
 static const double deg2rad = M_PI / 180.0;
 
 /* Struct definitions */
-struct int_vector {
-    long int x, y, z;
-};
-struct vector {
-    float x, y, z;
-};
 struct pair {
     short a, b;
 };
@@ -42,8 +55,8 @@ struct segment {
 };
 
 struct atom {
-    struct vector     xyz;
-    struct int_vector xyz_int;
+    Vec3     xyz;
+    Vec3i    xyz_int;
     char              res[5], atomname[5];
     short         res_num, atomtype, smogtype, is_core, is_designed, is_sidechain, sec_structure;
     unsigned char X, Y, Z;
@@ -86,11 +99,11 @@ struct cell {
 };
 
 struct backbone {
-    struct vector N;
-    struct vector CA;
-    struct vector C;
-    struct vector CB;
-    struct vector O;
+    Vec3 N;
+    Vec3 CA;
+    Vec3 C;
+    Vec3 CB;
+    Vec3 O;
 };
 
 struct hydrogen_bond {
@@ -364,7 +377,8 @@ struct Simulation {
     int        MAX_EXCHANGE;
     int       *accepted_replica, *rejected_replica, *attempted_replica;
     int       *replica_index;
-    float     *Enode, *Tnode, *buf_in, *buf_out;
+    float     *Enode, *Tnode;
+    Eigen::Matrix3Xd buf_in, buf_out;
     int       *Nnode, *Cnode;
 
     /* Statistics */
@@ -409,7 +423,7 @@ extern struct Simulation   sim;
 
 extern float             rot_mat[3][3];
 extern struct atom      *temp_atom, *temp_prev_atom;
-extern struct int_vector temp_xyz_int;
+extern Vec3i             temp_xyz_int;
 extern struct cell      *temp_cell, *temp_cell3;
 extern struct cell     **temp_cell_array;
 extern unsigned char    *is_rotated;

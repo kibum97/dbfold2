@@ -6,6 +6,7 @@
 #include "loop.h"
 #include "vector.h"
 #include "hbonds.h"
+#include <string_view>
 
 void ResetEnergies(
     struct Context *ctx,
@@ -148,8 +149,8 @@ float aromaticenergy(
     float         e = 0;
     int           r1, r2;
     int           i, j, x;
-    struct vector vector_1, vector_2, vector_center;
-    struct vector plane_1, plane_2;
+    Vec3 vector_1, vector_2, vector_center;
+    Vec3 plane_1, plane_2;
     float         distance_2, plane_angle;
     float         aro_int = 10.;
 
@@ -180,75 +181,53 @@ float aromaticenergy(
 
 void aromatic_center(
     struct Context *ctx,
-    int res_no, struct vector *V) {
-    if ((strcmp(ctx->native_residue[res_no].res, "PHE") == 0) ||
-        (strcmp(ctx->native_residue[res_no].res, "RING") == 0)) {
-        (*V).x =
-            (ctx->native[ctx->native_residue[res_no].CG].xyz.x + ctx->native[ctx->native_residue[res_no].CE1].xyz.x +
-             ctx->native[ctx->native_residue[res_no].CE2].xyz.x) /
-            3.;
-        (*V).y =
-            (ctx->native[ctx->native_residue[res_no].CG].xyz.y + ctx->native[ctx->native_residue[res_no].CE1].xyz.y +
-             ctx->native[ctx->native_residue[res_no].CE2].xyz.y) /
-            3.;
-        (*V).z =
-            (ctx->native[ctx->native_residue[res_no].CG].xyz.z + ctx->native[ctx->native_residue[res_no].CE1].xyz.z +
-             ctx->native[ctx->native_residue[res_no].CE2].xyz.z) /
-            3.;
-    } else if (strcmp(ctx->native_residue[res_no].res, "TRP") == 0) {
-        (*V).x =
-            (ctx->native[ctx->native_residue[res_no].CG].xyz.x + ctx->native[ctx->native_residue[res_no].CZ2].xyz.x +
-             ctx->native[ctx->native_residue[res_no].CZ3].xyz.x) /
-            3.;
-        (*V).y =
-            (ctx->native[ctx->native_residue[res_no].CG].xyz.y + ctx->native[ctx->native_residue[res_no].CZ2].xyz.y +
-             ctx->native[ctx->native_residue[res_no].CZ3].xyz.y) /
-            3.;
-        (*V).z =
-            (ctx->native[ctx->native_residue[res_no].CG].xyz.z + ctx->native[ctx->native_residue[res_no].CZ2].xyz.z +
-             ctx->native[ctx->native_residue[res_no].CZ3].xyz.z) /
-            3.;
+    int res_no, Vec3 *V) {
+    const auto& res = ctx->native_residue[res_no];
+    const auto& atoms = ctx->native;
+    
+    if ((strcmp(res.res, "PHE") == 0) || (strcmp(res.res, "RING") == 0)) {
+        *V = (atoms[res.CG].xyz + atoms[res.CE1].xyz + atoms[res.CE2].xyz) / 3.;
+    } else if (strcmp(res.res, "TRP") == 0) {
+        *V = (atoms[res.CG].xyz + atoms[res.CZ2].xyz + atoms[res.CZ3].xyz) / 3.;
     }
     return;
 }
 
 float aromatic_plane(
     struct Context *ctx,
-    int res_a, int res_b, struct vector *plane_a, struct vector *plane_b) {
-    struct vector tmp1, tmp2, tmp3, tmp4;
-    float         angle;
+    int res_a, int res_b, Vec3 *plane_a, Vec3 *plane_b) {
 
-    if ((strcmp(ctx->native_residue[res_a].res, "PHE") == 0) ||
-        (strcmp(ctx->native_residue[res_a].res, "RING") == 0)) {
-        MakeVector(ctx->native[ctx->native_residue[res_a].CG].xyz, ctx->native[ctx->native_residue[res_a].CE1].xyz,
-                   &tmp1);
-        MakeVector(ctx->native[ctx->native_residue[res_a].CG].xyz, ctx->native[ctx->native_residue[res_a].CE2].xyz,
-                   &tmp2);
-    } else if (strcmp(ctx->native_residue[res_a].res, "TRP") == 0) {
-        MakeVector(ctx->native[ctx->native_residue[res_a].CG].xyz, ctx->native[ctx->native_residue[res_a].CZ2].xyz,
-                   &tmp1);
-        MakeVector(ctx->native[ctx->native_residue[res_a].CG].xyz, ctx->native[ctx->native_residue[res_a].CZ3].xyz,
-                   &tmp2);
-    }
+    const auto& atoms = ctx->native;
+    const auto& res_data_a = ctx->native_residue[res_a];
+    const auto& res_data_b = ctx->native_residue[res_b];
+    
+    std::string_view name_a = res_data_a.res;
+    std::string_view name_b = res_data_b.res;
 
-    if ((strcmp(ctx->native_residue[res_b].res, "PHE") == 0) ||
-        (strcmp(ctx->native_residue[res_b].res, "RING") == 0)) {
-        MakeVector(ctx->native[ctx->native_residue[res_b].CG].xyz, ctx->native[ctx->native_residue[res_b].CE1].xyz,
-                   &tmp3);
-        MakeVector(ctx->native[ctx->native_residue[res_b].CG].xyz, ctx->native[ctx->native_residue[res_b].CE2].xyz,
-                   &tmp4);
-    } else if (strcmp(ctx->native_residue[res_b].res, "TRP") == 0) {
-        MakeVector(ctx->native[ctx->native_residue[res_b].CG].xyz, ctx->native[ctx->native_residue[res_b].CZ2].xyz,
-                   &tmp3);
-        MakeVector(ctx->native[ctx->native_residue[res_b].CG].xyz, ctx->native[ctx->native_residue[res_b].CZ3].xyz,
-                   &tmp4);
+    Vec3 v1, v2;
+    if (name_a == "PHE" || name_a == "RING") {
+        v1 = atoms[res_data_a.CE1].xyz - atoms[res_data_a.CG].xyz;
+        v2 = atoms[res_data_a.CE2].xyz - atoms[res_data_a.CG].xyz;
+    } else if (name_a == "TRP") {
+        v1 = atoms[res_data_a.CZ2].xyz - atoms[res_data_a.CG].xyz;
+        v2 = atoms[res_data_a.CZ3].xyz - atoms[res_data_a.CG].xyz;
     }
-    CrossProduct(tmp1, tmp2, plane_a);
-    CrossProduct(tmp3, tmp4, plane_b);
-    angle = Angle(*plane_a, *plane_b);
-    angle *= rad2deg;
-    if (angle > 90)
-        angle = 180 - angle;
+    *plane_a = v1.cross(v2); // Direct Eigen cross product
+
+    Vec3 v3, v4;
+    if (name_b == "PHE" || name_b == "RING") {
+        v3 = atoms[res_data_b.CE1].xyz - atoms[res_data_b.CG].xyz;
+        v4 = atoms[res_data_b.CE2].xyz - atoms[res_data_b.CG].xyz;
+    } else if (name_b == "TRP") {
+        v3 = atoms[res_data_b.CZ2].xyz - atoms[res_data_b.CG].xyz;
+        v4 = atoms[res_data_b.CZ3].xyz - atoms[res_data_b.CG].xyz;
+    }
+    *plane_b = v3.cross(v4);
+
+    // Angle calculation
+    float angle = Angle(*plane_a, *plane_b) * rad2deg;
+    if (angle > 90.0f) 
+        angle = 180.0f - angle;
 
     return angle;
 }

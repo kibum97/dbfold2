@@ -393,10 +393,10 @@ long int CheckHBond(
     struct Topology *top,
     int A, int B) {
     struct hydrogen_bond *cur_hbond;
-    struct vector         V3, H;
-    struct vector         tmp1, tmp2, tmp3, tmp4;
-    struct vector         plane1, plane2;
-    struct vector         bisect1, bisect2;
+    Vec3         V3, H;
+    Vec3         tmp1, tmp2, tmp3, tmp4;
+    Vec3         plane1, plane2;
+    Vec3         bisect1, bisect2;
     float                 d_HO;
     float                 d_CA_n0, d_CA_0p, d_CA_np, d_CA_00;
     float                 ang_Dphi, ang_Dpsi, ang_Aphi, ang_Apsi, ang_PH, ang_bH;

@@ -176,8 +176,8 @@ void InitializeProtein(struct Context *ctx, struct Topology *top, struct Simulat
     fprintf(sim->STATUS, "  pdb length:\t\t%d\n  # of CA's:\t\t%d\n\n", top->nresidues,
             ctx->native[top->natoms - 1].res_num + 1);
 
-    sim->buf_in  = (float *)calloc(3 * top->natoms, sizeof(float));
-    sim->buf_out = (float *)calloc(3 * top->natoms, sizeof(float));
+    //sim->buf_in = Eigen::Matrix3Xd::Zero(3, top->natoms);
+    //sim->buf_out = Eigen::Matrix3Xd::Zero(3, top->natoms);
 
     ReadAlignment(top, sys);
     fprintf(sim->STATUS, "Read Alignment\n");

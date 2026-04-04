@@ -105,12 +105,12 @@ void MakeMove(struct Context *ctx, struct System *sys, struct Topology *top,
              */
             if (sys->rmsd_constraint > 0) {
                 for (i = 0; i < top->nalign; ++i) {
-                    ctx->struct_f2[i + 1].CA.x =
-                        ctx->native[ctx->native_residue[top->map_to_seq[i]].CA].xyz.x;
-                    ctx->struct_f2[i + 1].CA.y =
-                        ctx->native[ctx->native_residue[top->map_to_seq[i]].CA].xyz.y;
-                    ctx->struct_f2[i + 1].CA.z =
-                        ctx->native[ctx->native_residue[top->map_to_seq[i]].CA].xyz.z;
+                    ctx->struct_f2[i + 1].CA.x() =
+                        ctx->native[ctx->native_residue[top->map_to_seq[i]].CA].xyz.x();
+                    ctx->struct_f2[i + 1].CA.y() =
+                        ctx->native[ctx->native_residue[top->map_to_seq[i]].CA].xyz.y();
+                    ctx->struct_f2[i + 1].CA.z() =
+                        ctx->native[ctx->native_residue[top->map_to_seq[i]].CA].xyz.z();
                 }
                 new_rms = getrms(ctx->struct_f1, ctx->struct_f2, constraint_align);
             }

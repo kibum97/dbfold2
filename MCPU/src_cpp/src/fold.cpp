@@ -89,7 +89,7 @@ void Fold(
 
     /* Save protein data into orig_native */
     for (i = 0; i < top->natoms; i++)
-        CopyAtom(ctx->native[i], &ctx->orig_native[i]);
+        CopyAtom(ctx->native[i], ctx->orig_native[i]);
 
     CenterProtein(&ctx->native, top->natoms);
     SetupMatrixStuff(integrator, top, ctx);
@@ -112,15 +112,8 @@ void Fold(
     }
 
     for (i = 0; i < top->nalign; ++i) {
-        ctx->struct_f1[i + 1].CA.x =
-            ctx->struct_native[ctx->struct_residue[top->map_to_struct[i]].CA]
-                .xyz.x;  // struct_native is our array for the STRUCTURE FILE: that is the "goal"
-                         // structure that the protein aims to look like
-        ctx->struct_f1[i + 1].CA.y = ctx->struct_native[ctx->struct_residue[top->map_to_struct[i]].CA].xyz.y;
-        ctx->struct_f1[i + 1].CA.z = ctx->struct_native[ctx->struct_residue[top->map_to_struct[i]].CA].xyz.z;
-        ctx->struct_f2[i + 1].CA.x = ctx->native[ctx->native_residue[top->map_to_seq[i]].CA].xyz.x;
-        ctx->struct_f2[i + 1].CA.y = ctx->native[ctx->native_residue[top->map_to_seq[i]].CA].xyz.y;
-        ctx->struct_f2[i + 1].CA.z = ctx->native[ctx->native_residue[top->map_to_seq[i]].CA].xyz.z;
+        ctx->struct_f1[i + 1].CA = ctx->struct_native[ctx->struct_residue[top->map_to_struct[i]].CA].xyz;
+        ctx->struct_f2[i + 1].CA = ctx->native[ctx->native_residue[top->map_to_seq[i]].CA].xyz;
     }
     ctx->native_rms = getrms(ctx->struct_f1, ctx->struct_f2, constraint_align);
 
@@ -328,9 +321,7 @@ void Fold(
             for (i = 0; i < top->natoms;
                  i++) {  // Temporary arrays to store all atom coordinates as they stood before any
                          // exchanges happened...these will be transferred later
-                sim->buf_out[3 * i]     = ctx->native[i].xyz.x;
-                sim->buf_out[3 * i + 1] = ctx->native[i].xyz.y;
-                sim->buf_out[3 * i + 2] = ctx->native[i].xyz.z;
+                sim->buf_out.col(i) = ctx->native[i].xyz;
             }
 
             /* Keep in mind the following process is being carried out in
@@ -349,7 +340,7 @@ void Fold(
                     if (sim->myrank == i) {  // For instance, if my rank is 6 and replica_index[6]=5,
                                         // then I received an exchange from node 5
                         sim->ierr = MPI_Recv(
-                            sim->buf_in, 3 * top->natoms, MPI_FLOAT, sim->replica_index[i], (i + 2),
+                            sim->buf_in.data(), 3 * top->natoms, MPI_DOUBLE, sim->replica_index[i], (i + 2),
                             sim->mpi_world_comm,
                             &sim->mpi_status);  // now, receive the atomic coordinates from my partner
                         /* Also receive the "replica number" of the partner */
@@ -358,7 +349,7 @@ void Fold(
                     } else if (sim->myrank == sim->replica_index[i]) {  // For instance, if my rank is 5 and
                                                               // replica_index[6]=5, then this means
                                                               // I gave an exchange to node 6
-                        sim->ierr = MPI_Send(sim->buf_out, 3 * top->natoms, MPI_FLOAT, i, (i + 2),
+                        sim->ierr = MPI_Send(sim->buf_out.data(), 3 * top->natoms, MPI_DOUBLE, i, (i + 2),
                                         sim->mpi_world_comm);  // give my coordinates to my partner
                         /* Send the "replica number" of this replica */
                         sim->ierr = MPI_Send(&sim->current_replica, 1, MPI_INT, i, (i + 3), sim->mpi_world_comm);
@@ -374,9 +365,7 @@ void Fold(
                 sim->myrank) {  // if exchange occurred, transfer temporary data to real-deal atomic data
                            // structure, and recompute energies with the updated atomic info
                 for (i = 0; i < top->natoms; i++) {
-                    ctx->native[i].xyz.x = sim->buf_in[3 * i];
-                    ctx->native[i].xyz.y = sim->buf_in[3 * i + 1];
-                    ctx->native[i].xyz.z = sim->buf_in[3 * i + 2];
+                    ctx->native[i].xyz = sim->buf_in.col(i);
                 }
             }
 
@@ -403,12 +392,8 @@ void Fold(
         if (ctx->backbone_accepted == 1) {
             for (i = 0; i < top->nalign; ++i) {
                 /* commented out because struct_native doesn't get altered */
-                ctx->struct_f1[i + 1].CA.x = ctx->struct_native[ctx->struct_residue[top->map_to_struct[i]].CA].xyz.x;
-                ctx->struct_f1[i + 1].CA.y = ctx->struct_native[ctx->struct_residue[top->map_to_struct[i]].CA].xyz.y;
-                ctx->struct_f1[i + 1].CA.z = ctx->struct_native[ctx->struct_residue[top->map_to_struct[i]].CA].xyz.z;
-                ctx->struct_f2[i + 1].CA.x = ctx->native[ctx->native_residue[top->map_to_seq[i]].CA].xyz.x;
-                ctx->struct_f2[i + 1].CA.y = ctx->native[ctx->native_residue[top->map_to_seq[i]].CA].xyz.y;
-                ctx->struct_f2[i + 1].CA.z = ctx->native[ctx->native_residue[top->map_to_seq[i]].CA].xyz.z;
+                ctx->struct_f1[i + 1].CA = ctx->struct_native[ctx->struct_residue[top->map_to_struct[i]].CA].xyz;
+                ctx->struct_f2[i + 1].CA = ctx->native[ctx->native_residue[top->map_to_seq[i]].CA].xyz;
             }
             ctx->native_rms = getrms(ctx->struct_f1, ctx->struct_f2, constraint_align);
         }
@@ -420,12 +405,8 @@ void Fold(
             /* rmsd by jyang */
             for (i = 0; i < top->nalign; ++i) {
                 /* commented out because struct_native doesn't get altered */
-                ctx->struct_f1[i + 1].CA.x = ctx->struct_native[ctx->struct_residue[top->map_to_struct[i]].CA].xyz.x;
-                ctx->struct_f1[i + 1].CA.y = ctx->struct_native[ctx->struct_residue[top->map_to_struct[i]].CA].xyz.y;
-                ctx->struct_f1[i + 1].CA.z = ctx->struct_native[ctx->struct_residue[top->map_to_struct[i]].CA].xyz.z;
-                ctx->struct_f2[i + 1].CA.x = ctx->native[ctx->native_residue[top->map_to_seq[i]].CA].xyz.x;
-                ctx->struct_f2[i + 1].CA.y = ctx->native[ctx->native_residue[top->map_to_seq[i]].CA].xyz.y;
-                ctx->struct_f2[i + 1].CA.z = ctx->native[ctx->native_residue[top->map_to_seq[i]].CA].xyz.z;
+                ctx->struct_f1[i + 1].CA = ctx->struct_native[ctx->struct_residue[top->map_to_struct[i]].CA].xyz;
+                ctx->struct_f2[i + 1].CA = ctx->native[ctx->native_residue[top->map_to_seq[i]].CA].xyz;
             }
             ctx->native_rms = getrms(ctx->struct_f1, ctx->struct_f2, constraint_align);
             TypeContacts(ctx, sys, top);

@@ -68,10 +68,10 @@ typedef float Float;
 #include "rng.h"
 
 extern short three[5];
-static char *at_types[NSMOGTYPES] __attribute__((unused)) = {
+const static char *at_types[NSMOGTYPES] __attribute__((unused)) = {
     "CA", "C3", "C2", "CP", "CC", "OC", "OB", "OD", "NC", "ND", "NM", "SP", "ME"};
 
-static char *ATOMNAME[NUM_ATOMNAMES] __attribute__((unused)) = {
+const static char *ATOMNAME[NUM_ATOMNAMES] __attribute__((unused)) = {
     "C",   "CA",  "CB",  "CD",  "CD1", "CD2", "CE",  "CE1", "CE2", "CE3", "CG",  "CG1",
     "CG2", "CH2", "CZ",  "CZ2", "CZ3", "N",   "ND1", "ND2", "NE",  "NE1", "NE2", "NZ",
     "O",   "OCT", "OD1", "OD2", "OE1", "OE2", "OG",  "OG1", "OH",  "OXT", "SD",  "SG"};

@@ -5,7 +5,7 @@
 
 void CenterProtein(struct atom **protein, int num_atoms) {
     int           i;
-    struct vector center_of_mass;
+    Vec3 center_of_mass;
 
     Zero(&center_of_mass);
     for (i = 0; i < num_atoms; i++)
@@ -92,7 +92,7 @@ void SSdRms(struct atom *protein1, struct atom *protein2, int num_atoms, Float *
 Float RadiusOfGyration(struct atom *protein, int num_atoms) {
     int           i, num_ca_atoms;
     Float         radius = 0;
-    struct vector center_of_mass;
+    Vec3          center_of_mass;
 
     Zero(&center_of_mass);
     num_ca_atoms = 0;
@@ -133,7 +133,7 @@ Float CalculateTorsion(struct atom *protein, int a, int b, int c, int d, Float o
     /*    torsion          -90          -130         130           90       0    */
 
     Float         dot, norm_c, sign, angle;
-    struct vector A1, B1, C1, U1, U2;
+    Vec3 A1, B1, C1, U1, U2;
 
     Zero(&A1);
     Zero(&B1);
@@ -179,7 +179,7 @@ Float CalculateTorsion(struct atom *protein, int a, int b, int c, int d, Float o
 }
 
 void AddCB(struct atom *protein, struct residue GLY, struct atom *CB) {
-    struct vector C1, N1, U1, U2;
+    Vec3 C1, N1, U1, U2;
 
     Zero(&C1);
     Zero(&N1);

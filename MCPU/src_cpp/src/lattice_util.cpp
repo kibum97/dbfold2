@@ -4,11 +4,8 @@ void CopyLatticeCoordinates(struct atom A, struct atom *B) {
     (*B).X         = A.X;
     (*B).Y         = A.Y;
     (*B).Z         = A.Z;
-    (*B).xyz_int.x = A.xyz_int.x;
-    (*B).xyz_int.y = A.xyz_int.y;
-    (*B).xyz_int.z = A.xyz_int.z;
+    (*B).xyz_int   = A.xyz_int;
     (*B).matrix    = A.matrix;
-
     return;
 }
 
@@ -19,13 +16,11 @@ void UpdateLattice(
 
     for (j = 0; j < rotate_natoms; j++) {
         temp_atom    = &ctx->native[rotate_atom[j]];
-        temp_atom->X = PerBound(integrator, (int)(floor(temp_atom->xyz.x * integrator->LATTICE_SIZE)) + integrator->HALF_MATRIX_SIZE);
-        temp_atom->Y = PerBound(integrator, (int)(floor(temp_atom->xyz.y * integrator->LATTICE_SIZE)) + integrator->HALF_MATRIX_SIZE);
-        temp_atom->Z = PerBound(integrator, (int)(floor(temp_atom->xyz.z * integrator->LATTICE_SIZE)) + integrator->HALF_MATRIX_SIZE);
+        temp_atom->X = PerBound(integrator, (int)(floor(temp_atom->xyz[0] * integrator->LATTICE_SIZE)) + integrator->HALF_MATRIX_SIZE);
+        temp_atom->Y = PerBound(integrator, (int)(floor(temp_atom->xyz[1] * integrator->LATTICE_SIZE)) + integrator->HALF_MATRIX_SIZE);
+        temp_atom->Z = PerBound(integrator, (int)(floor(temp_atom->xyz[2] * integrator->LATTICE_SIZE)) + integrator->HALF_MATRIX_SIZE);
         temp_atom->matrix    = &(ctx->the_matrix[temp_atom->X][temp_atom->Y][temp_atom->Z]);
-        temp_atom->xyz_int.x = (long int)(temp_atom->xyz.x * INT_PRECISION);
-        temp_atom->xyz_int.y = (long int)(temp_atom->xyz.y * INT_PRECISION);
-        temp_atom->xyz_int.z = (long int)(temp_atom->xyz.z * INT_PRECISION);
+        temp_atom->xyz_int = temp_atom->xyz.cast<int>();
     }
 
     return;
@@ -36,12 +31,10 @@ void UpdateLattice(
 void FindLatticeCoordinates(
     struct Context *ctx, struct MCIntegrator *integrator,
     struct atom *ATOM) {
-    (*ATOM).X         = PerBound(integrator, (int)(floor((*ATOM).xyz.x * integrator->LATTICE_SIZE)) + integrator->HALF_MATRIX_SIZE);
-    (*ATOM).Y         = PerBound(integrator, (int)(floor((*ATOM).xyz.y * integrator->LATTICE_SIZE)) + integrator->HALF_MATRIX_SIZE);
-    (*ATOM).Z         = PerBound(integrator, (int)(floor((*ATOM).xyz.z * integrator->LATTICE_SIZE)) + integrator->HALF_MATRIX_SIZE);
-    (*ATOM).xyz_int.x = (long int)((*ATOM).xyz.x * INT_PRECISION);
-    (*ATOM).xyz_int.y = (long int)((*ATOM).xyz.y * INT_PRECISION);
-    (*ATOM).xyz_int.z = (long int)((*ATOM).xyz.z * INT_PRECISION);
+    (*ATOM).X         = PerBound(integrator, (int)(floor((*ATOM).xyz[0] * integrator->LATTICE_SIZE)) + integrator->HALF_MATRIX_SIZE);
+    (*ATOM).Y         = PerBound(integrator, (int)(floor((*ATOM).xyz[1] * integrator->LATTICE_SIZE)) + integrator->HALF_MATRIX_SIZE);
+    (*ATOM).Z         = PerBound(integrator, (int)(floor((*ATOM).xyz[2] * integrator->LATTICE_SIZE)) + integrator->HALF_MATRIX_SIZE);
+    (*ATOM).xyz_int = (*ATOM).xyz.cast<int>();
     (*ATOM).matrix    = &(ctx->the_matrix[(*ATOM).X][(*ATOM).Y][(*ATOM).Z]);
 
     return;

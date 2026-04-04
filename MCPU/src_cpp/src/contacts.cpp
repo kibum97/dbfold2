@@ -47,12 +47,9 @@ void TypeContacts(struct Context *ctx, const struct System *sys, const struct To
 }
 
 void CheckForContacts(struct Context *ctx, const struct System *sys, short a, short b) {
-    double distance = (ctx->native[a].xyz_int.x - ctx->native[b].xyz_int.x) *
-                          (ctx->native[a].xyz_int.x - ctx->native[b].xyz_int.x) +
-                      (ctx->native[a].xyz_int.y - ctx->native[b].xyz_int.y) *
-                          (ctx->native[a].xyz_int.y - ctx->native[b].xyz_int.y) +
-                      (ctx->native[a].xyz_int.z - ctx->native[b].xyz_int.z) *
-                          (ctx->native[a].xyz_int.z - ctx->native[b].xyz_int.z);
+    Vec3i XX = ctx->native[a].xyz_int;
+    Vec3i YY = ctx->native[b].xyz_int;
+    double distance = (XX - YY).norm();
 
     if (ctx->data[a][b].check_clashes &&
         distance < sys->hard_core[ctx->native[a].smogtype][ctx->native[b].smogtype]) {
@@ -72,17 +69,11 @@ void CheckForContacts(struct Context *ctx, const struct System *sys, short a, sh
     return;
 }
 
-unsigned char CheckForDeltaContacts(struct contact_data *Data, struct int_vector XX,
-                                    struct int_vector YY, short type_a, short type_b,
+unsigned char CheckForDeltaContacts(struct contact_data *Data, Vec3i XX,
+                                    Vec3i YY, short type_a, short type_b,
                                     const struct System *sys, struct monte_carlo_flags mc_flags) {
-    long int X_int, Y_int, Z_int;
     double   distance;
-
-    X_int = XX.x - YY.x;
-    Y_int = XX.y - YY.y;
-    Z_int = XX.z - YY.z;
-
-    distance = X_int * X_int + Y_int * Y_int + Z_int * Z_int;
+    distance = (XX - YY).norm();
 
     if (Data->check_contacts && Data->check_clashes) {
         if (((distance <= sys->contact_distance[type_a][type_b].b) &&
@@ -118,10 +109,10 @@ unsigned char CheckForDeltaContacts(struct contact_data *Data, struct int_vector
 //========================================================================================================
 void check_bb_contacts(struct Context *ctx, short a, short b, const struct Topology *top,
                        const struct Simulation *sim) {
-    double        coo[3], oxy[3], cao[3];          // aceptor
-    double        nit[3], con[3], can[3], hyd[3];  // donor
+    Vec3 coo, oxy, cao; // acceptor
+    Vec3 nit, con, can, hyd;  // donor
     double        len_ho, ang_h, ang_o, dih_coo;
-    struct vector V3, H;
+    Vec3 V3, H;
     int           coo_at, oxy_at, cao_at;
     int           nit_at, con_at, can_at;
     int           passed = 1;
@@ -155,33 +146,20 @@ void check_bb_contacts(struct Context *ctx, short a, short b, const struct Topol
         exit(1);
     }
 
-    coo[0] = ctx->native[coo_at].xyz.x;
-    coo[1] = ctx->native[coo_at].xyz.y;
-    coo[2] = ctx->native[coo_at].xyz.z;
-    oxy[0] = ctx->native[oxy_at].xyz.x;
-    oxy[1] = ctx->native[oxy_at].xyz.y;
-    oxy[2] = ctx->native[oxy_at].xyz.z;
-    nit[0] = ctx->native[nit_at].xyz.x;
-    cao[0] = ctx->native[cao_at].xyz.x;
-    cao[1] = ctx->native[cao_at].xyz.y;
-    cao[2] = ctx->native[cao_at].xyz.z;
-    nit[1] = ctx->native[nit_at].xyz.y;
-    nit[2] = ctx->native[nit_at].xyz.z;
-    con[0] = ctx->native[con_at].xyz.x;
-    con[1] = ctx->native[con_at].xyz.y;
-    con[2] = ctx->native[con_at].xyz.z;
-    can[0] = ctx->native[can_at].xyz.x;
-    can[1] = ctx->native[can_at].xyz.y;
-    can[2] = ctx->native[can_at].xyz.z;
+    coo = ctx->native[coo_at].xyz;
+    oxy = ctx->native[oxy_at].xyz;
+    nit = ctx->native[nit_at].xyz;
+    cao = ctx->native[cao_at].xyz;
+    con = ctx->native[con_at].xyz;
+    can = ctx->native[can_at].xyz;
+
     MakeVector(ctx->native[nit_at].xyz, ctx->native[can_at].xyz, &H);
     MakeVector(ctx->native[nit_at].xyz, ctx->native[con_at].xyz, &V3);
     Add(V3, &H);
     Normalize(&H);
     Inverse(&H);
     Add(ctx->native[nit_at].xyz, &H);
-    hyd[0] = H.x;
-    hyd[1] = H.y;
-    hyd[2] = H.z;
+    hyd = H;
 
     c_bnd_len(hyd, oxy, &len_ho);
     c_bnd_ang(oxy, hyd, nit, &ang_h);
@@ -289,16 +267,10 @@ void fill_calpha_contact_string(const struct Topology *top, const struct residue
     double xi, yi, zi, xj, yj, zj, dist;
     for (i = 0; i < top->nresidues; i++) {
         atomi = residues[i].CA;
-        xi    = atoms[atomi].xyz.x;
-        yi    = atoms[atomi].xyz.y;
-        zi    = atoms[atomi].xyz.z;
         for (j = i + top->min_seq_sep; j < top->nresidues; j++) /* CONTACTS DEF*/
         {
             atomj = residues[j].CA;
-            xj    = atoms[atomj].xyz.x;
-            yj    = atoms[atomj].xyz.y;
-            zj    = atoms[atomj].xyz.z;
-            dist  = ((xi - xj) * (xi - xj) + (yi - yj) * (yi - yj) + (zi - zj) * (zi - zj));
+            dist  = (atoms[atomi].xyz - atoms[atomj].xyz).norm();
             if (dist < contact_calpha_cutoff * contact_calpha_cutoff) {
                 contactstring[i * top->nresidues + j] = contactstring[j * top->nresidues + i] = 1;
             } else {
@@ -315,16 +287,10 @@ double number_of_calpha_contacts(const struct Topology *top, const struct residu
     double number_of_contacts = 0.;
     for (i = 0; i < top->nresidues; i++) {
         atomi = residues[i].CA;
-        xi    = atoms[atomi].xyz.x;
-        yi    = atoms[atomi].xyz.y;
-        zi    = atoms[atomi].xyz.z;
         for (j = i + top->min_seq_sep; j < top->nresidues; j++) /* CONTACTS DEF*/
         {
             atomj = residues[j].CA;
-            xj    = atoms[atomj].xyz.x;
-            yj    = atoms[atomj].xyz.y;
-            zj    = atoms[atomj].xyz.z;
-            dist  = ((xi - xj) * (xi - xj) + (yi - yj) * (yi - yj) + (zi - zj) * (zi - zj));
+            dist  = (atoms[atomi].xyz - atoms[atomj].xyz).norm();
             if (dist < contact_calpha_cutoff * contact_calpha_cutoff) {
                 number_of_contacts += 1.;
             }
@@ -340,16 +306,10 @@ double number_of_calpha_native_contacts(const struct Topology *top, const struct
     double number_of_contacts = 0.;
     for (i = 0; i < top->nresidues; i++) {
         atomi = residues[i].CA;
-        xi    = atoms[atomi].xyz.x;
-        yi    = atoms[atomi].xyz.y;
-        zi    = atoms[atomi].xyz.z;
         for (j = i + top->min_seq_sep; j < top->nresidues; j++) /* CONTACTS DEF*/
         {
             atomj = residues[j].CA;
-            xj    = atoms[atomj].xyz.x;
-            yj    = atoms[atomj].xyz.y;
-            zj    = atoms[atomj].xyz.z;
-            dist  = ((xi - xj) * (xi - xj) + (yi - yj) * (yi - yj) + (zi - zj) * (zi - zj));
+            dist  = (atoms[atomi].xyz - atoms[atomj].xyz).norm();
             if (dist < contact_calpha_cutoff * contact_calpha_cutoff &&
                 contactstring[top->nresidues * i + j]) {
                 number_of_contacts += 1.;
@@ -367,16 +327,10 @@ double number_of_calpha_nonnative_contacts(const struct Topology *top,
     double number_of_contacts = 0.;
     for (i = 0; i < top->nresidues; i++) {
         atomi = residues[i].CA;
-        xi    = atoms[atomi].xyz.x;
-        yi    = atoms[atomi].xyz.y;
-        zi    = atoms[atomi].xyz.z;
         for (j = i + top->min_seq_sep; j < top->nresidues; j++) /* CONTACTS DEF*/
         {
             atomj = residues[j].CA;
-            xj    = atoms[atomj].xyz.x;
-            yj    = atoms[atomj].xyz.y;
-            zj    = atoms[atomj].xyz.z;
-            dist  = ((xi - xj) * (xi - xj) + (yi - yj) * (yi - yj) + (zi - zj) * (zi - zj));
+            dist  = (atoms[atomi].xyz - atoms[atomj].xyz).norm();
             if (dist < contact_calpha_cutoff * contact_calpha_cutoff &&
                 !contactstring[top->nresidues * i + j]) {
                 number_of_contacts += 1.;
@@ -394,16 +348,10 @@ double hamming_distance_calpha_contacts(const struct Topology *top, const struct
     double hamming_distance = 0.;
     for (i = 0; i < top->nresidues; i++) {
         atomi = residues[i].CA;
-        xi    = atoms[atomi].xyz.x;
-        yi    = atoms[atomi].xyz.y;
-        zi    = atoms[atomi].xyz.z;
         for (j = i + top->min_seq_sep; j < top->nresidues; j++) /* CONTACTS DEF*/
         {
             atomj     = residues[j].CA;
-            xj        = atoms[atomj].xyz.x;
-            yj        = atoms[atomj].xyz.y;
-            zj        = atoms[atomj].xyz.z;
-            dist      = ((xi - xj) * (xi - xj) + (yi - yj) * (yi - yj) + (zi - zj) * (zi - zj));
+            dist      = (atoms[atomi].xyz - atoms[atomj].xyz).norm();
             iscontact = dist < contact_calpha_cutoff * contact_calpha_cutoff;
             hamming_distance += iscontact ^ contactstring[top->nresidues * i + j];
         }

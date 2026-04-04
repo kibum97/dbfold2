@@ -9,96 +9,34 @@
 //!----------------------------------------------------------------------------
 //!----------------------------------------------------------------------------
 //!*************** Tripeptide Loop Closure Algorithm *****************
-//! files to be compiled with:
-//!    tripeptide_closure.f90
-//!    sturm.c
-//!
-//!*******************************************************************
-//! subroutine  initialize_loop_closure(b_len, b_ang, t_ang)
-//!*******************************************************************
-//! connectivity of atoms:
-//!   N1-A1-C1-N2-A2-C2-N3-A3-C3
-//! Same as in Dill paper
-//! input:
-//!
-//  * b_len(1:6): bond lengths (A1-C1, C1-N2, ..., N3-A3)
-//!  * b_ang(1:7): bond angles (N1-A1-C1, A1-C1-N2, ..., N3-A3-C3)
-//!  * t_ang(1:2): torsion angles (A1-C1-N2-A2, A2-C2-N3-A3)
-//!*******************************************************************
-//!
-//!*******************************************************************
-//! subroutine solv_3pep_poly(r_n1, r_a1, r_a3, r_c3, &
-//!     r_soln_n, r_soln_a, r_soln_c, n_soln)
-//!*******************************************************************
-//! input:
-//!  * r_n1(3), r_a1(3), r_a3(3), r_c3(3):
-//!       Cartesian coordinates of N and CA atoms of the first residue and
-//!        CA and C atoms of the last (third) residue.
-//! output:
-//!  * n_soln: number of alternative loop closure solutions.
-//!  * r_soln_n(3,3,8), r_soln_a(3,3,8), r_soln_c(3,3,8):
-//!       Cartesian coordinates of loop closure solutions.
-//!       first dimension: x, y, z component
-//!       second dim: residue number
-//!       third dim: solution number
-//!*******************************************************************
 //!----------------------------------------------------------------------------
 // MODULE tripep_closure
 //!----------------------------------------------------------------------------
-//  integer, parameter :: dp = kind(1.0d0)
-//  real(dp), parameter :: pi = 3.141592653589793238462643383279502884197d0
 #define pi 3.141592653589793238462643383279502884197e0
-//  real(dp), parameter :: two_pi=2.0d0*pi, deg2rad = pi/180.0d0, rad2deg = 180.0d0/pi
 #define two_pi 2.0e0 * pi
 #define deg2rad pi / 180.0e0
 #define rad2deg 180.0e0 / pi
 #define max(a, b) ((a) > (b)) ? (a) : (b)
 #define min(a, b) ((a) < (b)) ? (a) : (b)
-//  integer, parameter :: max_soln = 16
-// int max_soln = 16;
-//  integer, parameter :: deg_pol = 16
-// int deg_pol = 16;
-//  integer, parameter :: print_level = 0
 int print_level = 0;
-//  ! parameters for tripeptide loop (including bond lengths & angles)
-//  real(dp) :: len0(6), b_ang0(7), t_ang0(2)
 double len0[6], b_ang0[7], t_ang0[2];
-//  real(dp) :: aa13_min_sqr, aa13_max_sqr
 double aa13_min_sqr, aa13_max_sqr;
-//  real(dp) :: delta(0:3), xi(3), eta(3), alpha(3), theta(3)
 double delta[4], xi[3], eta[3], alpha[3], theta[3];
-//  real(dp) :: cos_alpha(3), sin_alpha(3), cos_theta(3), sin_theta(3)
 double cos_alpha[3], sin_alpha[3], cos_theta[3], sin_theta[3];
-//  real(dp) :: cos_delta(0:3), sin_delta(0:3)
 double cos_delta[4], sin_delta[4];
-//  real(dp) :: cos_xi(3), cos_eta(3), sin_xi(3), sin_eta(3)
 double cos_xi[3], cos_eta[3], sin_xi[3], sin_eta[3];
-//  real(dp) :: r_a1a3(3), r_a1n1(3), r_a3c3(3)
-double r_a1a3[3], r_a1n1[3], r_a3c3[3];
-//  real(dp) :: b_a1a3(3), b_a1n1(3), b_a3c3(3)
+Vec3 r_a1a3, r_a1n1, r_a3c3;
 double b_a1a3[3], b_a1n1[3], b_a3c3[3];
-//  real(dp) :: len_na(3), len_ac(3), len_aa(3)
 double len_na[3], len_ac[3], len_aa[3];
-//  ! used for polynomial coefficients
-//  real(dp) :: C0(0:2,3), C1(0:2,3), C2(0:2,3)
 double C0[3][3], C1[3][3], C2[3][3];
-//  real(dp) :: Q(0:16,0:4), R(0:16,0:2)
 double Q[5][17], R[3][17];
-// CONTAINS
 
-double dot_product(double va[3], double vb[3]) {
-    return va[0] * vb[0] + va[1] * vb[1] + va[2] * vb[2];
+Vec3::Scalar dot_product(const Vec3& va, const Vec3& vb) {
+    return va.dot(vb);
 }
 
-void matmul(double ma[3][3], double mb[3], double mc[3]) {
-    int i, j;
-
-    for (i = 0; i < 3; i++) {
-        mc[i] = 0.;
-        for (j = 0; j < 3; j++)
-            mc[i] += ma[i][j] * mb[j];
-    }
-    return;
+void matmul(const Mat3& ma, const Vec3& mb, Vec3& mc) {
+    mc = ma * mb;
 }
 
 double sign(double a, double b) {
@@ -107,17 +45,13 @@ double sign(double a, double b) {
     else
         return -fabs(a);
 }
+
 //!-----------------------------------------------------------------------
-// subroutine solv_3pep_poly(r_n1, r_a1, r_a3, r_c3, &
-//      r_soln_n, r_soln_a, r_soln_c, n_soln)
-void solve_3pep_poly(double r_n1[3], double r_a1[3], double r_a3[3], double r_c3[3],
-                     double r_soln_n[max_soln][3][3], double r_soln_a[max_soln][3][3],
-                     double r_soln_c[max_soln][3][3], int *n_soln) {
-    //  implicit none
-    //  real(dp), intent(in) :: r_n1(3), r_a1(3), r_a3(3), r_c3(3)
-    //  integer, intent(out) :: n_soln
-    //  real(dp), intent(out) :: r_soln_n(:,:,:), r_soln_a(:,:,:), r_soln_c(:,:,:)
-    //  real(dp) :: poly_coeff(0:deg_pol), roots(max_soln)
+void solve_3pep_poly(const Vec3& r_n1, const Vec3& r_a1, const Vec3& r_a3, const Vec3& r_c3,
+                     std::array<Eigen::Matrix3d, max_soln>& r_soln_n,
+                     std::array<Eigen::Matrix3d, max_soln>& r_soln_a,
+                     std::array<Eigen::Matrix3d, max_soln>& r_soln_c, int *n_soln) {
+
     double poly_coeff[deg_pol + 1], roots[max_soln];
     int    var_deg_pol;
 
@@ -160,19 +94,13 @@ void initialize_loop_closure(double b_len[6], double b_ang[7], double t_ang[2]) 
     //! atomic angles based on basic chemistry, orbitals etc
     //!-----------------------------------------------------------------------
     //  implicit none
-    //  real(dp), intent(in) :: b_len(6), b_ang(7), t_ang(2)
-    //  real(dp) :: len1, len2, a_min, a_max
     double len1, len2, a_min, a_max;
-    //  real(dp), dimension(3) :: axis, rr_a1, rr_c1, rr_n2, rr_a2, rr_n2a2_ref, rr_c1a1
-    double axis[3], rr_a1[3], rr_c1[3], rr_n2[3], rr_a2[3], rr_n2a2_ref[3], rr_c1a1[3];
-    //  real(dp), dimension(3) :: rr_a1a2, dr, bb_c1a1, bb_a1a2, bb_a2n2
-    double rr_a1a2[3], dr[3], bb_c1a1[3], bb_a1a2[3], bb_a2n2[3];
-    //  real(dp), dimension(3) :: r_a1, r_n1
-    //  double r_a1[3], r_n1[3];
-    //  real(dp) :: p(4), Us(3,3)
-    double p[4], Us[3][3];
-    double mulpro[3];
-    double tmp_val[3];
+    Vec3 rr_a1, rr_c1, rr_n2, rr_a2, rr_n2a2_ref, rr_c1a1;
+    Vec3 rr_a1a2, dr, bb_c1a1, bb_a1a2, bb_a2n2;
+    Eigen::Quaterniond p;
+    Eigen::Matrix3d Us;
+    Vec3 mulpro;
+    Vec3 tmp_val;
     //  real(dp), parameter :: tol_secant = 1.0d-15
     double tol_secant = 1.0e-15;
     //  integer, parameter :: max_iter_sturm = 100, max_iter_secant = 20
@@ -182,81 +110,52 @@ void initialize_loop_closure(double b_len[6], double b_ang[7], double t_ang[2]) 
     int i, j;
 
     //  call initialize_sturm(tol_secant, max_iter_sturm, max_iter_secant)
-    initialize_sturm(&tol_secant, &max_iter_sturm,
-                     &max_iter_secant);  // Not totally sure what this doe
+    initialize_sturm(&tol_secant, &max_iter_sturm, &max_iter_secant);
 
     //  len0(1:6) = b_len(1:6)
-    for (i = 0; i < 6; i++)
-        len0[i] = b_len[i];
-    //  b_ang0(1:7) = b_ang(1:7)
-    for (i = 0; i < 7; i++)
-        b_ang0[i] = b_ang[i];
-    //  t_ang0(1:2) = t_ang(1:2)
-    for (i = 0; i < 2; i++)
-        t_ang0[i] = t_ang[i];
+    std::copy(b_len, b_len + 6, len0);
+    std::copy(b_ang, b_ang + 7, b_ang0);
+    std::copy(t_ang, t_ang + 2, t_ang0);
 
     //  rr_c1(1:3) = 0.0d0
-    for (i = 0; i < 3; i++)
-        rr_c1[i] = 0.;
-    //  axis(1:3) = (/ 1.0d0, 0.0d0, 0.0d0 /)
-    axis[0] = 1.;
-    axis[1] = 0.;
-    axis[2] = 0.;
+    rr_c1.setZero();
+    Vec3 axis{1.0, 0.0, 0.0};
 
     //  do i = 0, 1
     for (i = 0; i < 2; i++)  // Loop through all atoms in triplet of residues
     {
-        //     rr_a1(1:3) = (/ cos(b_ang0(3*i+2))*len0(3*i+1), sin(b_ang0(3*i+2))*len0(3*i+1), 0.0d0
-        //     /)
-        // Get various vectors
-        rr_a1[0] = cos(b_ang0[3 * i + 1]) *
-                   len0[3 * i];  // Vector from previous nitrogen to current alpha carbon
-        rr_a1[1] = sin(b_ang0[3 * i + 1]) * len0[3 * i];
-        rr_a1[2] = 0.0e0;  // Set z value to 0
-        //     rr_n2(1:3) = (/ len0(3*i+2), 0.0d0, 0.0d0 /)
-        rr_n2[0] = len0[3 * i + 1];  // LEFT OFF HERE!
-        rr_n2[1] = 0.0e0;
-        rr_n2[2] = 0.0e0;
-        //     rr_c1a1(:) = rr_a1(:) - rr_c1(:)
-        for (j = 0; j < 3; j++)
-            rr_c1a1[j] = rr_a1[j] - rr_c1[j];
-        //     rr_n2a2_ref(1:3) = (/ -cos(b_ang0(3*i+3))*len0(3*i+3),
-        //     sin(b_ang0(3*i+3))*len0(3*i+3), 0.0d0 /)
-        rr_n2a2_ref[0] = -cos(b_ang0[3 * i + 2]) * len0[3 * i + 2];
-        rr_n2a2_ref[1] = sin(b_ang0[3 * i + 2]) * len0[3 * i + 2];
-        rr_n2a2_ref[2] = 0.0e0;
-        //     call quaternion(axis, t_ang0(i+1)*0.25d0, p)
+        double s1, c1, s2, c2;
+        sincos(b_ang0[3 * i + 1], &s1, &c1);
+        sincos(b_ang0[3 * i + 2], &s2, &c2);
+
+        double l0 = len0[3 * i];
+        double l1 = len0[3 * i + 1];
+        double l2 = len0[3 * i + 2];
+
+        rr_a1 = Vec3{c1 * l0, s1 * l0, 0.0};
+        rr_n2 = Vec3{l1, 0.0e0, 0.0e0};  // LEFT OFF HERE!
+        rr_c1a1 = rr_a1 - rr_c1;
+        rr_n2a2_ref = Vec3{-c2 * l2, s2 * l2, 0.0e0};
+        
+        
         quaternion(axis, t_ang0[i] * 0.25e0, p);
-        //     call rotation_matrix(p, Us)
         rotation_matrix(p, Us);
-        //     rr_a2(:) =  matmul(Us, rr_n2a2_ref) + rr_n2(:)
-        //     rr_a1a2(:) = rr_a2(:) - rr_a1(:)
-        //     dr(:) = rr_a1a2(:)
         matmul(Us, rr_n2a2_ref, mulpro);
-        for (j = 0; j < 3; j++) {
-            rr_a2[j]   = mulpro[j] + rr_n2[j];
-            rr_a1a2[j] = rr_a2[j] - rr_a1[j];
-            dr[j]      = rr_a1a2[j];
-        }
-        //     len2 = dot_product(dr, dr)
+        
+        rr_a2 = mulpro + rr_n2;
+        rr_a1a2 = rr_a2 - rr_a1;
+        dr = rr_a1a2;
+
         len2 = dot_product(dr, dr);
-        //     len1 = sqrt(len2)
         len1 = sqrt(len2);
-        //     ! len_aa
-        //     len_aa(i+2) = len1
         len_aa[i + 1] = len1;
-        //     bb_c1a1(:) = rr_c1a1(:)/len0(3*i+1)
-        //     bb_a1a2(:) = rr_a1a2(:)/len1
-        //     bb_a2n2(:) = (rr_n2(:) - rr_a2(:))/len0(3*i+3)
-        for (j = 0; j < 3; j++) {
-            bb_c1a1[j] = rr_c1a1[j] / len0[3 * i];
-            bb_a1a2[j] = rr_a1a2[j] / len1;
-            bb_a2n2[j] = (rr_n2[j] - rr_a2[j]) / len0[3 * i + 2];
-        }
-        //     ! xi
-        //     call calc_bnd_ang(-bb_a1a2, bb_a2n2, xi(i+2))
-        for (j = 0; j < 3; j++)
-            tmp_val[j] = -bb_a1a2[j];
+
+        bb_c1a1 = rr_c1a1 / l0;
+        bb_a1a2 = rr_a1a2 / len1;
+        bb_a2n2 = (rr_n2 - rr_a2) / l2;
+
+        tmp_val -= bb_a1a2;
+
         calc_bnd_ang(tmp_val, bb_a2n2, &xi[i + 1]);
         //     ! eta
         //     call calc_bnd_ang(bb_a1a2, -bb_c1a1, eta(i+1))
@@ -294,93 +193,50 @@ void initialize_loop_closure(double b_len[6], double b_ang[7], double t_ang[2]) 
 }
 //!-----------------------------------------------------------------------
 // subroutine get_input_angles(n_soln, r_n1, r_a1, r_a3, r_c3)
-void get_input_angles(int *n_soln, double r_n1[3], double r_a1[3], double r_a3[3], double r_c3[3]) {
+void get_input_angles(int *n_soln, const Vec3& r_n1, const Vec3& r_a1, const Vec3& r_a3, const Vec3& r_c3) {
     //!-----------------------------------------------------------------------
     //! Input angles and vectors (later used in coordinates)
     //!-----------------------------------------------------------------------
-    //  implicit none
-    //  real(dp), intent(in) :: r_n1(:), r_a1(:), r_a3(:), r_c3(:)
-    //  integer, intent(out) :: n_soln
-    //  real(dp) :: dr_sqr
-    double dr_sqr;
-    double tmp_val[3];
-    //  integer :: i
+    Vec3 tmp_val;
     int i;
-    //  character(len=2) :: cone_type
     char cone_type[2];
-    //!-----------------------------------------------------------------------
 
-    //  n_soln = max_soln
     *n_soln = max_soln;
 
-    //  ! vertual bond
-    //  r_a1a3(:) = r_a3(:) - r_a1(:)
-    for (i = 0; i < 3; i++)
-        r_a1a3[i] = r_a3[i] - r_a1[i];
-    //  dr_sqr = dot_product(r_a1a3,r_a1a3)
-    dr_sqr = dot_product(r_a1a3, r_a1a3);
-    //  len_aa(1) = sqrt(dr_sqr)
+    Vec3 r_a1a3 = r_a3 - r_a1;
+    double dr_sqr = r_a1a3.squaredNorm();
     len_aa[0] = sqrt(dr_sqr);
 
-    //  if (dr_sqr < aa13_min_sqr .or. dr_sqr > aa13_max_sqr) then
-    //     n_soln = 0
-    //!     print*, 'return 0'
-    //!     print*, sqrt(dr_sqr), sqrt(aa13_min_sqr), sqrt(aa13_max_sqr)
-    //     return
-    //  end if
     if ((dr_sqr < aa13_min_sqr) || (dr_sqr > aa13_max_sqr)) {
         *n_soln = 0;
         return;
     }
 
-    //  ! bond lengths
-    //  r_a1n1(:) = r_n1(:) - r_a1(:)
-    for (i = 0; i < 3; i++)
-        r_a1n1[i] = r_n1[i] - r_a1[i];
-    //  len_na(1) = sqrt(dot_product(r_a1n1,r_a1n1))
-    len_na[0] = sqrt(dot_product(r_a1n1, r_a1n1));
-    //  len_na(2) = len0(3)
+    Vec3 r_a1n1 = r_n1 - r_a1;
+    len_na[0] = r_a1n1.norm();
     len_na[1] = len0[2];
-    //  len_na(3) = len0(6)
     len_na[2] = len0[5];
-    //  r_a3c3(:) = r_c3(:) - r_a3(:)
-    for (i = 0; i < 3; i++)
-        r_a3c3[i] = r_c3[i] - r_a3[i];
-    //  len_ac(1) = len0(1)
+    Vec3 r_a3c3 = r_c3 - r_a3;
     len_ac[0] = len0[0];
-    //  len_ac(2) = len0(4)
     len_ac[1] = len0[3];
-    //  len_ac(3) = sqrt(dot_product(r_a3c3,r_a3c3))
-    len_ac[2] = sqrt(dot_product(r_a3c3, r_a3c3));
+    len_ac[2] = r_a3c3.norm();
 
     //  ! unit vectors
-    //  b_a1n1(:) = r_a1n1(:)/len_na(1)
-    //  b_a3c3(:) = r_a3c3(:)/len_ac(3)
-    //  b_a1a3(:) = r_a1a3(:)/len_aa(1)
-    for (i = 0; i < 3; i++) {
-        b_a1n1[i] = r_a1n1[i] / len_na[0];
-        b_a3c3[i] = r_a3c3[i] / len_ac[2];
-        b_a1a3[i] = r_a1a3[i] / len_aa[0];
-    }
+    Vec3 b_a1n1 = r_a1n1 / len_na[0];
+    Vec3 b_a3c3 = r_a3c3 / len_ac[2];
+    Vec3 b_a1a3 = r_a1a3 / len_aa[0];
 
-    //  ! delta(3): dih of N(1)CA(1)CA(3)C(3)
-    //  call calc_dih_ang(-b_a1n1, b_a1a3, b_a3c3, delta(3))
-    for (i = 0; i < 3; i++)
-        tmp_val[i] = -b_a1n1[i];
+
+    tmp_val = -b_a1n1;
     calc_dih_ang(tmp_val, b_a1a3, b_a3c3, &delta[3]);
-    //  delta(0) = delta(3)
     delta[0] = delta[3];
 
-    //  ! xi(1)
-    //  call calc_bnd_ang(-b_a1a3, b_a1n1, xi(1))
-    for (i = 0; i < 3; i++)
-        tmp_val[i] = -b_a1a3[i];
+    tmp_val = -b_a1a3;
     calc_bnd_ang(tmp_val, b_a1n1, &xi[0]);
 
-    //  ! eta(3)
-    //  call calc_bnd_ang(b_a1a3, b_a3c3, eta(3))
     calc_bnd_ang(b_a1a3, b_a3c3, &eta[2]);
 
+    // KP - STOPED HERE - NEED TO FINISH THIS FUNCTION
     //  do i = 1, 3
     for (i = 0; i < 3; i++) {
         //     cos_delta(i) = cos(delta(i))
@@ -1080,191 +936,106 @@ void poly_sub1(double u1[17], double u2[17], int p1, int p2, double u3[17], int 
 //!----------------------------------------------------------------------------
 // subroutine coord_from_poly_roots(n_soln, roots, r_n1, r_a1, r_a3, r_c3, r_soln_n, r_soln_a,
 // r_soln_c)
-void coord_from_poly_roots(int *n_soln, double roots[max_soln], double r_n1[3], double r_a1[3],
-                           double r_a3[3], double r_c3[3], double r_soln_n[max_soln][3][3],
-                           double r_soln_a[max_soln][3][3], double r_soln_c[max_soln][3][3]) {
-    //  implicit none
-    //  integer, intent(in) :: n_soln
-    //  real(dp), intent(in) :: r_n1(:), r_a1(:), r_a3(:), r_c3(:), roots(n_soln)
-    //  real(dp), intent(out) :: r_soln_n(:,:,:), r_soln_a(:,:,:), r_soln_c(:,:,:)
-    //  real(dp) :: ex(3), ey(3), ez(3), b_a1a2(3), b_a3a2(3), r_tmp(3)
-    double ex[3], ey[3], ez[3], b_a1a2[3], b_a3a2[3], r_tmp[3];
-    //  real(dp) :: p_s(3,3), s1(3,3), s2(3,3), p_t(3,3), t1(3,3), t2(3,3)
-    double p_s[3][3], s1[3][3], s2[3][3], p_t[3][3], t1[3][3], t2[3][3];
-    //  real(dp) :: p_s_c(3,3), s1_s(3,3), s2_s(3,3), p_t_c(3,3), t1_s(3,3), t2_s(3,3)
-    double p_s_c[3][3], s1_s[3][3], s2_s[3][3], p_t_c[3][3], t1_s[3][3], t2_s[3][3];
-    //  real(dp) :: angle, sig1_init, half_tan(3)
+void coord_from_poly_roots(int *n_soln, double roots[max_soln], const Vec3& r_n1, const Vec3& r_a1,
+                           const Vec3& r_a3, const Vec3& r_c3,
+                           std::array<Eigen::Matrix3d, max_soln>& r_soln_n,
+                           std::array<Eigen::Matrix3d, max_soln> &r_soln_a,
+                           std::array<Eigen::Matrix3d, max_soln>& r_soln_c) {
+    Vec3 ex, ey, ez, b_a1a2, b_a3a2, r_tmp;
+    std::array<Vec3, 3> p_s, s1, s2, p_t, t1, t2;
+    std::array<Vec3, 3> p_s_c, s1_s, s2_s, p_t_c, t1_s, t2_s;
     double angle, sig1_init, half_tan[3];
-    //  real(dp) :: cos_tau(0:3), sin_tau(0:3), cos_sig(3), sin_sig(3), ht, tmp, sig1
     double cos_tau[4], sin_tau[4], cos_sig[3], sin_sig[3], ht, tmp, sig1;
-    //  real(dp) :: r_s(3), r_t(3), r0(3), r_n(3,3), r_a(3,3), r_c(3,3), p(4), Us(3,3)
-    double r_s[3], r_t[3], r0[3], r_n[3][3], r_a[3][3], r_c[3][3], p[4], Us[3][3];
-    //  integer :: i_soln, i, j
+    Vec3 r_s, r_t, r0;
+    std::array<Vec3, 3> r_n, r_a, r_c;
+    Eigen::Quaterniond p;
+    Eigen::Matrix3d Us;
     int i_soln, i, j;
-    //  real(dp) :: a1c1, c1n2, n2a2, a2c2, c2n3, n3a3, a1a2, a2a3
     double a1c1, c1n2, n2a2, a2c2, c2n3, n3a3, a1a2, a2a3;
-    //  real(dp) :: rr_a1c1(3), rr_c1n2(3), rr_n2a2(3), rr_a2c2(3), rr_c2n3(3), rr_n3a3(3),
-    //  rr_a1a2(3), rr_a2a3(3)
-    double rr_a1c1[3], rr_c1n2[3], rr_n2a2[3], rr_a2c2[3], rr_c2n3[3], rr_n3a3[3], rr_a1a2[3],
-        rr_a2a3[3];
-    //  real(dp) :: a3a1a2, a2a3a1, n1a1c1, n2a2c2, n3a3c3, a1c1n2a2, a2c2n3a3
+    Vec3 rr_a1c1, rr_c1n2, rr_n2a2, rr_a2c2, rr_c2n3, rr_n3a3, rr_a1a2, rr_a2a3;
     double a3a1a2, a2a3a1, n1a1c1, n2a2c2, n3a3c3, a1c1n2a2, a2c2n3a3;
-    double tmp_value, ex_tmp[3];
-    double tmp_array[3], tmp_array1[3], tmp_array2[3], tmp_array3[3];
-    double mat1[3], mat2[3], mat3[3], mat4[3], mat5[3];
-    double mat11[3], mat22[3], mat33[3], mat44[3], mat55[3];
+    double tmp_value;
+    Vec3 ex_tmp;
+    Vec3 tmp_array, tmp_array1, tmp_array2, tmp_array3;
+    Vec3 mat1, mat2, mat3, mat4, mat5;
+    Vec3 mat11, mat22, mat33, mat44, mat55;
 
-    //  if (n_soln == 0) return
     if (*n_soln == 0)
         return;
-
-    //  ! Define body frame (ex, ey, ez)
-    //  ex(:) = b_a1a3(:)
     for (i = 0; i < 3; i++)
         ex[i] = b_a1a3[i];
-    //  call cross(r_a1n1, ex, ez)
     cross(r_a1n1, ex, ez);
-    //  ez(:) = ez(:)/sqrt(dot_product(ez,ez))
     tmp_value = sqrt(dot_product(ez, ez));
     for (i = 0; i < 3; i++)
         ez[i] = ez[i] / tmp_value;
-    //  call cross(ez, ex, ey)
     cross(ez, ex, ey);
     //  ! vertual bond vectors in the reference plane
-    //  b_a1a2(:) = -cos_alpha(1)*ex(:) + sin_alpha(1)*ey(:)
-    //  b_a3a2(:) = cos_alpha(3)*ex(:) + sin_alpha(3)*ey(:)
     for (i = 0; i < 3; i++) {
         b_a1a2[i] = -cos_alpha[0] * ex[i] + sin_alpha[0] * ey[i];
         b_a3a2[i] = cos_alpha[2] * ex[i] + sin_alpha[2] * ey[i];
     }
     //  !! Define cone coordinates for each angle joint.
     //  ! (p_s,s1,s2) and (p_t,t1,t2):  Right Orthonormal systems
-    //  ! residue 1
-    //  p_s(:,1) = -ex(:)
-    //  s1(:,1)  = ez(:)  ! (p_s)X(p_t)/||(p_s)X(p_t)||
-    //  s2(:,1)  = ey(:)  ! p_s X s1
-    //  p_t(:,1) = b_a1a2(:)
-    //  t1(:,1)  = ez(:)  ! s1
-    //  t2(:,1)  = sin_alpha(1)*ex(:) + cos_alpha(1)*ey(:) ! p_t X t1
-    for (i = 0; i < 3; i++) {
-        p_s[0][i] = -ex[i];
-        s1[0][i]  = ez[i];
-        s2[0][i]  = ey[i];
-        p_t[0][i] = b_a1a2[i];
-        t1[0][i]  = ez[i];
-        t2[0][i]  = sin_alpha[0] * ex[i] + cos_alpha[0] * ey[i];
-    }
+    p_s[0] -= ex;
+    s1[0] = ez;
+    s2[0] = ey;
+    p_t[0] = b_a1a2;
+    t1[0]  = ez;
+    t2[0]  = sin_alpha[0] * ex + cos_alpha[0] * ey;
+
     //  ! residue 2
-    //  p_s(:,2) = -b_a1a2(:)
-    //  s1(:,2)  = -ez(:)
-    //  s2(:,2)  = t2(:,1)  ! sina1*ex(:) + cosa1*ey(:)
-    //  p_t(:,2) = -b_a3a2(:)
-    //  t1(:,2)  = -ez(:)
-    //  t2(:,2)  = sin_alpha(3)*ex(:) - cos_alpha(3)*ey(:)
-    for (i = 0; i < 3; i++) {
-        p_s[1][i] = -b_a1a2[i];
-        s1[1][i]  = -ez[i];
-        s2[1][i]  = t2[0][i];
-        p_t[1][i] = -b_a3a2[i];
-        t1[1][i]  = -ez[i];
-        t2[1][i]  = sin_alpha[2] * ex[i] - cos_alpha[2] * ey[i];
-    }
+    p_s[1] = -b_a1a2;
+    s1[1]  = -ez;
+    s2[1]  = t2[0];
+    p_t[1] = -b_a3a2;
+    t1[1]  = -ez;
+    t2[1]  = sin_alpha[2] * ex - cos_alpha[2] * ey;
+
     //  ! residue 3
-    //  p_s(:,3) = b_a3a2(:)
-    //  s2(:,3)  = t2(:,2)   ! sina3*ex(:) + cosa3*ey(:)
-    //  s1(:,3)  = ez(:)
-    //  p_t(:,3) = ex(:)
-    //  t1(:,3) =  ez(:)
-    //  t2(:,3) = -ey(:)
-    for (i = 0; i < 3; i++) {
-        p_s[2][i] = b_a3a2[i];
-        s2[2][i]  = t2[1][i];
-        s1[2][i]  = ez[i];
-        p_t[2][i] = ex[i];
-        t1[2][i]  = ez[i];
-        t2[2][i]  = -ey[i];
-    }
+    p_s[2] = b_a3a2;
+    s1[2]  = ez;
+    s2[2]  = t2[1];
+    p_t[2] = ex;
+    t1[2]  = ez;
+    t2[2]  = -ey;
+
     //  ! scale vectors
-    //  do i = 1, 3
-    //     p_s_c(:,i) = p_s(:,i)*cos_xi(i)
-    //     s1_s(:,i)  =  s1(:,i)*sin_xi(i)
-    //     s2_s(:,i)  =  s2(:,i)*sin_xi(i)
-    //     p_t_c(:,i) = p_t(:,i)*cos_eta(i)
-    //     t1_s(:,i)  =  t1(:,i)*sin_eta(i)
-    //     t2_s(:,i)  =  t2(:,i)*sin_eta(i)
-    //  end do
-    for (i = 0; i < 3; i++)
-        for (j = 0; j < 3; j++) {
-            p_s_c[i][j] = p_s[i][j] * cos_xi[i];
-            s1_s[i][j]  = s1[i][j] * sin_xi[i];
-            s2_s[i][j]  = s2[i][j] * sin_xi[i];
-            p_t_c[i][j] = p_t[i][j] * cos_eta[i];
-            t1_s[i][j]  = t1[i][j] * sin_eta[i];
-            t2_s[i][j]  = t2[i][j] * sin_eta[i];
-        }
+    for (i = 0; i < 3; i++) {
+        p_s_c[i] = p_s[i] * cos_xi[i];
+        s1_s[i]  = s1[i] * sin_xi[i];
+        s2_s[i]  = s2[i] * sin_xi[i];
+        p_t_c[i] = p_t[i] * cos_eta[i];
+        t1_s[i]  = t1[i] * sin_eta[i];
+        t2_s[i]  = t2[i] * sin_eta[i];
+    }
 
     //  ! initial sig(1)
-    //  r_tmp(:) = (r_a1n1(:)/len_na(1) - p_s_c(:,1))/sin_xi(1)
-    for (i = 0; i < 3; i++)
-        r_tmp[i] = (r_a1n1[i] / len_na[0] - p_s_c[0][i]) / sin_xi[0];
-    //  call calc_bnd_ang(s1(:,1), r_tmp, angle)
+    r_tmp = (r_a1n1 / len_na[0] - p_s_c[0]) / sin_xi[0];
     calc_bnd_ang(s1[0], r_tmp, &angle);
-    //  sig1_init = sign(angle, dot_product(r_tmp(:),s2(:,1)))
     sig1_init = sign(angle, dot_product(r_tmp, s2[0]));
 
     //  ! CA
-    //  r_a(:,1) = r_a1(:)
-    //  r_a(:,2) = r_a1(:) + len_aa(2)*b_a1a2(:)
-    //  r_a(:,3) = r_a3(:)
-    //  r0(:) = r_a1(:)
-    for (i = 0; i < 3; i++) {
-        r_a[0][i] = r_a1[i];
-        r_a[1][i] = r_a1[i] + len_aa[1] * b_a1a2[i];
-        r_a[2][i] = r_a3[i];
-        r0[i]     = r_a1[i];
-    }
+    r_a[0] = r_a1;
+    r_a[1] = r_a1 + len_aa[1] * b_a1a2;
+    r_a[2] = r_a3;
+    r0 = r_a1;
 
-    //  do i_soln = 1, n_soln
     for (i_soln = 0; i_soln < *n_soln; i_soln++) {
-        //     half_tan(3) = roots(i_soln)
         half_tan[2] = roots[i_soln];
-        //     half_tan(2) = calc_t2(half_tan(3))
         half_tan[1] = calc_t2(half_tan[2]);
-        //     half_tan(1) = calc_t1(half_tan(3), half_tan(2))
         half_tan[0] = calc_t1(half_tan[2], half_tan[1]);
-        //     do i = 1, 3
-        //        ht = half_tan(i)
-        //        tmp = 1.0d0 + ht*ht
-        //        cos_tau(i) = (1.0d0 - ht*ht)/tmp
-        //        sin_tau(i) = 2.0d0*ht/tmp
-        //     end do
         for (i = 1; i <= 3; i++) {
             ht         = half_tan[i - 1];
             tmp        = 1.0e0 + ht * ht;
             cos_tau[i] = (1.0e0 - ht * ht) / tmp;
             sin_tau[i] = 2.0e0 * ht / tmp;
         }
-        //     cos_tau(0) = cos_tau(3)
         cos_tau[0] = cos_tau[3];
-        //     sin_tau(0) = sin_tau(3)
         sin_tau[0] = sin_tau[3];
-        //     fprintf(STATUS,"cos: %7.3f%7.3f%7.3f%7.3f\n", cos_tau[0], cos_tau[1], cos_tau[2],
-        //     cos_tau[3]); fprintf(STATUS,"sin: %7.3f%7.3f%7.3f%7.3f\n", sin_tau[0], sin_tau[1],
-        //     sin_tau[2], sin_tau[3]); do i = 1, 3
-        //        j = i - 1
-        //        cos_sig(i) = cos_delta(j)*cos_tau(j) + sin_delta(j)*sin_tau(j)
-        //        sin_sig(i) = sin_delta(j)*cos_tau(j) - cos_delta(j)*sin_tau(j)
-        //     end do
         for (i = 0; i < 3; i++) {
             cos_sig[i] = cos_delta[i] * cos_tau[i] + sin_delta[i] * sin_tau[i];
             sin_sig[i] = sin_delta[i] * cos_tau[i] - cos_delta[i] * sin_tau[i];
         }
-        //     do i = 1, 3
-        //        r_s(:) = p_s_c(:,i) + cos_sig(i)*s1_s(:,i) + sin_sig(i)*s2_s(:,i)
-        //        r_t(:) = p_t_c(:,i) + cos_tau(i)*t1_s(:,i) + sin_tau(i)*t2_s(:,i)
-        //        r_n(:,i) = r_s(:)*len_na(i) + r_a(:,i)
-        //        r_c(:,i) = r_t(:)*len_ac(i) + r_a(:,i)
-        //     end do
         for (i = 0; i < 3; i++)
             for (j = 0; j < 3; j++) {
                 r_s[j]    = p_s_c[i][j] + cos_sig[i] * s1_s[i][j] + sin_sig[i] * s2_s[i][j];
@@ -1274,160 +1045,31 @@ void coord_from_poly_roots(int *n_soln, double roots[max_soln], double r_n1[3], 
             }
 
         //     ! rotate back atoms by -(sig(1) - sig1_init) around -ex
-        //     sig1 = atan2(sin_sig(1), cos_sig(1))
         sig1 = atan2(sin_sig[0], cos_sig[0]);
-        //     call quaternion(-ex, -(sig1 - sig1_init)*0.25d0, p)
-        ex_tmp[0] = -ex[0];
-        ex_tmp[1] = -ex[1];
-        ex_tmp[2] = -ex[2];
+        ex_tmp -= ex;
         tmp_value = -(sig1 - sig1_init) * 0.25;
         quaternion(ex_tmp, tmp_value, p);
-        //     call rotation_matrix(p, Us)
         rotation_matrix(p, Us);
-
-        //     r_soln_n(:,1,i_soln) = r_n1(:)
-        //     r_soln_a(:,1,i_soln) = r_a1(:)
-        //     r_soln_c(:,1,i_soln) = matmul(Us, r_c(:,1) - r0(:)) + r0(:)
-        //     r_soln_n(:,2,i_soln) = matmul(Us, r_n(:,2) - r0(:)) + r0(:)
-        //     r_soln_a(:,2,i_soln) = matmul(Us, r_a(:,2) - r0(:)) + r0(:)
-        //     r_soln_c(:,2,i_soln) = matmul(Us, r_c(:,2) - r0(:)) + r0(:)
-        //     r_soln_n(:,3,i_soln) = matmul(Us, r_n(:,3) - r0(:)) + r0(:)
-        //     r_soln_a(:,3,i_soln) = r_a3(:)
-        //     r_soln_c(:,3,i_soln) = r_c3(:)
-        for (i = 0; i < 3; i++) {
-            mat11[i] = r_c[0][i] - r0[i];
-            mat22[i] = r_n[1][i] - r0[i];
-            mat33[i] = r_a[1][i] - r0[i];
-            mat44[i] = r_c[1][i] - r0[i];
-            mat55[i] = r_n[2][i] - r0[i];
-        }
+        mat11 = r_c[0] - r0;
+        mat22 = r_n[1] - r0;
+        mat33 = r_a[1] - r0;
+        mat44 = r_c[1] - r0;
+        mat55 = r_n[2] - r0;
         matmul(Us, mat11, mat1);
         matmul(Us, mat22, mat2);
         matmul(Us, mat33, mat3);
         matmul(Us, mat44, mat4);
         matmul(Us, mat55, mat5);
-        for (i = 0; i < 3; i++) {
-            r_soln_n[i_soln][0][i] = r_n1[i];
-            r_soln_a[i_soln][0][i] = r_a1[i];
-            r_soln_c[i_soln][0][i] = mat1[i] + r0[i];
-            r_soln_n[i_soln][1][i] = mat2[i] + r0[i];
-            r_soln_a[i_soln][1][i] = mat3[i] + r0[i];
-            r_soln_c[i_soln][1][i] = mat4[i] + r0[i];
-            r_soln_n[i_soln][2][i] = mat5[i] + r0[i];
-            r_soln_a[i_soln][2][i] = r_a3[i];
-            r_soln_c[i_soln][2][i] = r_c3[i];
-        }
 
-        //     if (print_level > 0) then
-        if (print_level > 0) {
-            //        print*, 'roots: t0, t2, t1', i_soln
-            //fprintf(STATUS, "roots: t0, t2, t1 %d\n", i_soln);
-            //        write(*,"(3f15.6)") half_tan(3), half_tan(2), half_tan(1)
-            //fprintf(STATUS, "%15.6f %15.6f %15.6f\n", half_tan[2], half_tan[1], half_tan[0]);
-
-            //        rr_a1c1(:) = r_soln_c(:,1,i_soln) - r_soln_a(:,1,i_soln)
-            //        rr_c1n2(:) = r_soln_n(:,2,i_soln) - r_soln_c(:,1,i_soln)
-            //        rr_n2a2(:) = r_soln_a(:,2,i_soln) - r_soln_n(:,2,i_soln)
-            //        rr_a2c2(:) = r_soln_c(:,2,i_soln) - r_soln_a(:,2,i_soln)
-            //        rr_c2n3(:) = r_soln_n(:,3,i_soln) - r_soln_c(:,2,i_soln)
-            //        rr_n3a3(:) = r_soln_a(:,3,i_soln) - r_soln_n(:,3,i_soln)
-            //        rr_a1a2(:) = r_soln_a(:,2,i_soln) - r_soln_a(:,1,i_soln)
-            //        rr_a2a3(:) = r_soln_a(:,3,i_soln) - r_soln_a(:,2,i_soln)
-            for (i = 0; i < 3; i++) {
-                rr_a1c1[i] = r_soln_c[i_soln][0][i] - r_soln_a[i_soln][0][i];
-                rr_c1n2[i] = r_soln_n[i_soln][1][i] - r_soln_c[i_soln][0][i];
-                rr_n2a2[i] = r_soln_a[i_soln][1][i] - r_soln_n[i_soln][1][i];
-                rr_a2c2[i] = r_soln_c[i_soln][1][i] - r_soln_a[i_soln][1][i];
-                rr_c2n3[i] = r_soln_n[i_soln][2][i] - r_soln_c[i_soln][1][i];
-                rr_n3a3[i] = r_soln_a[i_soln][2][i] - r_soln_n[i_soln][2][i];
-                rr_a1a2[i] = r_soln_a[i_soln][1][i] - r_soln_a[i_soln][0][i];
-                rr_a2a3[i] = r_soln_a[i_soln][2][i] - r_soln_a[i_soln][1][i];
-            }
-
-            //        a1c1 = sqrt(dot_product(rr_a1c1, rr_a1c1))
-            //        c1n2 = sqrt(dot_product(rr_c1n2, rr_c1n2))
-            //        n2a2 = sqrt(dot_product(rr_n2a2, rr_n2a2))
-            //        a2c2 = sqrt(dot_product(rr_a2c2, rr_a2c2))
-            //        c2n3 = sqrt(dot_product(rr_c2n3, rr_c2n3))
-            //        n3a3 = sqrt(dot_product(rr_n3a3, rr_n3a3))
-            //       a1a2 = sqrt(dot_product(rr_a1a2, rr_a1a2))
-            //        a2a3 = sqrt(dot_product(rr_a2a3, rr_a2a3))
-            a1c1 = sqrt(dot_product(rr_a1c1, rr_a1c1));
-            c1n2 = sqrt(dot_product(rr_c1n2, rr_c1n2));
-            n2a2 = sqrt(dot_product(rr_n2a2, rr_n2a2));
-            a2c2 = sqrt(dot_product(rr_a2c2, rr_a2c2));
-            c2n3 = sqrt(dot_product(rr_c2n3, rr_c2n3));
-            n3a3 = sqrt(dot_product(rr_n3a3, rr_n3a3));
-            a1a2 = sqrt(dot_product(rr_a1a2, rr_a1a2));
-            a2a3 = sqrt(dot_product(rr_a2a3, rr_a2a3));
-
-            //        write(*,"('na: n2a2, n3a3 = ', 4f9.3)") len0(3), n2a2, len0(6), n3a3
-            //fprintf(STATUS, "na: n2a2, n3a3 = %9.3f%9.3f%9.3f%9.3f\n", len0[2], n2a2, len0[5],
-            //        n3a3);
-            //        write(*,"('ac: a1c1, a2c2 = ', 4f9.3)") len0(1), a1c1, len0(4), a2c2
-            //fprintf(STATUS, "ac: a1c1, a2c2 = %9.3f%9.3f%9.3f%9.3f\n", len0[0], a1c1, len0[3],
-            //        a2c2);
-            //        write(*,"('cn: c1n2, c2n3 = ', 4f9.3)") len0(2), c1n2, len0(5), c2n3
-            //fprintf(STATUS, "cn: c1n2, c2n3 = %9.3f%9.3f%9.3f%9.3f\n", len0[1], c1n2, len0[4],
-            //        c2n3);
-            //        write(*,"('aa: a1a2, a2a3 = ', 4f9.3)") len_aa(2), a1a2, len_aa(3), a2a3
-            //fprintf(STATUS, "aa: a1a2, a2a3 = %9.3f%9.3f%9.3f%9.3f\n", len_aa[1], a1a2, len_aa[2],
-            //        a2a3);
-
-            //        call calc_bnd_ang(b_a1a3, rr_a1a2/a1a2, a3a1a2)
-            for (i = 0; i < 3; i++)
-                tmp_array[i] = rr_a1a2[i] / a1a2;
-            calc_bnd_ang(b_a1a3, tmp_array, &a3a1a2);
-            //        call calc_bnd_ang(rr_a2a3/a2a3, b_a1a3, a2a3a1)
-            for (i = 0; i < 3; i++)
-                tmp_array[i] = rr_a2a3[i] / a2a3;
-            calc_bnd_ang(tmp_array, b_a1a3, &a2a3a1);
-            //        write(*,"('alpha1, alpha3 = ', 2f9.3)") (pi-a3a1a2)*rad2deg,
-            //        (pi-a2a3a1)*rad2deg
-            //fprintf(STATUS, "alpha1, alpha3 = %9.3f%9.3f\n", (pi - a3a1a2) * rad2deg,
-            //        (pi - a2a3a1) * rad2deg);
-            //        call calc_bnd_ang(b_a1n1, rr_a1c1/a1c1, n1a1c1)
-            for (i = 0; i < 3; i++)
-                tmp_array[i] = rr_a1c1[i] / a1c1;
-            calc_bnd_ang(b_a1n1, tmp_array, &n1a1c1);
-            //        call calc_bnd_ang(b_a3c3, -rr_n3a3/n3a3, n3a3c3)
-            for (i = 0; i < 3; i++)
-                tmp_array[i] = -rr_n3a3[i] / n3a3;
-            calc_bnd_ang(b_a3c3, tmp_array, &n3a3c3);
-            //        call calc_bnd_ang(rr_a2c2/a2c2, -rr_n2a2/n2a2, n2a2c2)
-            for (i = 0; i < 3; i++) {
-                tmp_array1[i] = rr_a2c2[i] / a2c2;
-                tmp_array2[i] = -rr_n2a2[i] / n2a2;
-            }
-            calc_bnd_ang(tmp_array1, tmp_array2, &n2a2c2);
-            //        write(*,"('ang_nac = ', 2f9.3)") b_ang0(1)*rad2deg, n1a1c1*rad2deg
-            //fprintf(STATUS, "ang_nac = %9.3f%9.3f\n", b_ang0[0] * rad2deg, n1a1c1 * rad2deg);
-            //        write(*,"('ang_nac = ', 2f9.3)") b_ang0(4)*rad2deg, n2a2c2*rad2deg
-            //fprintf(STATUS, "ang_nac = %9.3f%9.3f\n", b_ang0[3] * rad2deg, n2a2c2 * rad2deg);
-            //        write(*,"('ang_nac = ', 2f9.3)") b_ang0(7)*rad2deg, n3a3c3*rad2deg
-            //fprintf(STATUS, "ang_nac = %9.3f%9.3f\n", b_ang0[6] * rad2deg, n3a3c3 * rad2deg);
-
-            //        call calc_dih_ang(rr_a1c1/a1c1, rr_c1n2/c1n2, rr_n2a2/n2a2, a1c1n2a2)
-            for (i = 0; i < 3; i++) {
-                tmp_array1[i] = rr_a1c1[i] / a1c1;
-                tmp_array2[i] = rr_c1n2[i] / c1n2;
-                tmp_array3[i] = rr_n2a2[i] / n2a2;
-            }
-            calc_dih_ang(tmp_array1, tmp_array2, tmp_array3, &a1c1n2a2);
-            //        call calc_dih_ang(rr_a2c2/a2c2, rr_c2n3/c2n3, rr_n3a3/n3a3, a2c2n3a3)
-            for (i = 0; i < 3; i++) {
-                tmp_array1[i] = rr_a2c2[i] / a2c2;
-                tmp_array2[i] = rr_c2n3[i] / c2n3;
-                tmp_array3[i] = rr_n3a3[i] / n3a3;
-            }
-            calc_dih_ang(tmp_array1, tmp_array2, tmp_array3, &a2c2n3a3);
-            //        write(*,"('t_ang1 = ', 2f9.3)") t_ang0(1)*rad2deg, a1c1n2a2*rad2deg
-            //fprintf(STATUS, "t_ang1 = %9.3f%9.3f\n", t_ang0[0] * rad2deg, a1c1n2a2 * rad2deg);
-            //        write(*,"('t_ang2 = ', 2f9.3)") t_ang0(2)*rad2deg, a2c2n3a3*rad2deg
-            //fprintf(STATUS, "t_ang2 = %9.3f%9.3f\n", t_ang0[1] * rad2deg, a2c2n3a3 * rad2deg);
-            //     end if
-        }
-
+        r_soln_n[i_soln].col(0) = r_n1;
+        r_soln_a[i_soln].col(0) = r_a1;
+        r_soln_c[i_soln].col(0) = mat1 + r0;
+        r_soln_n[i_soln].col(1) = mat2 + r0;
+        r_soln_a[i_soln].col(1) = mat3 + r0;
+        r_soln_c[i_soln].col(1) = mat4 + r0;
+        r_soln_n[i_soln].col(2) = mat5 + r0;
+        r_soln_a[i_soln].col(2) = r_a3;
+        r_soln_c[i_soln].col(2) = r_c3;
         //  end do
     }
 
@@ -1527,284 +1169,115 @@ double calc_t1(double t0, double t2) {
     return tmp_value;
     // end function calc_t1
 }
-//!-----------------------------------------------------------------------
-// subroutine calc_dih_ang(r1, r2, r3, angle)
-void calc_dih_ang(double r1[3], double r2[3], double r3[3], double *angle) {
-    //!-----------------------------------------------------------------------
-    //! r1=Rab, r2=Rbc, r3=Rcd : angle between planes abc and bcd
-    //!-----------------------------------------------------------------------
-    //  implicit none
-    //  real(dp), intent(in) :: r1(3), r2(3), r3(3)
-    //  real(dp), intent(out) :: angle
-    //  real(dp), dimension(3) :: p, q, s
-    double p[3], q[3], s[3];
-    //  real(dp) :: arg
-    double arg;
 
-    //  call cross(r1, r2, p)
-    cross(r1, r2, p);
-    //  call cross(r2, r3, q)
-    cross(r2, r3, q);
-    //  call cross(r3, r1, s)
-    cross(r3, r1, s);
-    //  arg = dot_product(p,q)/sqrt(dot_product(p,p)*dot_product(q,q))
-    arg = dot_product(p, q) / sqrt(dot_product(p, p) * dot_product(q, q));
-    //  arg = sign(min(abs(arg),1.0d0),arg) ! to be sure abs(arg)<=1
-    arg = sign(min(fabs(arg), 1.0e0), arg);
-    //  angle = sign(acos(arg), dot_product(s,r2))
-    *angle = sign(acos(arg), dot_product(s, r2));
+void calc_dih_ang(const Vec3& r1, const Vec3& r2, const Vec3& r3, double *angle) {
+    // Compute plane normals
+    Vec3 p, q;
+    CrossProduct(r1, r2, &p); // Normal to plane abc
+    CrossProduct(r2, r3, &q); // Normal to plane bcd
 
-    return;
-    // end subroutine calc_dih_ang
+    // Calculate the cosine of the angle (dot product of normals)
+    double cos_phi = Dot(p, q) / sqrt(Dot(p, p) * Dot(q, q));
+    
+    // To get the sign and use atan2
+    Vec3 s;
+    CrossProduct(p, r2, &s);
+    double sin_phi = Dot(s, q) / (sqrt(Dot(s, s) * Dot(q, q)));
+
+    // atan2 is stable and handles the quadrants automatically
+    *angle = atan2(sin_phi, cos_phi);
 }
-//!-----------------------------------------------------------------------
-float struct_calc_dih_ang(struct vector r1, struct vector r2, struct vector r3) {
-    struct vector p, q, s;
-    float         arg, angle;
 
-    CrossProduct(r1, r2, &p);
-    CrossProduct(r2, r3, &q);
-    CrossProduct(r3, r1, &s);
-    arg   = Dot(p, q) / sqrt(Dot(p, p) * Dot(q, q));
-    arg   = sign(min(fabs(arg), 1.0e0), arg);
-    angle = sign(acos(arg), Dot(s, r2));
+double struct_calc_dih_ang(const Vec3& r1, const Vec3& r2, const Vec3& r3) {
+    // NOTE: This is duplicate of calc_dih_ang but returns a float for use in the struct version of the code.
+    // Compute plane normals
+    Vec3 p, q;
+    CrossProduct(r1, r2, &p); // Normal to plane abc
+    CrossProduct(r2, r3, &q); // Normal to plane bcd
 
-    return angle;
+    // Calculate the cosine of the angle (dot product of normals)
+    double cos_phi = Dot(p, q) / sqrt(Dot(p, p) * Dot(q, q));
+    
+    // To get the sign and use atan2
+    Vec3 s;
+    CrossProduct(p, r2, &s);
+    double sin_phi = Dot(s, q) / (sqrt(Dot(s, s) * Dot(q, q)));
+
+    return atan2(sin_phi, cos_phi);
 }
 //!-----------------------------------------------------------------------
 // subroutine calc_bnd_ang(r1, r2, angle)
-void calc_bnd_ang(double r1[3], double r2[3], double *angle) {
-    //!-----------------------------------------------------------------------
-    //! assume that each vector is normalized
-    //! r1=Rba, r2=Rbc: angle between r1 and r2
-    //!-----------------------------------------------------------------------
-    //  implicit none
-    //  real(dp), intent(in) :: r1(3), r2(3)
-    //  real(dp), intent(out) :: angle
-    //  real(dp) :: arg
-    double arg;
-
-    //  arg = dot_product(r1, r2)
-    arg = dot_product(r1, r2);
-    //  arg = sign(min(abs(arg),1.0d0),arg) ! to be sure abs(arg)<=1
-    arg = sign(min(fabs(arg), 1.0e0), arg);
-    //  angle = acos(arg)
-    *angle = acos(arg);
-
-    return;
-    // end subroutine calc_bnd_ang
-}
-
-void c_bnd_len(double r1[3], double r2[3], double *length) {
-    double r3[3];
-    int    i;
-
-    for (i = 0; i < 3; i++)
-        r3[i] = r1[i] - r2[i];
-
-    *length = sqrt(dot_product(r3, r3));
+void calc_bnd_ang(const Vec3& r1, const Vec3& r2, double *angle) {
+    double arg = r1.dot(r2);
+    arg = std::clamp(arg, -1.0, 1.0); // for numerical safety
+    *angle = std::acos(arg);
     return;
 }
 
-void c_bnd_ang(double r1[3], double r2[3], double r3[3], double *angle) {
-    double r21[3], r23[3];
-    double l21, l23;
-    int    i;
+void c_bnd_len(const Vec3& r1, const Vec3& r2, double *length) {
+    *length = (r1 - r2).norm();
+    return;
+}
 
-    c_bnd_len(r2, r1, &l21);
-    c_bnd_len(r2, r3, &l23);
-
-    for (i = 0; i < 3; i++) {
-        r21[i] = (r1[i] - r2[i]) / l21;
-        r23[i] = (r3[i] - r2[i]) / l23;
-    }
+void c_bnd_ang(const Vec3& r1, const Vec3& r2, const Vec3& r3, double *angle) {
+    Vec3 r21 = (r1 - r2).normalized();
+    Vec3 r23 = (r3 - r2).normalized();
     calc_bnd_ang(r21, r23, angle);
-    return;
 }
 
-void c_dih_ang(double r1[3], double r2[3], double r3[3], double r4[3], double *angle) {
-    double r12[3], r23[3], r34[3];
-    int    i;
-
-    for (i = 0; i < 3; i++) {
-        r12[i] = r2[i] - r1[i];
-        r23[i] = r3[i] - r2[i];
-        r34[i] = r4[i] - r3[i];
-    }
+void c_dih_ang(const Vec3& r1, const Vec3& r2, const Vec3& r3, const Vec3& r4, double *angle) {
+    Vec3 r12, r23, r34;
     calc_dih_ang(r12, r23, r34, angle);
     return;
 }
 //!-----------------------------------------------------------------------
 // subroutine cross(p, q, s)
-void cross(double p[3], double q[3], double s[3]) {
-    //!-----------------------------------------------------------------------
-    //  implicit none
-    //  real(dp), dimension(:), intent(in) :: p, q
-    //  real(dp), dimension(:), intent(out) :: s
-
-    //  s(1) = p(2)*q(3) - p(3)*q(2)
-    s[0] = p[1] * q[2] - p[2] * q[1];
-    //  s(2) = p(3)*q(1) - p(1)*q(3)
-    s[1] = p[2] * q[0] - p[0] * q[2];
-    //  s(3) = p(1)*q(2) - p(2)*q(1)
-    s[2] = p[0] * q[1] - p[1] * q[0];
-
+void cross(const Vec3& p, const Vec3& q, Vec3& s) {
+    CrossProduct(p, q, &s);
     return;
-    // end subroutine cross
 }
 //!-----------------------------------------------------------------------
 // subroutine quaternion(axis, quarter_ang, p)
-void quaternion(double axis[3], double quarter_ang, double p[4]) {
-    //!-----------------------------------------------------------------------
-    //! calculate quaternion, given rotation axis and angle.
-    //!-----------------------------------------------------------------------
-    //  implicit none
-    //  real(dp), dimension(:), intent(in) :: axis
-    //  real(dp), intent(in) :: quarter_ang
-    //  real(dp), dimension(:), intent(out) :: p
-    //  real(dp) :: tan_w, tan_sqr, tan1, cosine, sine
-    double tan_w, tan_sqr, tan1, cosine, sine;
-
-    //  tan_w = tan(quarter_ang)
-    tan_w = tan(quarter_ang);
-    //  tan_sqr = tan_w * tan_w
-    tan_sqr = tan_w * tan_w;
-    //  tan1 = 1.0d0 + tan_sqr
-    tan1 = 1.0e0 + tan_sqr;
-    //  cosine = (1.0d0 - tan_sqr)/tan1
-    cosine = (1.0e0 - tan_sqr) / tan1;
-    //  sine = 2.0d0*tan_w/tan1
-    sine = 2.0e0 * tan_w / tan1;
-    //  p(1) = cosine
-    p[0] = cosine;
-    //  p(2:4) = axis(1:3) * sine
-    p[1] = axis[0] * sine;
-    p[2] = axis[1] * sine;
-    p[3] = axis[2] * sine;
-
-    return;
-    // end subroutine quaternion
+void quaternion(const Vec3& axis, double quarter_ang, Eigen::Quaterniond& p) {
+    double rotation_angle = 4.0 * quarter_ang;
+    Eigen::AngleAxisd aa(rotation_angle, axis.normalized());
+    p = aa;
 }
+
 //!-----------------------------------------------------------------------
 // subroutine rotation_matrix(q, U)
-void rotation_matrix(double q[4], double U[3][3]) {
-    //!-----------------------------------------------------------------------
-    //! constructs rotation matrix U from quaternion q.
-    //!-----------------------------------------------------------------------
-    //  implicit none
-    //  real(dp), dimension(:), intent(in) :: q
-    //  real(dp), dimension(:,:), intent(out) :: U
-    //  real(dp) :: q0,q1,q2,q3,b0,b1,b2,b3,q00,q01,q02,q03,q11,q12,q13,q22,q23,q33
-    double q0, q1, q2, q3, b0, b1, b2, b3, q00, q01, q02, q03, q11, q12, q13, q22, q23, q33;
-
-    //  q0 = q(1); q1 = q(2); q2 = q(3); q3 = q(4)
-    q0 = q[0];
-    q1 = q[1];
-    q2 = q[2];
-    q3 = q[3];
-    //  b0 = 2.0d0*q0; b1 = 2.0d0*q1
-    b0 = 2.0e0 * q0;
-    b1 = 2.0e0 * q1;
-    //  q00 = b0*q0-1.0d0; q02 = b0*q2; q03 = b0*q3
-    q00 = b0 * q0 - 1.0e0;
-    q02 = b0 * q2;
-    q03 = b0 * q3;
-    //  q11 = b1*q1;       q12 = b1*q2; q13 = b1*q3
-    q11 = b1 * q1;
-    q12 = b1 * q2;
-    q13 = b1 * q3;
-    //  b2 = 2.0d0*q2; b3 = 2.0d0*q3
-    b2 = 2.0e0 * q2;
-    b3 = 2.0e0 * q3;
-    //  q01 = b0*q1; q22 = b2*q2; q23 = b2*q3; q33 = b3*q3
-    q01 = b0 * q1;
-    q22 = b2 * q2;
-    q23 = b2 * q3;
-    q33 = b3 * q3;
-    //  U(1,1) = q00+q11; U(1,2) = q12-q03; U(1,3) = q13+q02
-    U[0][0] = q00 + q11;
-    U[0][1] = q12 - q03;
-    U[0][2] = q13 + q02;
-    //  U(2,1) = q12+q03; U(2,2) = q00+q22; U(2,3) = q23-q01
-    U[1][0] = q12 + q03;
-    U[1][1] = q00 + q22;
-    U[1][2] = q23 - q01;
-    //  U(3,1) = q13-q02; U(3,2) = q23+q01; U(3,3) = q00+q33
-    U[2][0] = q13 - q02;
-    U[2][1] = q23 + q01;
-    U[2][2] = q00 + q33;
-
+void rotation_matrix(const Eigen::Quaterniond& q, Eigen::Matrix3d& U) {
+    U = q.toRotationMatrix();
     return;
-    // end subroutine rotation_matrix
 }
 //!----------------------------------------------------------------------------
 // END MODULE tripep_closure
 //!----------------------------------------------------------------------------
-
-void get_rot(double obj_i[3], double obj_f[3], double tor1[3], double tor2[3], double tor3[3],
-             double tor4_i[3], double tor4_f[3]) {
-    /*obj_i: initial coordinate of target atom
-      obj_f: final coordinate of rarget atom
-      tor4_i: initial cooidinate of reference
-      tor4_f: final coordinate of reference
-      tor2-tor3: rotational axis
-    */
-    double Us[3][3], p[4];
-    double vec_rot[3], mat1[3], mat11[3];
-    double angle, ang_i, ang_f, vec_len;
-
-    int i;
-
-    c_dih_ang(tor1, tor2, tor3, tor4_i, &ang_i);
-    c_dih_ang(tor1, tor2, tor3, tor4_f, &ang_f);
-    angle = (ang_f - ang_i) * 0.25;
-    //  for (i=0;i<3;i++)
-    //    fprintf(STATUS,"%9.3f%9.3f\n", obj_i[i], tor4_i[i]);
-
-    c_bnd_len(tor2, tor3, &vec_len);
-    for (i = 0; i < 3; i++)
-        vec_rot[i] = (tor3[i] - tor2[i]) / vec_len;
-
-    quaternion(vec_rot, angle, p);
-    rotation_matrix(p, Us);
-
-    for (i = 0; i < 3; i++)
-        mat11[i] = obj_i[i] - tor3[i];
-    matmul(Us, mat11, mat1);
-    for (i = 0; i < 3; i++)
-        obj_f[i] = mat1[i] + tor3[i];
-
-    return;
+void apply_rotation_eigen(const Eigen::Ref<Vec3> obj_i, 
+                          Eigen::Ref<Vec3> obj_f, 
+                          const Eigen::Ref<Vec3> tor2, 
+                          const Eigen::Ref<Vec3> tor3, 
+                          double total_angle) {
+    // Normalized rotation axis (tor3 - tor2)
+    Vec3 axis = (tor3 - tor2).normalized();
+    // Create the rotation object (AngleAxis)
+    Eigen::AngleAxisd rotation(total_angle, axis);
+    // Apply rotation: Translate to origin (relative to tor3), rotate, translate back
+    obj_f = rotation * (obj_i - tor3) + tor3;
 }
 
-void driver_rot(double obj_i[3], double obj_f[3], double tor2[3], double tor3[3],
-                float dih_change) {
-    /*obj_i: initial coordinate of target atom
-      obj_f: final coordinate of target atom
-      tor2-tor3: rotational axis
-    */
-    double Us[3][3], p[4];
-    double vec_rot[3], mat1[3], mat11[3];
-    double angle, vec_len;
 
-    int i;
-
-    angle = dih_change * 0.25;
-    //  for (i=0;i<3;i++)
-    //    fprintf(STATUS,"%9.3f%9.3f\n", obj_i[i], tor4_i[i]);
-
-    c_bnd_len(tor2, tor3, &vec_len);
-    for (i = 0; i < 3; i++)
-        vec_rot[i] = (tor3[i] - tor2[i]) / vec_len;
-
-    quaternion(vec_rot, angle, p);
-    rotation_matrix(p, Us);
-
-    for (i = 0; i < 3; i++)
-        mat11[i] = obj_i[i] - tor3[i];
-    matmul(Us, mat11, mat1);
-    for (i = 0; i < 3; i++)
-        obj_f[i] = mat1[i] + tor3[i];
-
-    return;
+void get_rot(const Eigen::Ref<Vec3> obj_i, Eigen::Ref<Vec3> obj_f, 
+             const Eigen::Ref<Vec3> tor1, const Eigen::Ref<Vec3> tor2, const Eigen::Ref<Vec3> tor3,
+             const Eigen::Ref<Vec3> tor4_i, const Eigen::Ref<Vec3> tor4_f) {
+    double ang_i, ang_f;
+    c_dih_ang(tor1, tor2, tor3, tor4_i, &ang_i);
+    c_dih_ang(tor1, tor2, tor3, tor4_f, &ang_f);
+    double total_angle = ang_f - ang_i;
+    apply_rotation_eigen(obj_i, obj_f, tor2, tor3, total_angle);
+}
+void driver_rot(const Eigen::Ref<Vec3> obj_i, Eigen::Ref<Vec3> obj_f, 
+                const Eigen::Ref<Vec3> tor2, const Eigen::Ref<Vec3> tor3,
+                double dih_change) {
+    apply_rotation_eigen(obj_i, obj_f, tor2, tor3, dih_change);
 }

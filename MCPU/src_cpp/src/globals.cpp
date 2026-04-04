@@ -19,7 +19,7 @@ unsigned char *is_rotated;
 // --- Temporary Atom & Coordinate Variables ---
 struct atom *temp_atom;
 struct atom *temp_prev_atom;
-struct int_vector temp_xyz_int; 
+Vec3i temp_xyz_int; 
 
 // --- Cell / Grid Array Variables ---
 struct cell *temp_cell;

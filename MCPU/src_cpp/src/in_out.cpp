@@ -105,9 +105,13 @@ void read_pdb_backbone(
 // subroutine write_pdb_backbone(pdb_name, res_name, r_n, r_a, r_c, stt_res, end_res)
 void write_pdb_backbone(
     struct Simulation *sim,
-    char pdb_name[], char res_name[5][4], double r_n[5][3], double r_a[5][3],
-                        double r_c[5][3], double r_o[5][3], double r_s[5][MSAR][3], int stt_res,
-                        int end_res)
+    char pdb_name[], char res_name[5][4],
+    Eigen::Matrix<double, 3, 5>& r_n,
+    Eigen::Matrix<double, 3, 5>& r_a,
+    Eigen::Matrix<double, 3, 5>& r_c,
+    Eigen::Matrix<double, 3, 5>& r_o,
+    std::array<Eigen::Matrix<double, 3, MSAR>, 5>& r_s,
+    int stt_res, int end_res)
 //!-----------------------------------------------------------------------
 //! write backbone atom coord in pdb format
 //!-----------------------------------------------------------------------
@@ -143,17 +147,17 @@ void write_pdb_backbone(
         ir = res_no - stt_res;
         k++;
         fprintf(sim->fpdb, "ATOM   %4d  N   %s A%4d    %8.3lf%8.3lf%8.3lf\n", k, res_name[ir], res_no,
-                r_n[ir][0], r_n[ir][1], r_n[ir][2]);
+                r_n.col(ir).x(), r_n.col(ir).y(), r_n.col(ir).z());
         k++;
         fprintf(sim->fpdb, "ATOM   %4d  CA  %s A%4d    %8.3lf%8.3lf%8.3lf\n", k, res_name[ir], res_no,
-                r_a[ir][0], r_a[ir][1], r_a[ir][2]);
+                r_a.col(ir).x(), r_a.col(ir).y(), r_a.col(ir).z());
         k++;
         fprintf(sim->fpdb, "ATOM   %4d  C   %s A%4d    %8.3lf%8.3lf%8.3lf\n", k, res_name[ir], res_no,
-                r_c[ir][0], r_c[ir][1], r_c[ir][2]);
+                r_c.col(ir).x(), r_c.col(ir).y(), r_c.col(ir).z());
         fprintf(sim->fpdb, "ATOM   %4d  O   %s A%4d    %8.3lf%8.3lf%8.3lf\n", k, res_name[ir], res_no,
-                r_o[ir][0], r_o[ir][1], r_o[ir][2]);
+                r_o.col(ir).x(), r_o.col(ir).y(), r_o.col(ir).z());
         fprintf(sim->fpdb, "ATOM   %4d  CB  %s A%4d    %8.3lf%8.3lf%8.3lf\n", k, res_name[ir], res_no,
-                r_s[ir][0][0], r_s[ir][0][1], r_s[ir][0][2]);
+                r_s.at(ir).col(0).x(), r_s.at(ir).col(0).y(), r_s.at(ir).col(0).z());
     }
     fclose(sim->fpdb);
     return;

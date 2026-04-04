@@ -170,10 +170,7 @@ float Compute_constraint_energy(
              */
             atomi = residues[res1].CA;
         }
-        xi = atoms[atomi].xyz.x;
-        yi = atoms[atomi].xyz.y;
-        zi = atoms[atomi].xyz.z;
-
+        
         atomj = residues[res2].CB;
         if (atomj == -999) {
             /* GLY CB gets assigned index -999.
@@ -181,11 +178,10 @@ float Compute_constraint_energy(
              */
             atomj = residues[res2].CA;
         }
-        xj = atoms[atomj].xyz.x;
-        yj = atoms[atomj].xyz.y;
-        zj = atoms[atomj].xyz.z;
+        atomi = residues[res1].CA;
+        atomj = residues[res2].CA;
+        dist = (atoms[atomi].xyz - atoms[atomj].xyz).norm();
 
-        dist = sqrt(((xi - xj) * (xi - xj) + (yi - yj) * (yi - yj) + (zi - zj) * (zi - zj)));
 
         /* Note we don't use this var */
         sys->distances[i] = dist;
@@ -246,16 +242,8 @@ float Compute_constraint_energy_old(
         // To do, check that neither i nor j are already forming a disulfide bond before proceeding
 
         atomi = residues[res1].CA;
-        xi    = atoms[atomi].xyz.x;
-        yi    = atoms[atomi].xyz.y;
-        zi    = atoms[atomi].xyz.z;
-
         atomj = residues[res2].CA;
-        xj    = atoms[atomj].xyz.x;
-        yj    = atoms[atomj].xyz.y;
-        zj    = atoms[atomj].xyz.z;
-
-        dist = sqrt(((xi - xj) * (xi - xj) + (yi - yj) * (yi - yj) + (zi - zj) * (zi - zj)));
+        dist = (atoms[atomi].xyz - atoms[atomj].xyz).norm();
 
         constraint_energy = constraint_energy + weight * sys->k_constraint * (dist - 5) * (dist - 5);
 

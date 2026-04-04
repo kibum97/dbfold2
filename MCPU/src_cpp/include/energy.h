@@ -26,10 +26,10 @@ float sctenergy(
 );
 void aromatic_center(
     struct Context *ctx,
-    int res_no, struct vector *V);
+    int res_no, Vec3 *V);
 float aromatic_plane(
     struct Context *ctx,
-    int res_a, int res_b, struct vector *plane_a, struct vector *plane_b);
+    int res_a, int res_b, Vec3 *plane_a, Vec3 *plane_b);
 float aromaticenergy(
     struct Context *ctx,
     struct System *sys,

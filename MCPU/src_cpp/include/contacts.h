@@ -6,8 +6,8 @@
 void Contacts(struct Context *ctx, const struct Topology *top, const struct System *sys);
 void TypeContacts(struct Context *ctx, const struct System *sys, const struct Topology *top);
 void CheckForContacts(struct Context *ctx, const struct System *sys, short a, short b);
-unsigned char CheckForDeltaContacts(struct contact_data *Data, struct int_vector XX,
-                                    struct int_vector YY, short type_a, short type_b,
+unsigned char CheckForDeltaContacts(struct contact_data *Data, Vec3i XX,
+                                    Vec3i YY, short type_a, short type_b,
                                     const struct System *sys, struct monte_carlo_flags mc_flags);
 void          check_bb_contacts(struct Context *ctx, short a, short b, const struct Topology *top,
                                 const struct Simulation *sim);

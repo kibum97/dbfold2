@@ -64,7 +64,7 @@ int main(int argc, char *argv[]) {
     sim.seed = time(NULL);
     sim.seed += (int)(integrator.MC_TEMP * 1000) + getpid() + sim.myrank;
     // srand48(seed);
-    set_threefry_array((unsigned long int)&sim.seed);
+    set_threefry_array((unsigned long int) sim.seed);
     // fprintf(STATUS, "nprocs = %d, myrank = %d\n", nprocs, myrank);
     fprintf(sim.STATUS, "---GENERAL---\n");
     fprintf(sim.STATUS, "  seed:\t\t%ld\n\n", sim.seed);

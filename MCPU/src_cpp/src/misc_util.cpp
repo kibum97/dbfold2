@@ -1,6 +1,11 @@
 #include "misc_util.h"
+#include <cmath>
 
-Float Tiny(Float x) { return ((Float)((int)(x * PRECISION))) / PRECISION; }
+// Float Tiny(Float x) { return ((Float)((int)(x * PRECISION))) / PRECISION; }
+
+float Tiny(float x) {
+    return std::round(x * PRECISION) / PRECISION;
+}
 
 void squeeze(char s[], int c) {
     int i, j;
