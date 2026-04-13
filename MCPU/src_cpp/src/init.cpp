@@ -1,3 +1,5 @@
+#define JSON_DIAGNOSTICS 1
+
 #include "init.h"
 
 #include <math.h>
@@ -5,6 +7,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <string>
+#include <vector>
+#include <unordered_map>
+#include <cstring>
+#include <format>
 
 #include "constraint.h"
 #include "contacts.h"
@@ -21,6 +32,14 @@
 #include "vector.h"
 #include "align.h"
 #include "hbonds.h"
+#include "db/amino_acid_db.h"
+
+
+#include <nlohmann/json.hpp>
+#include <fstream>
+#include <string>
+
+using json = nlohmann::json;
 
 short three[5] = {1, 3, 9, 27, 81};
 
@@ -31,18 +50,15 @@ short three[5] = {1, 3, 9, 27, 81};
 void ReadTypesFile(struct Simulation *sim, struct Topology *top, struct System *sys) {
     int   type_num, i;
     char  res_name[4], atom_name[4];
-    FILE *type_file;
 
-    if ((type_file = fopen(sim->atom_type_file, "r")) == NULL) {
-        fprintf(sim->STATUS, "ERROR: Can't open the file: %s!\n", sim->atom_type_file);
+    std::ifstream type_file(sim->atom_type_file);
+    if (!type_file.is_open()) {
+        fprintf(sim->STATUS, "ERROR: Can't open the file: %s!\n", sim->atom_type_file.c_str());
         exit(1);
     }
-    if (type_file == NULL) {
-        fprintf(sim->STATUS, "Error: Type file non-existant\n");
-        exit(-1);
-    }
     i = -1;
-    while (fscanf(type_file, "%s %s %d", atom_name, res_name, &type_num) != EOF) {
+    while (type_file.good()) {
+        type_file >> atom_name >> res_name >> type_num;
         ++i;
         strcpy(top->atom_type_list[i].atom_name, atom_name);
         strcpy(top->atom_type_list[i].res_name, res_name);
@@ -58,7 +74,7 @@ void ReadTypesFile(struct Simulation *sim, struct Topology *top, struct System *
     }
     top->natom_type_list = i + 1;
     sys->MAX_TYPES       = top->atom_type_list[i].type_num + 1;
-    fclose(type_file);
+    type_file.close();
 }
 
 void SetupMuPotential(struct System *sys, struct Topology *top, struct Context *ctx,
@@ -151,16 +167,15 @@ void InitializeProtein(struct Context *ctx, struct Topology *top, struct Simulat
 
     /* Initialize static data */
 
-    top->amino_acids = (struct amino *)calloc(20, sizeof(struct amino));
+    // top->amino_acids = (struct amino *)calloc(20, sizeof(struct amino));
+    top->amino_acids.resize(20);
     fprintf(sim->STATUS, "Made amino_acids structure\n");
 
     ReadTypesFile(sim, top, sys); /*Left off here*/
     fprintf(sim->STATUS, "Read Types File\n");
-    ReadHelicityData(sys, top, ctx, sim);  // KP: Not being used?
-    fprintf(sim->STATUS, "Read Helicity Data\n");
 
     /* Read data from native_file into native */
-    ReadNative(sim, sys, integrator, top, sim->native_file, ctx->native,
+    ReadNative(sim, sys, integrator, top, sim->native_file.c_str(), ctx->native,
                &top->natoms);  // AB: This reads native_file into the structure native
     fprintf(sim->STATUS, "Read Native\n");
 
@@ -171,7 +186,7 @@ void InitializeProtein(struct Context *ctx, struct Topology *top, struct Simulat
             top->nresidues++;
 
     if (top->nresidues != (ctx->native[top->natoms - 1].res_num + 1))
-        fprintf(sim->STATUS, "FILE: %s   MISSING RESIDUES!!!\n", sim->native_file);
+        fprintf(sim->STATUS, "FILE: %s   MISSING RESIDUES!!!\n", sim->native_file.c_str());
 
     fprintf(sim->STATUS, "  pdb length:\t\t%d\n  # of CA's:\t\t%d\n\n", top->nresidues,
             ctx->native[top->natoms - 1].res_num + 1);
@@ -251,26 +266,40 @@ void InitializeProtein(struct Context *ctx, struct Topology *top, struct Simulat
     initialize_sct(top, sys, sim);
     initialize_aromatic(top, sys, sim, ctx, integrator);
     initialize_secstr(sim, top);
-    read_cluster(sim, sys);
+    read_cluster(
+        "/n/home01/kibumpark/pkg/dbfold2/MCPU/src_cpp/config_files/center30_state.csv",
+        sys
+    );
+    std::cout << "DEBUG: Finished reading cluster data." << std::endl;
     if (sys->weight_hbond) {
         InitializeHydrogenBonding(top, ctx, sys, sim);
+        std::cout << "DEBUG: Finished initializing hydrogen bonding data structures." << std::endl;
         ctx->hbond_pair = (struct pair *)calloc(top->natoms * top->natoms, sizeof(struct pair));
     }
+    std::cout << "DEBUG: Finished initializing hydrogen bonding." << std::endl;
 
     /* Determine residue triplets */
 
     DetermineTriplets(top, integrator, sim, sys);
 
+    std::cout << "DEBUG: Finished determining residue triplets." << std::endl;
+
     /* Initialize backbone rotation data */
     InitializeBackboneRotationData(top, integrator, ctx);
+
+    std::cout << "DEBUG: Finished initializing backbone rotation data." << std::endl;
 
     /* Get contacts */
 
     Contacts(ctx, top, sys);
 
+    std::cout << "DEBUG: Finished calculating contacts." << std::endl;
+
     /* Setup potential and related structures */
 
     SetupAlignmentStructure(ctx, top, sys, integrator, sim);
+
+    std::cout << "DEBUG: Finished setting up alignment structure." << std::endl;
 
     if (sys->USE_GO_POTENTIAL) {
         sys->mu = 1;
@@ -282,6 +311,8 @@ void InitializeProtein(struct Context *ctx, struct Topology *top, struct Simulat
 
     TypeContacts(ctx, sys, top);
     ctx->native_E = FullAtomEnergy(sys, ctx);
+
+    std::cout << "DEBUG: Finished setting up potential and calculating native energy." << std::endl;
 
     //  free(amino_acids);
 
@@ -419,7 +450,7 @@ void SetRadii(struct System *sys) {
 
 void ReadNative(struct Simulation *sim,
     struct System *sys, struct MCIntegrator *integrator, struct Topology *top,
-    char *file_name, struct atom *protein, int *Natoms) {
+    const char *file_name, struct atom *protein, int *Natoms) {
     FILE *the_file;
     char  line[250];
 
@@ -537,7 +568,7 @@ void ReadAvgChis(struct Context *ctx, struct Topology *top, struct Simulation *s
 
     integrator->rotamer_angles = (struct angles*)calloc(top->nresidues, sizeof(struct angles));
 
-    if ((sim->DATA = fopen(sim->rotamer_data_file, "r")) == NULL) {
+    if ((sim->DATA = fopen(sim->rotamer_data_file.c_str(), "r")) == NULL) {
         fprintf(sim->STATUS, "ERROR: Can't open the file: %s!\n", sim->rotamer_data_file);
         exit(1);
     }
@@ -563,60 +594,70 @@ void ReadAvgChis(struct Context *ctx, struct Topology *top, struct Simulation *s
 }
 
 void ReadSidechainTorsionData(struct Simulation *sim, struct Topology *top) {
-    int   temp_x, i, j, k;
-    short temp;
-    char  AA[4], BB[4], CC[4], DD[4], symbol[2], name[4], line[250];
-
-    if ((sim->DATA = fopen(sim->amino_data_file, "r")) == NULL) {
-        fprintf(sim->STATUS, "ERROR: Can't open the file: %s!\n", sim->amino_data_file);
+    // 1. Load the library from JSON
+    auto aa_library = mcpu::db::LoadTopology("/n/home01/kibumpark/pkg/dbfold2/MCPU/src_cpp/config_files/amino_torsion.json");
+    if (aa_library.empty()) {
+        fprintf(sim->STATUS, "ERROR: Can't load amino acid torsion library!\n");
         exit(1);
     }
 
-    temp = 0;
-    while (fgets(line, 150, sim->DATA) != NULL) {
-        if (!strncmp(line, "*", 1))
-            temp++;
-        else if (strncmp(line, "!!", 2)) {
-            if (temp == 0)
-                sscanf(line, "%*s %*s");
-            else if (temp == 1) {
-                sscanf(line, "%d %s %*d %d %*s %s", &i, name, &j, symbol);
-                strcpy(top->amino_acids[i].name, name);
-                strcpy(top->amino_acids[i].symbol, symbol);
-                top->amino_acids[i].ntorsions = j;
-                if (!strcmp(name, "PRO"))
-                    top->amino_acids[i].nrotamers = 2;
-                else if (!strcmp(name, "TYR") || !strcmp(name, "HIS") || !strcmp(name, "PHE"))
-                    top->amino_acids[i].nrotamers = 6;
-                else if (!strcmp(name, "GLY"))
-                    top->amino_acids[i].nrotamers = 0;
-                else
-                    top->amino_acids[i].nrotamers = (int)three[top->amino_acids[i].ntorsions];
-            } else if (temp == 2) {
-                sscanf(line, "%s %d %s %s %s %s %*f", name, &temp_x, AA, BB, CC, DD);
-                for (i = 0; i < 20; i++)
-                    if (!strcmp(name, top->amino_acids[i].name))
-                        break;
-                strcpy(top->amino_acids[i].torsion[temp_x][0], AA);
-                strcpy(top->amino_acids[i].torsion[temp_x][1], BB);
-                strcpy(top->amino_acids[i].torsion[temp_x][2], CC);
-                strcpy(top->amino_acids[i].torsion[temp_x][3], DD);
-            } else if (temp == 3) {
-                strncpy(name, line, 3);
-                for (i = 0; i < 20; i++)
-                    if (!strncmp(name, top->amino_acids[i].name, 3))
-                        break;
-                strtok(line, " \t");
-                j                                    = atoi(strtok(NULL, " \t\n"));
-                top->amino_acids[i].rotate_natoms[j] = atoi(strtok(NULL, " \t\n"));
-                for (k = 0; k < top->amino_acids[i].rotate_natoms[j]; k++)
-                    strcpy(top->amino_acids[i].rotate_atom[j][k], strtok(NULL, " \t\n"));
+    // Ensure the topology vector is sized for the 20 standard amino acids
+    if (top->amino_acids.size() < 20) {
+        top->amino_acids.resize(20);
+    }
+
+    for (const auto& aa : aa_library) {
+        // 2. Identify the index (using aa.name from our JSON)
+        int aa_num = GetAminoNumber(const_cast<char*>(aa.name.c_str()));
+        
+        if (aa_num < 0 || aa_num >= 20) {
+            fprintf(sim->STATUS, "ERROR: Invalid amino acid in torsion library: %s\n", aa.name.c_str());
+            continue; // Or exit(1) depending on strictness
+        }
+
+        auto& target = top->amino_acids[aa_num];
+
+        // 3. Copy Metadata (Safe copy to std::array<char, N>)
+        std::fill(target.name.begin(), target.name.end(), '\0');
+        std::strncpy(target.name.data(), aa.name.c_str(), 3);
+        
+        std::fill(target.symbol.begin(), target.symbol.end(), '\0');
+        std::strncpy(target.symbol.data(), aa.symbol.c_str(), 1);
+
+        target.ntorsions = aa.ntorsions;
+
+        // 4. Rotamer Logic (MCPU Specific)
+        if (aa.name == "PRO") {
+            target.nrotamers = 2;
+        } else if (aa.name == "TYR" || aa.name == "HIS" || aa.name == "PHE") {
+            target.nrotamers = 6;
+        } else if (aa.name == "GLY") {
+            target.nrotamers = 0;
+        } else {
+            // 'three' is the precomputed powers of 3 array (3^ntorsions)
+            target.nrotamers = (int)three[aa.ntorsions];
+        }
+
+        // 5. Map Torsion Definitions and Rotation Atoms
+        for (int t_idx = 0; t_idx < aa.ntorsions && t_idx < 4; ++t_idx) {
+            const auto& t_src = aa.torsions[t_idx];
+
+            // Define the 4 atoms forming the torsion (N, CA, CB, CG, etc.)
+            for (int k = 0; k < 4 && k < t_src.atoms.size(); ++k) {
+                std::strncpy(target.torsion[t_idx][k].data(), t_src.atoms[k].c_str(), 3);
+                target.torsion[t_idx][k][3] = '\0';
+            }
+
+            // Define the atoms that move when this torsion rotates
+            target.rotate_natoms[t_idx] = (int)t_src.affected_atoms.size();
+            for (int k = 0; k < target.rotate_natoms[t_idx] && k < 10; ++k) {
+                std::strncpy(target.rotate_atom[t_idx][k].data(), t_src.affected_atoms[k].c_str(), 3);
+                target.rotate_atom[t_idx][k][3] = '\0';
             }
         }
     }
-    fclose(sim->DATA);
 
-    return;
+    fprintf(sim->STATUS, "DEBUG: Sidechain torsion data synchronized for %zu residues.\n", aa_library.size());
 }
 
 /*=============================================================*/
@@ -629,7 +670,7 @@ void ReadPotential(struct Simulation *sim, struct System *sys) {
     float val;
     /* read max types potential */
 
-    if ((pot_file = fopen(sim->potential_file, "r")) == NULL) {
+    if ((pot_file = fopen(sim->potential_file.c_str(), "r")) == NULL) {
         fprintf(sim->STATUS, "ERROR: Can't open the file: %s!\n", sim->potential_file);
         exit(1);
     }
@@ -1066,7 +1107,7 @@ void InitializeSidechainRotationData(struct Topology *top, struct MCIntegrator *
                 for (l = 0; l < top->natoms; l++)
                     if (ctx->native[l].res_num == i &&
                         !strcmp(ctx->native[l].atomname,
-                                top->amino_acids[ctx->native_residue[i].amino_num].torsion[j][k])) {
+                                top->amino_acids[ctx->native_residue[i].amino_num].torsion[j][k].data())) {
                         /* sidechain_torsion records the 4 atoms that define each torsion */
                         integrator->sidechain_torsion[i][j][k] = l;
                         break;
@@ -1084,7 +1125,7 @@ void InitializeSidechainRotationData(struct Topology *top, struct MCIntegrator *
                     if (ctx->native[l].res_num == i &&
                         !strcmp(
                             ctx->native[l].atomname,
-                            top->amino_acids[ctx->native_residue[i].amino_num].rotate_atom[j][k])) {
+                            top->amino_acids[ctx->native_residue[i].amino_num].rotate_atom[j][k].data())) {
                         integrator->rotate_sidechain_atom[i][j][k] = l;
                         break;
                     }
@@ -1257,13 +1298,13 @@ void SetProgramOptions(struct Simulation *sim, struct System *sys, struct MCInte
     int   find_yang_move  = 0;
     int   find_yang_scale = 0;
 
-    char cfg_file[200];
+    std::string cfg_file;
     int  l = 0, ls = 0, MPI_STOP = 0;
 
     /* Acquire cfg_file name */
-    memset(cfg_file, '\0', 200);
+    cfg_file.resize(200);
     if (sim->myrank == 0) {
-        strcpy(cfg_file, argv[1]);
+        strcpy(&cfg_file[0], argv[1]);
         if (argc != 2) {
             printf("ERROR!!! Usage is like this: ./fold_potential config_file, argc : %d\n", argc);
             for (l = 0; l < argc; l++) {
@@ -1273,229 +1314,132 @@ void SetProgramOptions(struct Simulation *sim, struct System *sys, struct MCInte
         }
     }
 
+    #ifdef USE_MPI
     sim->ierr = MPI_Bcast(&MPI_STOP, 1, MPI_INT, 0, sim->mpi_world_comm);
 
     if (MPI_STOP == 1) {
         MPI_Finalize();
         exit(1);
     } else {
-        sim->ierr = MPI_Bcast(cfg_file, 200, MPI_CHAR, 0, sim->mpi_world_comm);
+        sim->ierr = MPI_Bcast(&cfg_file[0], 200, MPI_CHAR, 0, sim->mpi_world_comm);
     }
+    #endif
 
     /* open cfg file */
-
-    if ((sim->DATA = fopen(cfg_file, "r")) == NULL) {
-        printf("ERROR: Can't open the file: %s!\n", cfg_file);
-        exit(1);
+    std::ifstream file(cfg_file);
+    if (!file.is_open()) {
+        throw std::runtime_error("ERROR: Can't open the JSON config file: " + cfg_file);
     }
 
-    /* acquire params from cfg file */
-    /* increased from 150 to 500 */
-    while (fgets(line, 500, sim->DATA) != NULL) {
-        /* printf("%s", line);*/
-        if (strncmp(line, "!", 1)) {
-            sscanf(line, "%s %f", token, &value);
-            if (!strcmp(token, "NATIVE_FILE")) {
-                sscanf(line, "%*s %s", name);
-                strcpy(sim->native_file, name);
-            } else if (!strcmp(token, "STRUCTURE_FILE")) {
-                sscanf(line, "%*s %s", name);
-                strcpy(sim->structure_file, name);
-            } else if (!strcmp(token, "NATIVE_DIRECTORY")) {
-                sscanf(line, "%*s %s", name);
-                strcpy(sim->native_directory, name);
-            } else if (!strcmp(token, "TEMPLATE_FILE")) {
-                sscanf(line, "%*s %s", name);
-                strcpy(sim->template_file, name);
-            } else if (!strcmp(token, "SUBSTRUCTURE_FILE")) {
-                sscanf(line, "%*s %s", name);
-                strcpy(sim->substructure_path, name);
-            } else if (!strcmp(token, "ALIGNMENT_FILE")) {
-                sscanf(line, "%*s %s", name);
-                strcpy(sim->alignment_file, name);
-            } else if (!strcmp(token, "TRIPLET_ENERGY_FILE")) {
-                sscanf(line, "%*s %s", name);
-                strcpy(sim->triplet_file, name);
-            } else if (!strcmp(token, "SIDECHAIN_TORSION_FILE")) {
-                sscanf(line, "%*s %s", name);
-                strcpy(sim->sctorsion_file, name);
-            } else if (!strcmp(token, "SECONDARY_STRUCTURE_FILE")) {
-                sscanf(line, "%*s %s", name);
-                strcpy(sim->sec_str_file, name);
-            } else if (!strcmp(token, "AMINO_DATA_FILE")) {
-                sscanf(line, "%*s %s", name);
-                strcpy(sim->amino_data_file, name);
-            } else if (!strcmp(token, "ATOM_TYPE_FILE")) {
-                sscanf(line, "%*s %s", name);
-                strcpy(sim->atom_type_file, name);
-            } else if (!strcmp(token, "ROTAMER_DATA_FILE")) {
-                sscanf(line, "%*s %s", name);
-                strcpy(sim->rotamer_data_file, name);
-            } else if (!strcmp(token, "PDB_OUT_FILE")) {
-                sscanf(line, "%*s %s", name);
-                strcpy(sim->pdb_out_file, name);
-                strcpy(sim->std_prefix, name);
-                ls = strlen(name);
-                /*sprintf(pdb_out_file+ls, "_%5.3f", MC_TEMP);*/
-            } else if (!strcmp(token, "POTENTIAL_DATA")) {
-                sscanf(line, "%*s %s", name);
-                strcpy(sim->potential_file, name);
-            } else if (!strcmp(token, "HELICITY_DATA")) {
-                sscanf(line, "%*s %s", name);
-                strcpy(sim->helicity_data, name);
-            } else if (!strcmp(token, "HYDROGEN_BONDING_DATA")) {
-                sscanf(line, "%*s %s", name);
-                strcpy(sim->hydrogen_bonding_data, name);
-            } else if (!strcmp(token, "AROMATIC_FILE")) {
-                sscanf(line, "%*s %s", name);
-                strcpy(sim->aromatic_file, name);
-            } else if (!strcmp(token, "MOVABLE_RESIDUES")) {
-                sscanf(line, "%*s %s", name);
-                strcpy(sim->movable_region_file, name);
-            } else if (!strcmp(token, "PROTEIN_NAME")) {
-                sscanf(line, "%*s %s", name);
-                strcpy(sim->PROTEIN_NAME, name);
-            } else if (!strcmp(token, "PRINT_PDB"))
-                sim->PRINT_PDB = (int)value;
-            else if (!strcmp(token, "MC_STEPS"))
-                sim->MC_STEPS = (long int)value;
-            else if (!strcmp(token, "MC_ANNEAL_STEPS"))
-                sim->MC_ANNEAL_STEPS = (long int)value;
-            else if (!strcmp(token, "MC_STEP_SIZE"))
-                integrator->STEP_SIZE = value * PI / 180.0;
-            else if (!strcmp(token, "SIDECHAIN_NOISE"))
-                integrator->SIDECHAIN_NOISE = value * PI / 180.0;
-            else if (!strcmp(token, "SIDECHAIN_MOVES"))
-                integrator->SIDECHAIN_MOVES = (int)value;
-            else if (!strcmp(token, "MC_PRINT_STEPS"))
-                sim->MC_PRINT_STEPS = (int)value;
-            else if (!strcmp(token, "MC_PDB_PRINT_STEPS"))
-                sim->MC_PDB_PRINT_STEPS = (int)value;
-            else if (!strcmp(token, "MC_TEMP_MIN"))
-                integrator->MC_TEMP_MIN = value;
-            else if (!strcmp(token, "TEMP_STEP"))
-                integrator->TEMP_STEP = value;
-            else if (!strcmp(token, "NODES_PER_TEMP"))
-                sim->NODES_PER_TEMP = (int)value;
-            else if (!strcmp(token, "ALPHA"))
-                sys->ALPHA = value;
-            else if (!strcmp(token, "LAMBDA"))
-                sys->LAMBDA = value;
-            else if (!strcmp(token, "NATIVE_ATTRACTION"))
-                sys->NATIVE_ATTRACTION = value;
-            else if (!strcmp(token, "NON_NATIVE_REPULSION"))
-                sys->NON_NATIVE_REPULSION = value;
-            else if (!strcmp(token, "USE_ROT_PROB"))
-                integrator->USE_ROT_PROB = value;
-            else if (!strcmp(token, "SEQ_DEP_HB"))
-                sys->SEQ_DEP_HB = value;
-            else if (!strcmp(token, "CLASH_WEIGHT"))
-                sys->weight_clash = value;
-            else if (!strcmp(token, "HYDROGEN_BOND"))
-                ctx->hydrogen_bond = value;
-            else if (!strcmp(token, "RMS_WEIGHT"))
-                sys->weight_rms = value;
-            else if (!strcmp(token, "CONSTRAINT_RMSD"))
-                sys->rmsd_constraint = value;
-            else if (!strcmp(token, "NON_SPECIFIC_ENERGY"))
-                sys->NON_SPECIFIC_ENERGY = value;
-            else if (!strcmp(token, "USE_GLOBAL_BB_MOVES"))
-                integrator->USE_GLOBAL_BB_MOVES = value;
-            else if (!strcmp(token, "CONSTRAINT_FILE")) {  // AB
-                sscanf(line, "%*s %s", name);
-                strcpy(sim->constraint_file, name);
-            } else if (!strcmp(token, "RMSD_CONSTRAINT_FILE")) {
-                sscanf(line, "%*s %s", name);
-                strcpy(sim->rmsd_constraint_file, name);
-            } else if (!strcmp(token, "K_CONSTRAINT"))  // AB
-                sys->k_constraint = value;
-            else if (!strcmp(token, "YANG_MOVE")) {
-                integrator->YANG_MOVE = value;
-                find_yang_move        = 1;
-            } else if (!strcmp(token, "YANG_SCALE")) {
-                integrator->YANG_SCALE = value;
-                find_yang_scale        = 1;
-            } else if (!strcmp(token, "SKIP_LOCAL_CONTACT_RANGE"))
-                sim->SKIP_LOCAL_CONTACT_RANGE = (int)value;
-            else if (!strcmp(token, "SKIP_BB_CONTACT_RANGE"))
-                sim->SKIP_BB_CONTACT_RANGE = (int)value;
-            else if (!strcmp(token, "MY_RANK_OFFSET"))
-                sim->my_rank_offset = (int)value;
-            else if (!strcmp(token, "USE_SIDECHAINS"))
-                integrator->USE_SIDECHAINS = (int)value;
-            else if (!strcmp(token, "NO_NEW_CLASHES"))
-                sim->NO_NEW_CLASHES = (int)value;
-            else if (!strcmp(token, "USE_ROTAMERS"))
-                integrator->USE_ROTAMERS = (int)value;
-            else if (!strcmp(token, "READ_POTENTIAL"))
-                sim->READ_POTENTIAL = (int)value;
-            else if (!strcmp(token, "USE_GO_POTENTIAL"))
-                sys->USE_GO_POTENTIAL = (int)value;
-            else if (!strcmp(token, "MC_REPLICA_STEPS"))
-                sim->MC_REPLICA_STEPS = (int)value;
-            else if (!strcmp(token, "MAX_EXCHANGE"))
-                sim->MAX_EXCHANGE = (int)value;
-            else if (!strcmp(token, "UMBRELLA"))
-                sim->umbrella = (int)value;
-            else if (!strcmp(token, "K_BIAS"))
-                sys->k_bias = value;
-            else if (!strcmp(token, "NUMBER_OF_CONTACTS_MAX"))
-                sim->number_of_contacts_max = (int)value;
-            else if (!strcmp(token, "CONTACTS_STEP"))
-                sim->contacts_step = (int)value;
-            else if (!strcmp(token, "MIN_SEQ_SEP"))
-                top->min_seq_sep = (int)value;
-            else if (!strcmp(token, "CONTACT_CALPHA_CUTOFF"))
-                sys->contact_calpha_cutoff =
-                    value;  // note that by default, this value is set to 7 in backbone.h, unless
-                            // you enter something in cfg file
-            else if (!strcmp(token, "USE_CLUSTER"))  // With what probability should code use a
-                                                     // knowledge based move?
-                integrator->USE_CLUSTER =
-                    value;  // note that by default, this value is set to 0 in backbone.h,
-                            // unless you enter something in cfg file
-            else if (!strcmp(token, "MAX_CLUSTERSTEP"))  // As of what MC should knowledge based
-                                                         // moves be stopped?
-                integrator->MAX_CLUSTERSTEP =
-                    value;  // note that by default, this value is set to 0 in
-                            // backbone.h, unless you enter something in cfg file
-            else if (!strcmp(token,
-                             "CLUSTER_MOVE"))  // How often do you call the loopmove function? This
-                                               // does not mean you do a knowledge move
-                integrator->CLUSTER_MOVE =
-                    value;  // note that by default, this value is set to 0.33 in
-                            // backbone.h, unless you enter something in cfg file
-            else {
-                printf("config file option not found: %s\n", token);
-                // exit(0);
-            }
-        }
+    json config = json::parse(file);
+    // --- Native Protein Data ---
+    std::cout << "DEBUG: Reading config file: " << cfg_file << std::endl;
+    auto& npd = config["native_protein_data"];
+    sim->native_file      = npd["NATIVE_FILE"].get<std::string>();
+    sim->structure_file   = npd["STRUCTURE_FILE"].get<std::string>();
+    sim->native_directory = npd.value("NATIVE_DIRECTORY", "None");
+    sim->template_file    = npd["TEMPLATE_FILE"].get<std::string>();
+    sim->alignment_file   = npd["ALIGNMENT_FILE"].get<std::string>();
+    sim->pdb_out_file     = npd["PDB_OUT_FILE"].get<std::string>();
+    std::cout << "DEBUG: PDB_OUT_FILE at initialization : " << sim->pdb_out_file << std::endl;
+    sim->PROTEIN_NAME     = npd["PROTEIN_NAME"].get<std::string>();
+
+    // --- Potential Parameters ---
+    std::cout << "DEBUG: Reading potential parameters from config file." << std::endl;
+    auto& pp = config["potential_parameters"];
+    sim->NO_NEW_CLASHES       = pp["NO_NEW_CLASHES"].get<int>();
+    sim->READ_POTENTIAL       = pp.value("READ_POTENTIAL", (short)0);
+    sys->USE_GO_POTENTIAL     = pp["USE_GO_POTENTIAL"].get<int>();
+    sys->weight_clash         = pp["CLASH_WEIGHT"].get<float>();
+    sys->weight_rms           = pp["RMS_WEIGHT"].get<float>();
+    // ctx->hydrogen_bond        = pp["HYDROGEN_BOND"].get<float>();
+    sys->NATIVE_ATTRACTION    = pp["NATIVE_ATTRACTION"].get<float>();
+    sys->NON_NATIVE_REPULSION = pp["NON_NATIVE_REPULSION"].get<float>();
+    sys->NON_SPECIFIC_ENERGY  = pp["NON_SPECIFIC_ENERGY"].get<float>();
+
+    // --- Contact Definition ---
+    std::cout << "DEBUG: Reading contact definition parameters from config file." << std::endl;
+    auto& cd = config["contact_definition"];
+    sim->SKIP_LOCAL_CONTACT_RANGE = cd["SKIP_LOCAL_CONTACT_RANGE"].get<int>();
+    sim->SKIP_BB_CONTACT_RANGE    = cd["SKIP_BB_CONTACT_RANGE"].get<int>();
+
+    // --- Monte-Carlo Parameters ---
+    sys->rmsd_constraint = config["monte_carlo_parameters"]["CONSTRAINT_RMSD"].get<float>();
+    integrator->YANG_MOVE       = config["monte_carlo_parameters"]["YANG_MOVE"].get<float>();
+    integrator->YANG_SCALE      = config["monte_carlo_parameters"]["YANG_SCALE"].get<int>();
+    if (integrator->YANG_MOVE) { // DEBUG/NOTe: Does this turn off if YANG MOVE is not set
+        find_yang_move = 1;
     }
+    if (integrator->YANG_SCALE) {
+        find_yang_scale = 1;
+    }
+    integrator->USE_SIDECHAINS = config["monte_carlo_parameters"]["USE_SIDECHAINS"].get<int>();
+    sys->SEQ_DEP_HB = config["monte_carlo_parameters"]["SEQ_DEP_HB"].get<int>();
+    std::cout << "DEBUG: YANG_MOVE : " << integrator->YANG_MOVE << ", YANG_SCALE : " << integrator->YANG_SCALE
+              << std::endl;
+    std::cout << "DEBUG: yang move flags - find_yang_move : " << find_yang_move << ", find_yang_scale : " << find_yang_scale << std::endl;
 
-    fclose(sim->DATA); /* close cfg file */
+    // --- Parameter Files ---
+    auto& pf = config["parameter_files"];
+    sim->triplet_file          = pf["TRIPLET_ENERGY_FILE"].get<std::string>();
+    sim->sctorsion_file        = pf["SIDECHAIN_TORSION_FILE"].get<std::string>();
+    sim->sec_str_file          = pf["SECONDARY_STRUCTURE_FILE"].get<std::string>();
+    sim->amino_data_file       = pf["AMINO_DATA_FILE"].get<std::string>();
+    sim->rotamer_data_file     = pf["ROTAMER_DATA_FILE"].get<std::string>();
+    sim->atom_type_file        = pf["ATOM_TYPE_FILE"].get<std::string>();
+    sim->hydrogen_bonding_data = pf["HYDROGEN_BONDING_DATA"].get<std::string>();
+    sim->hbond_energy_file       = pf["HYDROGEN_BOND_ENERGY_FILE"].get<std::string>();
+    // sim->hbond_file            = pf["HYDROGEN_BOND_FILE"].get<std::string>();
+    // sys->seq_hbond_file        = pf["SEQ_HYDROGEN_BOND_FILE"].get<std::string>();
+    sim->potential_file        = pf["POTENTIAL_DATA"].get<std::string>();
+    sim->aromatic_file         = pf["AROMATIC_FILE"].get<std::string>();
+    // sys->all_triplet_file      = pf["TRIPLET_FILE"].get<std::string>();
+    // sys->all_sctorsion_file    = pf["SC_TORISON_FILE"].get<std::string>();
+    /* close cfg file */
 
-    if (strcmp(sim->native_directory, "None") != 0) {
-        sprintf(sim->native_file, "%s/%d.pdb", sim->native_directory,
-                sim->myrank + sim->my_rank_offset);
+    // --- Replica Exchange Parameters ---
+    std::cout << "DEBUG: Reading replica exchange parameters from config file." << std::endl;
+    auto& re = config["replica_exchange_parameters"];
+    sim->NODES_PER_TEMP = re["NODES_PER_TEMP"].get<int>();
+    sim->contacts_step  = re["CONTACTS_STEP"].get<int>();
+    sim->umbrella       = re["UMBRELLA"].get<int>();
+    integrator->MC_TEMP_MIN = re["MC_TEMP_MIN"].get<float>();
+    integrator->TEMP_STEP   = re["TEMP_STEP"].get<float>();
+    sys->k_bias          = re["K_BIAS"].get<float>();
+    sim->number_of_contacts_max = re["NUMBER_OF_CONTACTS_MAX"].get<int>();
+    top->min_seq_sep = re["MIN_SEQ_SEP"].get<int>();
+    sys->contact_calpha_cutoff    = re["CONTACT_CALPHA_CUTOFF"].get<float>();
+
+    printf("Finished reading config file!\n");
+    if (strcmp(sim->native_directory.c_str(), "None") != 0) {
+        char path_buf[1024];
+        sprintf(path_buf, "%s/%d.pdb", sim->native_directory.c_str(), sim->myrank + sim->my_rank_offset);
+        sim->native_file = path_buf;
 
         FILE *test_file;
-        if ((test_file = fopen(sim->native_file, "r")) == NULL) {
+        if ((test_file = fopen(sim->native_file.c_str(), "r")) == NULL) {
             int mod_rank = (sim->myrank + sim->my_rank_offset) % sim->NODES_PER_TEMP;
             // printf("The current value of mod_rank is %i", mod_rank);
-            sprintf(sim->native_file, "%s/%d.pdb", sim->native_directory, mod_rank);
+            char mod_path_buf[1024];
+            sprintf(mod_path_buf, "%s/%d.pdb", sim->native_directory.c_str(), mod_rank);
+            sim->native_file = mod_path_buf;
             // printf("The current value of native_file is %s", native_file);
         }
     }
 
+    std::cout << "DEBUG: number of processes : " << sim->nprocs << std::endl;
+    
     if (sim->nprocs % sim->NODES_PER_TEMP != 0) {
         printf("ERROR! Number of cores must be divisible by NODES_PER_TEMP");
-        exit(0);
+        //exit(1);
     }
 
     sim->Tnode = (float *)calloc(sim->nprocs, sizeof(float));
     sim->Enode = (float *)calloc(sim->nprocs, sizeof(float));
     sim->Cnode = (int *)calloc(sim->nprocs, sizeof(int));  // number of contacts setpoints
     sim->Nnode = (int *)calloc(sim->nprocs, sizeof(int));
+
+    std::cout << "DEBUG: Setting up temperature and contact setpoint arrays for replica exchange." << std::endl;
 
     float current_temp = integrator->MC_TEMP_MIN;
     int   current_setpoint;
@@ -1515,33 +1459,52 @@ void SetProgramOptions(struct Simulation *sim, struct System *sys, struct MCInte
                                   // change the sim->my_rank_offset
     sim->number_of_contacts_setpoint = sim->Cnode[sim->myrank];  /// same with setpoint
 
-    /* SET name of PDB and log file  */
+    std::cout << "DEBUG: Finished setting up temperature and contact setpoint arrays for replica exchange." << std::endl;
 
+    /* SET name of PDB and log file  */
+    std::string std_prefix = sim->pdb_out_file;
     if (sim->umbrella == 1) {
-        sprintf(sim->std_file, "%s_T_%5.3f_%d.log", sim->std_prefix, integrator->MC_TEMP,
-                sim->number_of_contacts_setpoint);
-        sprintf(sim->pdb_out_file + ls, "_%5.3f_%d", integrator->MC_TEMP,
-                sim->number_of_contacts_setpoint);
+        std::string suffix = std::format("_{:5.3f}_{}", 
+                                     integrator->MC_TEMP, 
+                                     sim->number_of_contacts_setpoint);
+
+        sim->std_file = std::format("{}{}.log", std_prefix, suffix);
+        sim->pdb_out_file = sim->pdb_out_file + suffix;
     } else {
         sys->k_bias = 0;  // regardless of what we had inputted for k_bias, if umbrella is off, we
                           // don't want any bias!!
         if (sim->NODES_PER_TEMP == 1 && sim->my_rank_offset == 0) {
-            sprintf(sim->std_file, "%s_T_%5.3f.log", sim->std_prefix, integrator->MC_TEMP);
-            sprintf(sim->pdb_out_file + ls, "_%5.3f", integrator->MC_TEMP);
+            sim->std_file = std::format("{}_T_{:5.3f}.log", 
+                                    std_prefix, 
+                                    integrator->MC_TEMP);
+
+            std::string pdb_suffix = std::format("_{:5.3f}", integrator->MC_TEMP);
+            sim->pdb_out_file = sim->pdb_out_file + pdb_suffix;
         } else {
-            sprintf(sim->std_file, "%s_T_%5.3f_%d.log", sim->std_prefix, integrator->MC_TEMP,
-                    sim->myrank + sim->my_rank_offset);
-            sprintf(sim->pdb_out_file + ls, "_%5.3f_%d", integrator->MC_TEMP,
-                    sim->myrank + sim->my_rank_offset);
+            int combined_rank = sim->myrank + sim->my_rank_offset;
+
+            sim->std_file = std::format("{}_T_{:5.3f}_{}.log", 
+                                        std_prefix, 
+                                        integrator->MC_TEMP, 
+                                        combined_rank);
+
+            std::string pdb_suffix = std::format("_{:5.3f}_{}", 
+                                                integrator->MC_TEMP, 
+                                                combined_rank);
+            sim->pdb_out_file = sim->pdb_out_file + pdb_suffix;
         }
     }
 
+    std::cout << "DEBUG: Finished setting up names for log and PDB output files." << std::endl;
+    
     /* OPEN log file  for business*/
     /*sprintf(std_file, "%s_%5.3f.log", std_prefix, MC_TEMP);*/
     sim->STATUS =
-        fopen(sim->std_file, "w"); /* for some reason, code gives file handle the name STATUS */
+        fopen(sim->std_file.c_str(), "w"); /* for some reason, code gives file handle the name STATUS */
     // fprintf(STATUS,"The value of temp1 is %s and the value of mod_rank is %i", temp1, mod_rank);
     // fflush(STATUS);
+
+    std::cout << "DEBUG: Log file opened for writing." << std::endl;
 
     sim->replica_index = (int *)calloc(sim->nprocs, sizeof(int));
 
@@ -1554,9 +1517,13 @@ void SetProgramOptions(struct Simulation *sim, struct System *sys, struct MCInte
         sim->accepted_replica[l] = sim->rejected_replica[l] = 0;
     }
 
+    std::cout << "DEBUG: Replica exchange tracking arrays initialized." << std::endl;
+
     fprintf(sim->STATUS, "The native directory is %s \n", sim->native_directory);
     fprintf(sim->STATUS, "Temperature/setpoint range for replica exchange!\n");
 
+    std::cout << "DEBUG: Logging initial replica exchange parameters." << std::endl;
+    
     for (l = 0; l < sim->nprocs; l++) {
         fprintf(sim->STATUS, "%4d : %5.3f %d \n", l, sim->Tnode[l], sim->Cnode[l]);
     }
@@ -1565,31 +1532,52 @@ void SetProgramOptions(struct Simulation *sim, struct System *sys, struct MCInte
             sim->myrank, cfg_file, sys->k_bias, sim->number_of_contacts_setpoint);
     fflush(sim->STATUS);
 
+    std::cout << "DEBUG: Finished logging initial replica exchange parameters." << std::endl;
+
     if (find_yang_move == 0) {
         fprintf(sim->STATUS, "There is nothing on YANG_MOVE!\n");
+        std::cout << "DEBUG: There is nothing on YANG_MOVE!" << std::endl;
         exit(1);
     }
     if (find_yang_scale == 0) {
         fprintf(sim->STATUS, "There is nothing on YANG_SCALE!\n");
+        std::cout << "DEBUG: There is nothing on YANG_SCALE!" << std::endl;
         exit(1);
     }
+    printf("Temperature/setpoint range for replica exchange!\n");
+
+    std::cout << "DEBUG: Temperature/setpoint range for replica exchange!" << std::endl;
 
     /* lattice parameters */
+    std::cout << "DEBUG: Setting lattice parameters." << std::endl;
+    std::cout << "DEBUG: Distance dependence flag is " << DISTANCE_DEPENDENCE << std::endl;
+    std::cout << "DEBUG: System lambda is " << sys->LAMBDA << " and alpha is " << sys->ALPHA << std::endl;
     if (DISTANCE_DEPENDENCE)
         integrator->LATTICE_SIZE = 1.0 / 5.25;
     else
         integrator->LATTICE_SIZE = 1 / (sys->LAMBDA * sys->ALPHA * (1.88 + 1.88));
+    std::cout << "DEBUG: Lattice size set with " << sys->LAMBDA << " and " << sys->ALPHA << std::endl;
     integrator->MATRIX_SIZE      = 20;
     integrator->HALF_MATRIX_SIZE = integrator->MATRIX_SIZE / 2;
+    printf("Temperature/setpoint range for replica exchange2!\n");
+
+    std::cout << "DEBUG: Finished setting lattice parameters." << std::endl;
 
     /*Read the constraints--AB*/
-    if (strcmp(sim->constraint_file, "None") != 0) {
+    if (sim->constraint_file[0] != '\0' && strcmp(sim->constraint_file.c_str(), "None") != 0) {
         fprintf(sim->STATUS, "There are constraints to read!\n");
         fflush(sim->STATUS);
         Read_constraints(sys, sim, ctx);
         fprintf(sim->STATUS, "Constraints read\n");
         fflush(sim->STATUS);
+    } else {
+        // Optional: Log that you are skipping constraints
+        fprintf(sim->STATUS, "No constraints provided. Skipping.\n");
+        fflush(sim->STATUS);
     }
+    printf("Finished setting program options!\n");
+
+    std::cout << "DEBUG: Finished setting program options." << std::endl;
 
     return;
 }

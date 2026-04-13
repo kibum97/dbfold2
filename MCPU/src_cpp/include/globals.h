@@ -1,7 +1,9 @@
-#ifndef GLOBALS_H
-#define GLOBALS_H
-
+#pragma once
 #include <Eigen/Dense>
+#include <vector>
+#include <array>
+#include <memory>
+#include <optional>
 
 namespace MCPU2 {
     #ifdef USE_SINGLE_PRECISION
@@ -13,6 +15,8 @@ namespace MCPU2 {
     using Vec3  = Eigen::Vector3<Real>;
     using Vec3i = Eigen::Vector3i;
     using Mat3  = Eigen::Matrix3<Real>;
+
+    using MatrixCoords = Eigen::Matrix<Real, 4, Eigen::Dynamic, Eigen::ColMajor>;
 
     // One-letter cast helper to keep math code from getting cluttered
     template <typename T>
@@ -28,6 +32,7 @@ using namespace MCPU2;
 #include <string.h>
 
 #include "define.h"
+#include "db/hbond_db.h"
 
 /* Math constants */
 static const double pi      = M_PI;
@@ -70,14 +75,17 @@ struct atom_type {
 };
 
 struct amino {
-    char  name[4];
-    char  symbol[2];
-    char  torsion[4][4][4];
-    float avg_angle[4][4][4][4][4];
-    int   ntorsions;
-    int   nrotamers;
-    int   rotate_natoms[4];
-    char  rotate_atom[4][10][4];
+    std::array<char, 4>  name;
+    std::array<char, 2>  symbol;
+    std::array<std::array<std::array<char, 4>, 4>, 4> torsion;
+    std::array<std::array<std::array<std::array<std::array<float, 4>, 4>, 4>, 4>, 4> avg_angle;
+    int ntorsions = 0;
+    int nrotamers = 0;
+    std::array<int, 4> rotate_natoms = {0, 0, 0, 0};
+    std::array<std::array<std::array<char, 4>, 10>, 4> rotate_atom;
+    std::string_view get_name() const { 
+        return std::string_view(name.data()); 
+    }
 };
 
 struct residue {
@@ -106,26 +114,15 @@ struct backbone {
     Vec3 O;
 };
 
-struct hydrogen_bond {
-    float max_D2;
-    float min_D2;
-    float D_int;
+struct HydrogenBond {
+    // 1. Default initialization prevents garbage values
+    float max_D2 = 0.0f;
+    float min_D2 = 0.0f;
+    float D_int  = 0.0f;
 
-    struct atom *donor;
-    struct atom *donor2;
-    struct atom *donor3;
-    struct atom *donor4;
-    struct atom *donor5;
-    struct atom *donor6;
-    struct atom *donor7;
-    struct atom *acceptor;
-    struct atom *acceptor2;
-    struct atom *acceptor3;
-    struct atom *acceptor4;
-    struct atom *acceptor5;
-    struct atom *acceptor6;
-    struct atom *acceptor7;
-    struct atom *acceptor8;
+    // 2. Replace the 15 manual pointers with zero-allocation arrays
+    std::array<atom*, 7> donors = {nullptr};
+    std::array<atom*, 8> acceptors = {nullptr};
 };
 
 struct monte_carlo {
@@ -159,6 +156,24 @@ struct alignment {
 
 
 /* Topology - Static biological structure */
+class Topology_new {
+public:
+    int n_residues;
+    int n_atoms;
+
+    std::vector<int> bb_start_col;
+    std::vector<int> sc_start_col;
+    std::vector<int> sc_atom_count;
+
+    std::vector<int> atom_types;
+    std::vector<int> residue_types;
+};
+
+class Context_new {
+    
+};
+
+
 struct Topology {
     int natoms, nresidues;
     int first_atom_res;
@@ -177,29 +192,32 @@ struct Topology {
     int  *map_to_seq, *map_to_struct;
     int  *seq_to_struct, *struct_to_seq;
     int  no_chi_list[20];
-    int  *helix;
     int  Res_aromatic[MAXSEQUENCE];
     int  movable_residue_map[MAX_RES];
     int  is_template[MAX_RES];
     int  res_atomno[MAX_RES];
 
     struct atom_type atom_type_list[200];
-    struct amino    *amino_acids;
+    //struct amino    *amino_acids;
+    std::vector<amino> amino_acids;
 };
 
 /* System - Physics weights and potential parameters */
 struct System {
+    double k_bias;
+    double   contact_calpha_cutoff;
+    float    ALPHA, LAMBDA;
+
     int MAX_TYPES;
     int USE_GO_POTENTIAL;
     int SEQ_DEP_HB;
 
     float    weight_potential, weight_clash, weight_rms, weight_hbond;
     float    NATIVE_ATTRACTION, NON_NATIVE_REPULSION, NON_SPECIFIC_ENERGY;
-    float    ALPHA, LAMBDA;
+
     float    mu, beta;
-    double   k_bias;
     float    rmsd_constraint;
-    double   contact_calpha_cutoff;
+
     long int NO_HBOND;
 
     /* Tables and Matrices (Future Eigen Targets) */
@@ -209,8 +227,8 @@ struct System {
     struct cutoff **contact_distance;
 
     double **prob_ang;
-    double **cluster_phi;
-    double **cluster_psi;
+    float  cluster_phi[20][NOCLUSTERS];
+    float  cluster_psi[20][NOCLUSTERS];
     float    deviation_ang[20][100][4];
 
     short      torsion_E[MAXSEQUENCE][6][6][6][6];
@@ -238,7 +256,7 @@ struct MCIntegrator {
     float MC_TEMP_MIN;
     float TEMP_STEP;
     float STEP_SIZE;
-    float YANG_SCALE;
+    int YANG_SCALE;
     float CLUSTER_MOVE;
     float SIDECHAIN_NOISE;
 
@@ -326,15 +344,14 @@ struct Context {
     struct cell         ***the_matrix;
     struct pair           *ab, *cd;
     struct pair           *hbond_pair;
-    struct hydrogen_bond **hbonds;
-
+    std::vector<std::unordered_map<int, HydrogenBond>> hbonds;
     /* Current Energies */
     float  native_E;
     float  E, E_pot, dE, dE_pot, prev_E, prev_E_pot;
     float  E_tor, E_sct, E_aro, E_Rg, dE_tor, dE_sct, dE_aro, dE_Rg;
     float  prev_E_aro, prev_E_sct, prev_E_tor;
     float  prev_E_hbond, E_hbond, dE_hbond;
-    float  hydrogen_bond;
+    // float  hydrogen_bond;
     short *hbond_E;
     int    helix_sheet;
     float  E_constraint, prev_E_constraint, dE_constraint, mean_constraint_distance;
@@ -389,21 +406,20 @@ struct Simulation {
     FILE *fpdb;
     FILE *STATUS;
     FILE *DATA;
-    char  path_dir[1024];
-    char  native_file[1024], structure_file[1024], triplet_file[1024];
-    char  sctorsion_file[1024], sec_str_file[1024], template_file[1024];
-    char amino_data_file[1024], rotamer_data_file[1024], potential_file[1024], atom_type_file[1024];
-    char helicity_data[1024], hydrogen_bonding_data[1024];
-    char substructure_path[1024], alignment_file[1024];
-    char std_prefix[1024];
-    char aromatic_file[1024];
-    char PROTEIN_NAME[100];
-    char pdb_out_file[1024];
-    char std_file[1024];
-    char native_directory[1024];
-    char constraint_file[1024];
-    char rmsd_constraint_file[1024];
-    char movable_region_file[1024];
+    std::string  path_dir;
+    std::string  native_file, structure_file, triplet_file;
+    std::string  sctorsion_file, sec_str_file, template_file;
+    std::string amino_data_file, rotamer_data_file, potential_file, atom_type_file;
+    std::string hydrogen_bonding_data, hbond_energy_file;
+    std::string substructure_path, alignment_file;
+    std::string aromatic_file;
+    std::string PROTEIN_NAME;
+    std::string pdb_out_file;
+    std::string std_file;
+    std::string native_directory;
+    std::string constraint_file;
+    std::string rmsd_constraint_file;
+    std::string movable_region_file;
 
     /* Debug */
 #if DEBUG
@@ -436,6 +452,11 @@ extern float  rot_mat_00, rot_mat_10, rot_mat_20, rot_mat_01, rot_mat_11, rot_ma
     rot_mat_12, rot_mat_22;
 
 extern struct alignment constraint_align;
+
+
+namespace mcpu::temp_globals {
+    inline HBondTopologyConfig active_hbond_config; 
+}
 
 #endif
 

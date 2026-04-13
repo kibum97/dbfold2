@@ -3,6 +3,8 @@
 
 #include "globals.h"
 
+#include <string_view>
+
 float HydrogenBonds(
     struct Topology *top,
     struct Context *ctx,
@@ -19,7 +21,7 @@ void InitializeHydrogenBonding(
     struct System *sys,
     struct Simulation *sim
 );
-int      MatchAtomname(char *);
+int MatchAtomname(std::string_view name);
 long int CheckHBond(
     struct Context *ctx,
     struct System *sys,

@@ -3,6 +3,9 @@
 #include <stdio.h>
 #include <span>
 #include <array>
+#include <fstream>
+#include <sstream>
+#include <string>
 
 #include "contacts.h"
 #include "define.h"
@@ -24,7 +27,7 @@ void Read_movable_region(
     int   movable_lower_bound;
     int   movable_upper_bound;
     int   n_movable = 0;
-    FILE *fp        = fopen(sim->movable_region_file, "r");
+    FILE *fp        = fopen(sim->movable_region_file.c_str(), "r");
     if (fp == NULL) {
         fprintf(sim->STATUS, "Could not open file %s \n", sim->movable_region_file);
         exit(1);
@@ -565,22 +568,22 @@ void yangloop(
     solve_3pep_poly(r_n.col(1), r_a.col(1), r_a.col(3), r_c.col(3), r_soln_n, r_soln_a, r_soln_c, n_soln);  // Find new loop closure solution post rotation
 
     if (calc_rmsd) { // KP NOTE: Can be remvoed
-        for (k = 0; k < *n_soln; k++) {
-            r_n.col(1) = r_soln_n[k].col(0);
-            r_a.col(1) = r_soln_a[k].col(0);
-            r_c.col(1) = r_soln_c[k].col(0);
-            sum = 0.0e0;
-            for (i = 0; i < 3; i++) {
-                sum += (r_soln_n[k] - r0drms_n).squaredNorm();
-                sum += (r_soln_a[k] - r0drms_a).squaredNorm();
-                sum += (r_soln_c[k] - r0drms_c).squaredNorm();
-            }
-            rmsd = sqrt(sum / 9.0e0);
-            if (rmsd < min_value) {
-                min_value = rmsd;
-                index     = k;
-            }
-        }
+        // for (k = 0; k < *n_soln; k++) {
+        //     r_n.col(1) = r_soln_n[k].col(0);
+        //     r_a.col(1) = r_soln_a[k].col(0);
+        //     r_c.col(1) = r_soln_c[k].col(0);
+        //     sum = 0.0e0;
+        //     for (i = 0; i < 3; i++) {
+        //         sum += (r_soln_n[k] - r0drms_n).squaredNorm();
+        //         sum += (r_soln_a[k] - r0drms_a).squaredNorm();
+        //         sum += (r_soln_c[k] - r0drms_c).squaredNorm();
+        //     }
+        //     rmsd = sqrt(sum / 9.0e0);
+        //     if (rmsd < min_value) {
+        //         min_value = rmsd;
+        //         index     = k;
+        //     }
+        // }
         if (*n_soln > 0) {
             index = (int)(threefryrand() * (*n_soln));
             if (index >= (*n_soln)) {
@@ -776,7 +779,7 @@ void get_template(
         len_template[i]     = 0;
     }
 
-    if ((the_file = fopen(sim->template_file, "r")) == NULL) {
+    if ((the_file = fopen(sim->template_file.c_str(), "r")) == NULL) {
         fprintf(sim->STATUS, "ERROR: Can't open the file: %s!\n", sim->template_file);
         exit(1);
     }
@@ -898,7 +901,7 @@ void initialize_torsion(
                         sys->torsion_E[r][x][y][z][w] = 1000;
 
     fprintf(sim->STATUS, "Opening the file: %s\n", sim->triplet_file);
-    if ((ftor = fopen(sim->triplet_file, "r")) == NULL) {
+    if ((ftor = fopen(sim->triplet_file.c_str(), "r")) == NULL) {
         fprintf(sim->STATUS, "ERROR: Can't open the file: %s!\n", sim->triplet_file);
         exit(1);
     }
@@ -917,7 +920,7 @@ void initialize_sct(
 ) {
     int r, cur_res, value;
     int x, y, z, w;
-
+    printf("DEBUG: initialize_sct\n");
     FILE *ftor;
     char  line[1000];
 
@@ -929,7 +932,7 @@ void initialize_sct(
                         sys->sct_E[r][x][y][z][w] = 1000;
 
     fprintf(sim->STATUS, "Opening the file: %s\n", sim->sctorsion_file);
-    if ((ftor = fopen(sim->sctorsion_file, "r")) == NULL) {
+    if ((ftor = fopen(sim->sctorsion_file.c_str(), "r")) == NULL) {
         fprintf(sim->STATUS, "ERROR: Can't open the file: %s!\n", sim->sctorsion_file);
         exit(1);
     }
@@ -939,7 +942,7 @@ void initialize_sct(
         //    fprintf(sim->STATUS, "%10d\n", sys->sct_E[cur_res][x][y][z][w]);
     }
     fclose(ftor);
-
+    printf("DEBUG: initialize_sct done\n");
     return;
 }
 
@@ -954,9 +957,9 @@ void initialize_aromatic(
     FILE *ftor;
     char  line[1000];
 
-    fprintf(sim->STATUS, "Opening the file: %s\n", sim->aromatic_file);
-    if ((ftor = fopen(sim->aromatic_file, "r")) == NULL) {
-        fprintf(sim->STATUS, "ERROR: Can't open the file: %s!\n", sim->aromatic_file);
+    fprintf(sim->STATUS, "Opening the file: %s\n", sim->aromatic_file.c_str());
+    if ((ftor = fopen(sim->aromatic_file.c_str(), "r")) == NULL) {
+        fprintf(sim->STATUS, "ERROR: Can't open the file: %s!\n", sim->aromatic_file.c_str());
         exit(1);
     }
     while (fgets(line, 200, ftor) != NULL) {
@@ -977,77 +980,35 @@ void initialize_aromatic(
     return;
 }
 
-//========================================================================================================
-int will2edo(int edo) {
-    if (edo == 1)
-        return 7;
-    else if (edo == 2)
-        return 0;
-    else if (edo == 3)
-        return 19;
-    else if (edo == 4)
-        return 10;
-    else if (edo == 5)
-        return 9;
-    else if (edo == 6)
-        return 15;
-    else if (edo == 7)
-        return 16;
-    else if (edo == 8)
-        return 3;
-    else if (edo == 9)
-        return 6;
-    else if (edo == 10)
-        return 2;
-    else if (edo == 11)
-        return 5;
-    else if (edo == 12)
-        return 11;
-    else if (edo == 13)
-        return 1;
-    else if (edo == 14)
-        return 4;
-    else if (edo == 15)
-        return 12;
-    else if (edo == 16)
-        return 8;
-    else if (edo == 17)
-        return 13;
-    else if (edo == 18)
-        return 18;
-    else if (edo == 19)
-        return 17;
-    else if (edo == 20)
-        return 14;
-    else
-        return 0;
-};
+
 
 //========================================================================================================
 void read_cluster(
-    struct Simulation *sim, struct System *sys
+    std::string filename, struct System *sys
 ) {
-    FILE *fcluster;
-    int   cur_res;
-    //  int i, j;
-    int   temp_value = 0;
-    float x, y;
-    char  cluster_file[100], line[1000];
+    std::ifstream file(filename);
+    std::string line;
+    
+    // Skip header line if it exists
+    std::getline(file, line);
 
-    sprintf(cluster_file, "../config_files/center%d_state", NOCLUSTERS);
-    fprintf(sim->STATUS, "Opening the file: %s\n", cluster_file);
-    if ((fcluster = fopen(cluster_file, "r")) == NULL) {
-        fprintf(sim->STATUS, "ERROR: Can't open the file: %s!\n", cluster_file);
-        exit(1);
+    while (std::getline(file, line)) {
+        std::stringstream ss(line);
+        std::string value;
+        
+        int res, clu;
+        float phi, psi;
+
+        std::getline(ss, value, ','); clu = std::stoi(value);
+        std::getline(ss, value, ','); res = std::stoi(value);
+        std::getline(ss, value, ','); phi = std::stof(value);
+        std::getline(ss, value, ','); psi = std::stof(value);
+    
+        sys->cluster_phi[res][clu] = phi;
+        sys->cluster_psi[res][clu] = psi;
     }
-    while (fgets(line, 200, fcluster) != NULL) {
-        temp_value = temp_value % NOCLUSTERS;
-        sscanf(line, "%d %f %f", &cur_res, &x, &y);
-        sys->cluster_phi[will2edo(cur_res)][temp_value] = x;
-        sys->cluster_psi[will2edo(cur_res)][temp_value] = y;
-        temp_value++;
-    }
-    fclose(fcluster);
+    std::cout << "Cluster data read from " << filename << std::endl;
+    file.close();
     //  for (i=0;i<20;i++)
     //    for (j=0;j<NOCLUSTERS;j++)
     //      fprintf(sim->STATUS, "%d %d %8.5f %8.5f\n", i, j, sys->cluster_phi[i][j], sys->cluster_psi[i][j]);
@@ -1091,7 +1052,7 @@ void initialize_secstr(
     int   i;
 
     fprintf(sim->STATUS, "Opening the file: %s\n", sim->sec_str_file);
-    if ((ftor = fopen(sim->sec_str_file, "r")) == NULL) {
+    if ((ftor = fopen(sim->sec_str_file.c_str(), "r")) == NULL) {
         fprintf(sim->STATUS, "ERROR: Can't open the file: %s!\n", sim->sec_str_file);
         exit(1);
     }

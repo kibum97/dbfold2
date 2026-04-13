@@ -2,6 +2,7 @@
 #define PDB_UTIL_H
 
 #include "globals.h"
+#include <string_view>
 
 void ParsePDBLine(
     struct Simulation *sim,
@@ -18,23 +19,21 @@ void PrintPDB(
     struct Simulation *sim,
     struct Context *ctx,
     struct Topology *top,
-    char *filename);
+    const char *filename);
 void PrintPDB_Emin(
-    struct Simulation *sim,
+    struct Simulation *sim,     
     struct Context *ctx,
     struct Topology *top,
-    char *filename);
+    const char *filename);
 void PrintPDB_RMSDmin(
     struct Simulation *sim,
     struct Context *ctx,
     struct Topology *top,
-    char *filename);
+    const char *filename);
 int SMoGType(
     struct Simulation *sim,
     char *atomname, char *residue);
-int GetSMoGType(
-    struct Simulation *sim,
-    const char *c);
+int GetSMoGType(std::string_view c);
 void PrintReplica(
     struct Simulation *sim,
     struct Context *ctx,

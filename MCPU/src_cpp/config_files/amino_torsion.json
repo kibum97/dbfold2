@@ -1,0 +1,719 @@
+[
+  {
+    "name": "ALA",
+    "symbol": "A",
+    "heavy_atoms": 6,
+    "ntorsions": 0,
+    "torsions": []
+  },
+  {
+    "name": "ARG",
+    "symbol": "R",
+    "heavy_atoms": 12,
+    "ntorsions": 4,
+    "torsions": [
+      {
+        "id": 0,
+        "atoms": [
+          "N",
+          "CA",
+          "CB",
+          "CG"
+        ],
+        "affected_atoms": [
+          "CG",
+          "CD",
+          "NE",
+          "CZ",
+          "NH1",
+          "NH2"
+        ]
+      },
+      {
+        "id": 1,
+        "atoms": [
+          "CA",
+          "CB",
+          "CG",
+          "CD"
+        ],
+        "affected_atoms": [
+          "CD",
+          "NE",
+          "CZ",
+          "NH1",
+          "NH2"
+        ]
+      },
+      {
+        "id": 2,
+        "atoms": [
+          "CB",
+          "CG",
+          "CD",
+          "NE"
+        ],
+        "affected_atoms": [
+          "NE",
+          "CZ",
+          "NH1",
+          "NH2"
+        ]
+      },
+      {
+        "id": 3,
+        "atoms": [
+          "CG",
+          "CD",
+          "NE",
+          "CZ"
+        ],
+        "affected_atoms": [
+          "CZ",
+          "NH1",
+          "NH2"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "ASN",
+    "symbol": "N",
+    "heavy_atoms": 9,
+    "ntorsions": 2,
+    "torsions": [
+      {
+        "id": 0,
+        "atoms": [
+          "N",
+          "CA",
+          "CB",
+          "CG"
+        ],
+        "affected_atoms": [
+          "CG",
+          "OD1",
+          "ND2"
+        ]
+      },
+      {
+        "id": 1,
+        "atoms": [
+          "CA",
+          "CB",
+          "CG",
+          "OD1"
+        ],
+        "affected_atoms": [
+          "OD1",
+          "ND2"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "ASP",
+    "symbol": "D",
+    "heavy_atoms": 9,
+    "ntorsions": 2,
+    "torsions": [
+      {
+        "id": 0,
+        "atoms": [
+          "N",
+          "CA",
+          "CB",
+          "CG"
+        ],
+        "affected_atoms": [
+          "CG",
+          "OD1",
+          "OD2"
+        ]
+      },
+      {
+        "id": 1,
+        "atoms": [
+          "CA",
+          "CB",
+          "CG",
+          "OD1"
+        ],
+        "affected_atoms": [
+          "OD1",
+          "OD2"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "CYS",
+    "symbol": "C",
+    "heavy_atoms": 7,
+    "ntorsions": 1,
+    "torsions": [
+      {
+        "id": 0,
+        "atoms": [
+          "N",
+          "CA",
+          "CB",
+          "SG"
+        ],
+        "affected_atoms": [
+          "SG"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "GLN",
+    "symbol": "Q",
+    "heavy_atoms": 10,
+    "ntorsions": 3,
+    "torsions": [
+      {
+        "id": 0,
+        "atoms": [
+          "N",
+          "CA",
+          "CB",
+          "CG"
+        ],
+        "affected_atoms": [
+          "CG",
+          "CD",
+          "OE1",
+          "NE2"
+        ]
+      },
+      {
+        "id": 1,
+        "atoms": [
+          "CA",
+          "CB",
+          "CG",
+          "CD"
+        ],
+        "affected_atoms": [
+          "CD",
+          "OE1",
+          "NE2"
+        ]
+      },
+      {
+        "id": 2,
+        "atoms": [
+          "CB",
+          "CG",
+          "CD",
+          "OE1"
+        ],
+        "affected_atoms": [
+          "OE1",
+          "NE2"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "GLU",
+    "symbol": "E",
+    "heavy_atoms": 10,
+    "ntorsions": 3,
+    "torsions": [
+      {
+        "id": 0,
+        "atoms": [
+          "N",
+          "CA",
+          "CB",
+          "CG"
+        ],
+        "affected_atoms": [
+          "CG",
+          "CD",
+          "OE1",
+          "OE2"
+        ]
+      },
+      {
+        "id": 1,
+        "atoms": [
+          "CA",
+          "CB",
+          "CG",
+          "CD"
+        ],
+        "affected_atoms": [
+          "CD",
+          "OE1",
+          "OE2"
+        ]
+      },
+      {
+        "id": 2,
+        "atoms": [
+          "CB",
+          "CG",
+          "CD",
+          "OE1"
+        ],
+        "affected_atoms": [
+          "OE1",
+          "OE2"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "GLY",
+    "symbol": "G",
+    "heavy_atoms": 5,
+    "ntorsions": 0,
+    "torsions": []
+  },
+  {
+    "name": "HIS",
+    "symbol": "H",
+    "heavy_atoms": 11,
+    "ntorsions": 2,
+    "torsions": [
+      {
+        "id": 0,
+        "atoms": [
+          "N",
+          "CA",
+          "CB",
+          "CG"
+        ],
+        "affected_atoms": [
+          "CG",
+          "ND1",
+          "CD2",
+          "CE1",
+          "NE2"
+        ]
+      },
+      {
+        "id": 1,
+        "atoms": [
+          "CA",
+          "CB",
+          "CG",
+          "ND1"
+        ],
+        "affected_atoms": [
+          "ND1",
+          "CD2",
+          "CE1",
+          "NE2"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "ILE",
+    "symbol": "I",
+    "heavy_atoms": 9,
+    "ntorsions": 2,
+    "torsions": [
+      {
+        "id": 0,
+        "atoms": [
+          "N",
+          "CA",
+          "CB",
+          "CG1"
+        ],
+        "affected_atoms": [
+          "CG1",
+          "CG2",
+          "CD1"
+        ]
+      },
+      {
+        "id": 1,
+        "atoms": [
+          "CA",
+          "CB",
+          "CG1",
+          "CD1"
+        ],
+        "affected_atoms": [
+          "CD1"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "LEU",
+    "symbol": "L",
+    "heavy_atoms": 9,
+    "ntorsions": 2,
+    "torsions": [
+      {
+        "id": 0,
+        "atoms": [
+          "N",
+          "CA",
+          "CB",
+          "CG"
+        ],
+        "affected_atoms": [
+          "CG",
+          "CD1",
+          "CD2"
+        ]
+      },
+      {
+        "id": 1,
+        "atoms": [
+          "CA",
+          "CB",
+          "CG",
+          "CD1"
+        ],
+        "affected_atoms": [
+          "CD1",
+          "CD2"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "LYS",
+    "symbol": "K",
+    "heavy_atoms": 10,
+    "ntorsions": 4,
+    "torsions": [
+      {
+        "id": 0,
+        "atoms": [
+          "N",
+          "CA",
+          "CB",
+          "CG"
+        ],
+        "affected_atoms": [
+          "CG",
+          "CD",
+          "CE",
+          "NZ"
+        ]
+      },
+      {
+        "id": 1,
+        "atoms": [
+          "CA",
+          "CB",
+          "CG",
+          "CD"
+        ],
+        "affected_atoms": [
+          "CD",
+          "CE",
+          "NZ"
+        ]
+      },
+      {
+        "id": 2,
+        "atoms": [
+          "CB",
+          "CG",
+          "CD",
+          "CE"
+        ],
+        "affected_atoms": [
+          "CE",
+          "NZ"
+        ]
+      },
+      {
+        "id": 3,
+        "atoms": [
+          "CG",
+          "CD",
+          "CE",
+          "NZ"
+        ],
+        "affected_atoms": [
+          "NZ"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "MET",
+    "symbol": "M",
+    "heavy_atoms": 9,
+    "ntorsions": 3,
+    "torsions": [
+      {
+        "id": 0,
+        "atoms": [
+          "N",
+          "CA",
+          "CB",
+          "CG"
+        ],
+        "affected_atoms": [
+          "CG",
+          "SD",
+          "CE"
+        ]
+      },
+      {
+        "id": 1,
+        "atoms": [
+          "CA",
+          "CB",
+          "CG",
+          "SD"
+        ],
+        "affected_atoms": [
+          "SD",
+          "CE"
+        ]
+      },
+      {
+        "id": 2,
+        "atoms": [
+          "CB",
+          "CG",
+          "SD",
+          "CE"
+        ],
+        "affected_atoms": [
+          "CE"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "PHE",
+    "symbol": "F",
+    "heavy_atoms": 12,
+    "ntorsions": 2,
+    "torsions": [
+      {
+        "id": 0,
+        "atoms": [
+          "N",
+          "CA",
+          "CB",
+          "CG"
+        ],
+        "affected_atoms": [
+          "CG",
+          "CD1",
+          "CD2",
+          "CE1",
+          "CE2",
+          "CZ"
+        ]
+      },
+      {
+        "id": 1,
+        "atoms": [
+          "CA",
+          "CB",
+          "CG",
+          "CD1"
+        ],
+        "affected_atoms": [
+          "CD1",
+          "CD2",
+          "CE1",
+          "CE2",
+          "CZ"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "PRO",
+    "symbol": "P",
+    "heavy_atoms": 8,
+    "ntorsions": 2,
+    "torsions": [
+      {
+        "id": 0,
+        "atoms": [
+          "N",
+          "CA",
+          "CB",
+          "CG"
+        ],
+        "affected_atoms": [
+          "CG",
+          "CD"
+        ]
+      },
+      {
+        "id": 1,
+        "atoms": [
+          "CA",
+          "CB",
+          "CG",
+          "CD"
+        ],
+        "affected_atoms": [
+          "CD"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "SER",
+    "symbol": "S",
+    "heavy_atoms": 7,
+    "ntorsions": 1,
+    "torsions": [
+      {
+        "id": 0,
+        "atoms": [
+          "N",
+          "CA",
+          "CB",
+          "OG"
+        ],
+        "affected_atoms": [
+          "OG"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "THR",
+    "symbol": "T",
+    "heavy_atoms": 8,
+    "ntorsions": 1,
+    "torsions": [
+      {
+        "id": 0,
+        "atoms": [
+          "N",
+          "CA",
+          "CB",
+          "OG1"
+        ],
+        "affected_atoms": [
+          "OG1",
+          "CG2"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "TRP",
+    "symbol": "W",
+    "heavy_atoms": 15,
+    "ntorsions": 2,
+    "torsions": [
+      {
+        "id": 0,
+        "atoms": [
+          "N",
+          "CA",
+          "CB",
+          "CG"
+        ],
+        "affected_atoms": [
+          "CG",
+          "CD1",
+          "CD2",
+          "NE1",
+          "CE2",
+          "CE3",
+          "CZ2",
+          "CZ3",
+          "CH2"
+        ]
+      },
+      {
+        "id": 1,
+        "atoms": [
+          "CA",
+          "CB",
+          "CG",
+          "CD1"
+        ],
+        "affected_atoms": [
+          "CD1",
+          "CD2",
+          "NE1",
+          "CE2",
+          "CE3",
+          "CZ2",
+          "CZ3",
+          "CH2"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "TYR",
+    "symbol": "Y",
+    "heavy_atoms": 13,
+    "ntorsions": 2,
+    "torsions": [
+      {
+        "id": 0,
+        "atoms": [
+          "N",
+          "CA",
+          "CB",
+          "CG"
+        ],
+        "affected_atoms": [
+          "CG",
+          "CD1",
+          "CD2",
+          "CE1",
+          "CE2",
+          "CZ",
+          "OH"
+        ]
+      },
+      {
+        "id": 1,
+        "atoms": [
+          "CA",
+          "CB",
+          "CG",
+          "CD2"
+        ],
+        "affected_atoms": [
+          "CD1",
+          "CD2",
+          "CE1",
+          "CE2",
+          "CZ",
+          "OH"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "VAL",
+    "symbol": "V",
+    "heavy_atoms": 8,
+    "ntorsions": 1,
+    "torsions": [
+      {
+        "id": 0,
+        "atoms": [
+          "N",
+          "CA",
+          "CB",
+          "CG1"
+        ],
+        "affected_atoms": [
+          "CG1",
+          "CG2"
+        ]
+      }
+    ]
+  }
+]

@@ -192,10 +192,10 @@ void MakeMove(struct Context *ctx, struct System *sys, struct Topology *top,
             //	align_drms(native, native_residue, struct_native, struct_residue, map_to_seq,
             // map_to_struct, nalign, &bb_rms);
 
-            if (strcmp(sim->constraint_file, "None") != 0) {  // AB
+            if (sim->constraint_file != "None") {  // AB
                 ctx->dE_constraint = Compute_constraint_energy(ctx, sys, ctx->native_residue, ctx->native) -
                                      ctx->prev_E_constraint;  // AB
-            } else if (strcmp(sim->rmsd_constraint_file, "None") != 0) {
+            } else if (sim->rmsd_constraint_file != "None") {
                 ctx->dE_constraint = Compute_frag_rmsd_constraint_energy(
                                          sys, ctx->struct_f1, ctx->struct_f2, constraint_align) -
                                      ctx->prev_E_constraint;  // AB

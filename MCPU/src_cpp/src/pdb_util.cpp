@@ -9,7 +9,7 @@ void PrintPDB(
     struct Simulation *sim,
     struct Context *ctx,
     struct Topology *top,
-    char *filename) {
+    const char *filename) {
     int i;
 
     if ((sim->DATA = fopen(filename, "w")) == NULL) {
@@ -86,7 +86,7 @@ void PrintPDB_Emin(
     struct Simulation *sim,
     struct Context *ctx,
     struct Topology *top,
-    char *filename) {
+    const char *filename) {
     int i;
 
     if ((sim->DATA = fopen(filename, "w")) == NULL) {
@@ -111,7 +111,7 @@ void PrintPDB_RMSDmin(
     struct Simulation *sim,
     struct Context *ctx,
     struct Topology *top,
-    char *filename) {
+    const char *filename) {
     int i;
 
     if ((sim->DATA = fopen(filename, "w")) == NULL) {
@@ -136,112 +136,107 @@ int SMoGType(
     struct Simulation *sim,
     char *atomname, char *residue) {
     if (!strncmp(atomname, "H", 1))
-        return (GetSMoGType(sim, "H"));
+        return (GetSMoGType("H"));
     else if (!(strcmp(atomname, "C")))
-        return (GetSMoGType(sim, "CC"));
+        return (GetSMoGType("CC"));
     else if (!(strcmp(atomname, "CA")))
-        return (GetSMoGType(sim, "CA"));
+        return (GetSMoGType("CA"));
     else if (!(strcmp(atomname, "CB"))) {
         if ((!(strcmp(residue, "SER"))) || (!(strcmp(residue, "THR"))))
-            return (GetSMoGType(sim, "CP"));
+            return (GetSMoGType("CP"));
         else
-            return (GetSMoGType(sim, "C3"));
+            return (GetSMoGType("C3"));
     } else if (!(strncmp(atomname, "CG", 2))) {
         if ((!(strcmp(residue, "ASP"))) || (!(strcmp(residue, "ASN"))))
-            return (GetSMoGType(sim, "CC"));
+            return (GetSMoGType("CC"));
         else if ((!(strcmp(residue, "PHE"))) || (!(strcmp(residue, "TYR"))) ||
                  (!(strcmp(residue, "HIS"))) || (!(strcmp(residue, "TRP"))))
-            return (GetSMoGType(sim, "C2"));
+            return (GetSMoGType("C2"));
         else
-            return (GetSMoGType(sim, "C3"));
+            return (GetSMoGType("C3"));
     } else if (!(strncmp(atomname, "CD", 2))) {
         if ((!(strcmp(residue, "GLU"))) || (!(strcmp(residue, "GLN"))))
-            return (GetSMoGType(sim, "CC"));
+            return (GetSMoGType("CC"));
         else if (!(strcmp(residue, "ARG")))
-            return (GetSMoGType(sim, "CP"));
+            return (GetSMoGType("CP"));
         else if (!(strcmp(residue, "PRO")))
-            return (GetSMoGType(sim, "CA"));
+            return (GetSMoGType("CA"));
         else if ((!(strcmp(residue, "PHE"))) || (!(strcmp(residue, "TYR"))) ||
                  (!(strcmp(residue, "HIS"))) || (!(strcmp(residue, "TRP"))))
-            return (GetSMoGType(sim, "C2"));
+            return (GetSMoGType("C2"));
         else
-            return (GetSMoGType(sim, "C3"));
+            return (GetSMoGType("C3"));
     } else if (!(strncmp(atomname, "CE", 2))) {
         if ((!(strcmp(residue, "LYS"))) || (!(strcmp(residue, "HIS"))))
-            return (GetSMoGType(sim, "CP"));
+            return (GetSMoGType("CP"));
         else
-            return (GetSMoGType(sim, "C2"));
+            return (GetSMoGType("C2"));
     } else if (!(strncmp(atomname, "CZ", 2))) {
         if (!(strcmp(residue, "ARG")))
-            return (GetSMoGType(sim, "CC"));
+            return (GetSMoGType("CC"));
         else if (!(strcmp(residue, "TYR")))
-            return (GetSMoGType(sim, "CP"));
+            return (GetSMoGType("CP"));
         else
-            return (GetSMoGType(sim, "C2"));
+            return (GetSMoGType("C2"));
     } else if (!(strncmp(atomname, "CH", 2)))
-        return (GetSMoGType(sim, "C2"));
+        return (GetSMoGType("C2"));
     else if (!(strcmp(atomname, "N")))
-        return (GetSMoGType(sim, "NM"));
+        return (GetSMoGType("NM"));
     else if (!(strncmp(atomname, "ND", 2))) {
         if (!(strcmp(residue, "HIS")))
-            return (GetSMoGType(sim, "NC"));
+            return (GetSMoGType("NC"));
         else
-            return (GetSMoGType(sim, "ND"));
+            return (GetSMoGType("ND"));
     } else if (!(strncmp(atomname, "NE", 2))) {
         if (!(strcmp(residue, "HIS")))
-            return (GetSMoGType(sim, "NC"));
+            return (GetSMoGType("NC"));
         else
-            return (GetSMoGType(sim, "ND"));
+            return (GetSMoGType("ND"));
     } else if (!(strcmp(atomname, "NZ")))
-        return (GetSMoGType(sim, "NC"));
+        return (GetSMoGType("NC"));
     else if (!(strncmp(atomname, "NH", 2)))
-        return (GetSMoGType(sim, "NC"));
+        return (GetSMoGType("NC"));
     else if (!(strcmp(atomname, "O")))
         if (!(strncmp(residue, "HOH", 3)))
-            return (GetSMoGType(sim, "OD"));
+            return (GetSMoGType("OD"));
         else
-            return (GetSMoGType(sim, "OB"));
+            return (GetSMoGType("OB"));
     else if (!(strncmp(atomname, "OG", 2)))
-        return (GetSMoGType(sim, "OD"));
+        return (GetSMoGType("OD"));
     else if (!(strncmp(atomname, "OD", 2))) {
         if (!(strcmp(residue, "ASP")))
-            return (GetSMoGType(sim, "OC"));
+            return (GetSMoGType("OC"));
         else
-            return (GetSMoGType(sim, "OB"));
+            return (GetSMoGType("OB"));
     } else if (!(strncmp(atomname, "OE", 2))) {
         if (!(strcmp(residue, "GLU")))
-            return (GetSMoGType(sim, "OC"));
+            return (GetSMoGType("OC"));
         else
-            return (GetSMoGType(sim, "OB"));
+            return (GetSMoGType("OB"));
     } else if (!(strncmp(atomname, "OH", 2)))
-        return (GetSMoGType(sim, "OD"));
+        return (GetSMoGType("OD"));
     else if (!(strncmp(atomname, "S", 1)))
-        return (GetSMoGType(sim, "SP"));
+        return (GetSMoGType("SP"));
     else if (!(strncmp(atomname, "OXT", 3)))
-        return (GetSMoGType(sim, "OC"));
+        return (GetSMoGType("OC"));
     else if (!(strncmp(atomname, "OCT", 3)))
-        return (GetSMoGType(sim, "OC"));
+        return (GetSMoGType("OC"));
     else if (!strncmp(atomname, "ME", 2) || !strncmp(atomname, "ZN", 2) ||
              !strncmp(atomname, "FE", 2) || !strncmp(atomname, "MG", 2) ||
              !strncmp(atomname, "MN", 2) || !strncmp(atomname, "CU", 2))
-        return (GetSMoGType(sim, "ME"));
+        return (GetSMoGType("ME"));
     else {
-        return (GetSMoGType(sim, "H"));
+        return (GetSMoGType("H"));
     }
 
     return -500;
 }
 
-int GetSMoGType(
-    struct Simulation *sim,
-    const char *c) {
-    int i;
-
-    for (i = 0; i < NSMOGTYPES; i++)
-        if (!strcmp(at_types[i], c))
-            return i;
-    fprintf(sim->STATUS, "atom type %s not found in the parameter table. Check!\n", c);
-    exit(0);
+int GetSMoGType(std::string_view c) {
+    if (auto it = SMOG_TYPE_MAP.find(c); it != SMOG_TYPE_MAP.end()) {
+        return it->second;
+    }
+    throw std::runtime_error("ERROR: Atom type '" + std::string(c) + "' not found in the parameter table. Check!");
 }
 
 int TypeMaxAtoms(

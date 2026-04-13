@@ -17,7 +17,7 @@
 //! subroutine  initialize_loop_closure(b_len, b_ang, t_ang)
 //!*******************************************************************
 //! connectivity of atoms:
-//!   N1-A1-C1-N2-A2-C2-N3-A3-C3
+//!   N1-A1-C1-N2-A2-C2-N3-A3-C3apply_rotation_eigen
 //! Same as in Dill paper
 //! input:
 //!

@@ -7,12 +7,7 @@ void ReadAlignment(
     struct Topology *top,
     struct System *sys
 );
-void ReadHelicityData(
-    struct System *sys,
-    struct Topology *top,
-    struct Context *ctx,
-    struct Simulation *sim
-);
+
 void SetupAlignmentStructure(
     struct Context *ctx,
     struct Topology *top,

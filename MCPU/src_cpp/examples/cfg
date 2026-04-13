@@ -59,9 +59,7 @@ MAX_CLUSTERSTEP			0
 USE_SIDECHAINS			1
 USE_ROTAMERS			1
 USE_ROT_PROB			0
-SEQ_DEP_HB			1
-
- 
+SEQ_DEP_HB			1 
 !!
 !!
 !! Umbrella parameters !!

@@ -17,7 +17,7 @@ void SetupMuPotential(struct System *sys, struct Topology *top, struct Context *
                       struct Simulation *sim);
 void ReadNative(struct Simulation *sim,
     struct System *sys, struct MCIntegrator *integrator, struct Topology *top,
-    char *file_name, struct atom *protein, int *Natoms);
+    const char *file_name, struct atom *protein, int *Natoms);
 void ReadTypesFile(struct Simulation *sim, struct Topology *top, struct System *sys);
 void GetResidueInfo(struct atom *Chain, struct residue *Residue, int Nres, int Natoms);
 void GetPhiPsi(struct atom *Chain, struct residue *Residue, int Nres);

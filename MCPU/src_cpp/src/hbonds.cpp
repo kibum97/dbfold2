@@ -5,6 +5,10 @@
 #include "tripep_closure.h"
 #include "vector.h"
 
+#include <vector>
+#include <unordered_map>
+#include <string>
+
 float HydrogenBonds(
     struct Topology *top,
     struct Context *ctx,
@@ -200,7 +204,7 @@ void InitializeHydrogenBonding(
     int   E;
     FILE *DATA;
     FILE *fseq_hb;
-    char  line[250], file[250];
+    char  line[250];
     char  line_seq_hb[250], file_seq_hb[250];
     char  res[4], res2[4], donor[4], donor2[4], donor3[4], donor4[4], donor5[4], donor6[4],
         donor7[4];
@@ -210,17 +214,21 @@ void InitializeHydrogenBonding(
     int   tmp_type, tmp_a, tmp_b;
     float tmp_val;
 
+
     float min_D, max_D, D_int;
 
-    if ((ctx->hbonds = (struct hydrogen_bond **)calloc(top->natoms, sizeof(struct hydrogen_bond *))) ==
-        NULL) {
-        fprintf(sim->STATUS, "ERROR: Failed to generate hbonds\n");
-        exit(1);
-    }
-    for (i = 0; i < top->natoms; i++)
-        ctx->hbonds[i] = (struct hydrogen_bond *)calloc(top->natoms, sizeof(struct hydrogen_bond));
+    // if ((ctx->hbonds = (struct hydrogen_bond **)calloc(top->natoms, sizeof(struct hydrogen_bond *))) ==
+    //     NULL) {
+    //     fprintf(sim->STATUS, "ERROR: Failed to generate hbonds\n");
+    //     exit(1);
+    // }
+    // for (i = 0; i < top->natoms; i++)
+    //     ctx->hbonds[i] = (struct hydrogen_bond *)calloc(top->natoms, sizeof(struct hydrogen_bond));
+    ctx->hbonds.clear();
+    ctx->hbonds.resize(top->natoms);
 
-    strcpy(file_seq_hb, "../config_files/seq_dep_hb_mu_low.energy");
+    strcpy(file_seq_hb, "/n/home01/kibumpark/pkg/dbfold2/MCPU/src_cpp/config_files/seq_dep_hb_mu_low.energy");
+    std::cout << "Opening the file: " << file_seq_hb << std::endl;
     fprintf(sim->STATUS, "Opening the file: %s\n", file_seq_hb);
     if ((fseq_hb = fopen(file_seq_hb, "r")) == NULL) {
         fprintf(sim->STATUS, "ERROR: Can't open the file: %s!\n", file_seq_hb);
@@ -235,93 +243,74 @@ void InitializeHydrogenBonding(
             sys->seq_hb[tmp_type][tmp_a][tmp_b] = (-1.) * tmp_val;
         }
     }
-
-    if ((DATA = fopen(sim->hydrogen_bonding_data, "r")) == NULL) {
+    std::cout << "DEBUG: Finished reading seq_dep_hb_mu_low.energy, first entry: " << sys->seq_hb[0][0][0] << std::endl;
+    if ((DATA = fopen(sim->hydrogen_bonding_data.c_str(), "r")) == NULL) {
         fprintf(sim->STATUS, "ERROR: Can't open the file: %s!\n", sim->hydrogen_bonding_data);
         exit(1);
     }
+    std::cout << "Opening the file: " << sim->hydrogen_bonding_data << std::endl;
+    const auto& config = DEFAULT_HBOND_TOPOLOGY;
 
-    while (fgets(line, 250, DATA) != NULL) {
-        if (line[0] != '#') {
-            sscanf(line,
-                   "%s %s %d %s %d %s %d %s %d %s %d %s %d %s %d %s %s %d %s %d %s %d %s %d %s %d "
-                   "%s %d %s %d %s %d %d %f %f %f %s",
-                   res, donor, &offset[0], donor2, &offset[1], donor3, &offset[2], donor4,
-                   &offset[7], donor5, &offset[9], donor6, &offset[10], donor7, &offset[13], res2,
-                   acceptor, &offset[3], acceptor2, &offset[4], acceptor3, &offset[5], acceptor4,
-                   &offset[6], acceptor5, &offset[8], acceptor6, &offset[11], acceptor7,
-                   &offset[12], acceptor8, &offset[14], &skip, &min_D, &max_D, &D_int, file);
+    for (int i = 0; i < top->nresidues; i++) {
+        for (int j = 0; j < top->nresidues; j++) {
+            // Check the skip parameter
+            if (std::abs(i - j) < config.skip) continue;
 
-            for (i = 0; i < top->nresidues; i++)
-                for (j = 0; j < top->nresidues; j++) {
-                    match = 1;
+            // Check boundary conditions for donors
+            bool valid_bounds = true;
+            for (int off : config.donor_offsets) {
+                if (i + off < 0 || i + off >= top->nresidues) { valid_bounds = false; break; }
+            }
+            if (!valid_bounds) continue;
 
-                    l = 0;
-                    for (k = 0; k < 3 && !l; k++)
-                        l = (i + offset[k] < 0 || i + offset[k] >= top->nresidues);
-                    if (!l)
-                        l = (i + offset[7] < 0 || i + offset[7] >= top->nresidues);
-                    if (!l)
-                        l = (i + offset[9] < 0 || i + offset[9] >= top->nresidues);
-                    if (!l)
-                        l = (i + offset[10] < 0 || i + offset[10] >= top->nresidues);
-                    if (!l)
-                        l = (i + offset[13] < 0 || i + offset[13] >= top->nresidues);
-                    for (k = 3; k < 7 && !l; k++)
-                        l = (j + offset[k] < 0 || j + offset[k] >= top->nresidues);
-                    if (!l)
-                        l = (j + offset[8] < 0 || j + offset[8] >= top->nresidues);
-                    if (!l)
-                        l = (j + offset[11] < 0 || j + offset[11] >= top->nresidues);
-                    if (!l)
-                        l = (j + offset[12] < 0 || j + offset[12] >= top->nresidues);
-                    if (!l)
-                        l = (j + offset[14] < 0 || j + offset[14] >= top->nresidues);
+            // Check boundary conditions for acceptors
+            for (int off : config.acceptor_offsets) {
+                if (j + off < 0 || j + off >= top->nresidues) { valid_bounds = false; break; }
+            }
+            if (!valid_bounds) continue;
 
-                    if (!l && match && fabs(i - j) >= skip) {
-                        D  = ctx->native_residue[i + offset[0]].atomnumber[MatchAtomname(donor)];
-                        D2 = ctx->native_residue[i + offset[1]].atomnumber[MatchAtomname(donor2)];
-                        D3 = ctx->native_residue[i + offset[2]].atomnumber[MatchAtomname(donor3)];
-                        D4 = ctx->native_residue[i + offset[7]].atomnumber[MatchAtomname(donor4)];
-                        D5 = ctx->native_residue[i + offset[9]].atomnumber[MatchAtomname(donor5)];
-                        D6 = ctx->native_residue[i + offset[10]].atomnumber[MatchAtomname(donor6)];
-                        D7 = ctx->native_residue[i + offset[13]].atomnumber[MatchAtomname(donor7)];
-                        A  = ctx->native_residue[j + offset[3]].atomnumber[MatchAtomname(acceptor)];
-                        A2 = ctx->native_residue[j + offset[4]].atomnumber[MatchAtomname(acceptor2)];
-                        A3 = ctx->native_residue[j + offset[5]].atomnumber[MatchAtomname(acceptor3)];
-                        A4 = ctx->native_residue[j + offset[6]].atomnumber[MatchAtomname(acceptor4)];
-                        A5 = ctx->native_residue[j + offset[8]].atomnumber[MatchAtomname(acceptor5)];
-                        A6 = ctx->native_residue[j + offset[11]].atomnumber[MatchAtomname(acceptor6)];
-                        A7 = ctx->native_residue[j + offset[12]].atomnumber[MatchAtomname(acceptor7)];
-                        A8 = ctx->native_residue[j + offset[14]].atomnumber[MatchAtomname(acceptor8)];
+            // Atom number lookups for donors and acceptors
+            try {
+                std::array<int, 7> D_atoms;
+                std::array<int, 8> A_atoms;
 
-                        ctx->hbonds[A][D].donor = ctx->hbonds[D][A].donor = &(ctx->native[D]);
-                        ctx->hbonds[A][D].donor2 = ctx->hbonds[D][A].donor2 = &(ctx->native[D2]);
-                        ctx->hbonds[A][D].donor3 = ctx->hbonds[D][A].donor3 = &(ctx->native[D3]);
-                        ctx->hbonds[A][D].donor4 = ctx->hbonds[D][A].donor4 = &(ctx->native[D4]);
-                        ctx->hbonds[A][D].donor5 = ctx->hbonds[D][A].donor5 = &(ctx->native[D5]);
-                        ctx->hbonds[A][D].donor6 = ctx->hbonds[D][A].donor6 = &(ctx->native[D6]);
-                        ctx->hbonds[A][D].donor7 = ctx->hbonds[D][A].donor7 = &(ctx->native[D7]);
-                        ctx->hbonds[A][D].acceptor = ctx->hbonds[D][A].acceptor = &(ctx->native[A]);
-                        ctx->hbonds[A][D].acceptor2 = ctx->hbonds[D][A].acceptor2 = &(ctx->native[A2]);
-                        ctx->hbonds[A][D].acceptor3 = ctx->hbonds[D][A].acceptor3 = &(ctx->native[A3]);
-                        ctx->hbonds[A][D].acceptor4 = ctx->hbonds[D][A].acceptor4 = &(ctx->native[A4]);
-                        ctx->hbonds[A][D].acceptor5 = ctx->hbonds[D][A].acceptor5 = &(ctx->native[A5]);
-                        ctx->hbonds[A][D].acceptor6 = ctx->hbonds[D][A].acceptor6 = &(ctx->native[A6]);
-                        ctx->hbonds[A][D].acceptor7 = ctx->hbonds[D][A].acceptor7 = &(ctx->native[A7]);
-                        ctx->hbonds[A][D].acceptor8 = ctx->hbonds[D][A].acceptor8 = &(ctx->native[A8]);
-
-                        ctx->hbonds[A][D].max_D2 = ctx->hbonds[D][A].max_D2 = max_D * max_D;
-                        ctx->hbonds[A][D].min_D2 = ctx->hbonds[D][A].min_D2 = min_D * min_D;
-                        ctx->hbonds[A][D].D_int = ctx->hbonds[D][A].D_int = D_int;
-                        ctx->data[A][D].check_hbond = ctx->data[D][A].check_hbond = 1;
-                        //           fprintf(STATUS, "%d %d %d %d %d %d %s %d %d %d\n", D, D2, D3,
-                        //           A, A2, A3, donor, MatchAtomname(donor), i, j);
-                    }
+                for (size_t k = 0; k < 7; ++k) {
+                    int idx = MatchAtomname(config.donors[k]); 
+                    if (idx < 0) throw std::runtime_error("Atom not found");
+                    D_atoms[k] = ctx->native_residue[i + config.donor_offsets[k]].atomnumber[idx];
                 }
+                for (size_t k = 0; k < 8; ++k) {
+                    int idx = MatchAtomname(config.acceptors[k]); 
+                    if (idx < 0) throw std::runtime_error("Atom not found");
+                    A_atoms[k] = ctx->native_residue[j + config.acceptor_offsets[k]].atomnumber[idx];
+                }
+
+                int D = D_atoms[0];
+                int A = A_atoms[0];
+
+                // Populate the sparse maps symmetrically
+                for (auto [src, dst] : {std::pair{A, D}, std::pair{D, A}}) {
+                    auto& bond = ctx->hbonds[src][dst];
+                    
+                    bond.max_D2 = config.max_D * config.max_D;
+                    bond.min_D2 = config.min_D * config.min_D;
+                    bond.D_int  = config.D_int;
+
+                    // Directly copy the resolved pointers into the array
+                    for (size_t k = 0; k < 7; ++k) bond.donors[k]   = &(ctx->native[D_atoms[k]]);
+                    for (size_t k = 0; k < 8; ++k) bond.acceptors[k] = &(ctx->native[A_atoms[k]]);
+                }
+
+                ctx->data[A][D].check_hbond = 1;
+                ctx->data[D][A].check_hbond = 1;
+
+            } catch (const std::exception&) {
+                // If an atom isn't found in the topology (MatchAtomname fails),
+                // we silently skip this specific bond, matching the original C behavior.
+            }
         }
     }
-    fclose(sim->DATA);
+    std::cout << "DEBUG: Finished reading hydrogen bonding data file." << std::endl;
 
     //  n_hbond_int = (int)((max_D-min_D)/D_int)+1;
     i7 = 3 * LTOR * LTOR * LTOR * LTOR * LANG * LANG;
@@ -346,8 +335,11 @@ void InitializeHydrogenBonding(
                                 ctx->hbond_E[jj1 * i6 + jj2 * i5 + jj3 * i4 + jj4 * i3 + jj5 * i2 +
                                         jj6 * i1 + jj7] = 0;
 
-    if ((sim->DATA = fopen(file, "r")) == NULL) {
-        fprintf(sim->STATUS, "ERROR: Can't open the file: %s!\n", file);
+    std::cout << "DEBUG: Finished initializing hbond_E array, starting to read energy values from file." << std::endl;
+
+    std::string file = sim->hbond_energy_file;
+    if ((sim->DATA = fopen(file.c_str(), "r")) == NULL) {
+        fprintf(sim->STATUS, "ERROR: Can't open the file: %s!\n", file.c_str());
         exit(1);
     }
 
@@ -374,17 +366,17 @@ void InitializeHydrogenBonding(
     //  fprintf(STATUS, "hey %d %d %f %f %f %f %d %d %d %d %d %d %d %d %d %d %d\n", r1, r2, d1, d2,
     //  d3, d4, i1, jj1, jj2, jj3, jj4, r1*20*i4, r2*i4, jj1*i3, jj2*i2, jj3*i1, jj4);
 
+    std::cout << "DEBUG: Finished reading hydrogen bonding energy values from file." << std::endl;
+
     return;
 }
 
-int MatchAtomname(char *name) {
-    int i;
-
-    for (i = 0; i < NUM_ATOMNAMES; i++)
-        if (!strcmp(name, ATOMNAME[i]))
-            return i;
-
-    return -999;
+int MatchAtomname(std::string_view name) {
+    // .find() is the safest and fastest way to look up in a map
+    if (auto it = ATOM_NAME_MAP.find(name); it != ATOM_NAME_MAP.end()) {
+        return it->second; // Return the explicitly linked integer
+    }    
+    return -999; // Not found
 }
 
 long int CheckHBond(
@@ -392,7 +384,7 @@ long int CheckHBond(
     struct System *sys,
     struct Topology *top,
     int A, int B) {
-    struct hydrogen_bond *cur_hbond;
+    struct HydrogenBond *cur_hbond;
     Vec3         V3, H;
     Vec3         tmp1, tmp2, tmp3, tmp4;
     Vec3         plane1, plane2;
@@ -411,33 +403,33 @@ long int CheckHBond(
 
     cur_hbond = &(ctx->hbonds[A][B]);
 
-    res_dif = abs((cur_hbond->donor)->res_num - (cur_hbond->acceptor)->res_num);
+    res_dif = abs((cur_hbond->donors[0])->res_num - (cur_hbond->acceptors[0])->res_num);
 
-    if (((cur_hbond->donor)->res_num == 0) || ((cur_hbond->acceptor)->res_num == 0))
+    if (((cur_hbond->donors[0])->res_num == 0) || ((cur_hbond->acceptors[0])->res_num == 0))
         return sys->NO_HBOND;
-    if (((cur_hbond->donor)->res_num == top->nresidues - 1) ||
-        ((cur_hbond->acceptor)->res_num == top->nresidues - 1))
+    if (((cur_hbond->donors[0])->res_num == top->nresidues - 1) ||
+        ((cur_hbond->acceptors[0])->res_num == top->nresidues - 1))
         return sys->NO_HBOND;
 
     // estimate position of hydrogen atom, H
-    MakeVector((cur_hbond->donor)->xyz, (cur_hbond->donor2)->xyz, &H);
-    MakeVector((cur_hbond->donor)->xyz, (cur_hbond->donor3)->xyz, &V3);
+    MakeVector((cur_hbond->donors[0])->xyz, (cur_hbond->donors[1])->xyz, &H);
+    MakeVector((cur_hbond->donors[0])->xyz, (cur_hbond->donors[2])->xyz, &V3);
     Add(V3, &H);
     Normalize(&H);
     Inverse(&H);
-    Add((cur_hbond->donor)->xyz, &H);
+    Add((cur_hbond->donors[0])->xyz, &H);
 
     // determine if h...O distance is less than cutoff for hbonds
-    d_HO     = D2(H, (cur_hbond->acceptor)->xyz);
+    d_HO     = D2(H, (cur_hbond->acceptors[0])->xyz);
     d_memory = d_HO;
     if (d_HO > HB_CUTOFF * HB_CUTOFF)
         return sys->NO_HBOND;
 
     // distances between CA atoms, p = previous, 0 = same, n = next residue
-    d_CA_n0 = D2((cur_hbond->donor5)->xyz, (cur_hbond->acceptor3)->xyz);
-    d_CA_0p = D2((cur_hbond->donor2)->xyz, (cur_hbond->acceptor6)->xyz);
-    d_CA_np = D2((cur_hbond->donor5)->xyz, (cur_hbond->acceptor6)->xyz);
-    d_CA_00 = D2((cur_hbond->donor2)->xyz, (cur_hbond->acceptor3)->xyz);
+    d_CA_n0 = D2((cur_hbond->donors[4])->xyz, (cur_hbond->acceptors[2])->xyz);
+    d_CA_0p = D2((cur_hbond->donors[1])->xyz, (cur_hbond->acceptors[5])->xyz);
+    d_CA_np = D2((cur_hbond->donors[4])->xyz, (cur_hbond->acceptors[5])->xyz);
+    d_CA_00 = D2((cur_hbond->donors[1])->xyz, (cur_hbond->acceptors[2])->xyz);
     min1    = min(d_CA_n0, d_CA_np);
     min2    = min(d_CA_0p, d_CA_00);
     min3    = min(min1, min2);
@@ -456,30 +448,30 @@ long int CheckHBond(
         if (min3 > 5.4 * 5.4)
             return sys->NO_HBOND;
         // if secondary structure is predicted as helix, don't form h-bond when res_dif>4
-        if ((top->secstr[(cur_hbond->donor)->res_num] == 'H') ||
-            (top->secstr[(cur_hbond->acceptor)->res_num] == 'H'))
+        if ((top->secstr[(cur_hbond->donors[0])->res_num] == 'H') ||
+            (top->secstr[(cur_hbond->acceptors[0])->res_num] == 'H'))
             return sys->NO_HBOND;
     }
 
-    MakeVector((cur_hbond->donor3)->xyz, (cur_hbond->donor)->xyz, &tmp1);
-    MakeVector((cur_hbond->donor)->xyz, (cur_hbond->donor2)->xyz, &tmp2);
-    MakeVector((cur_hbond->donor2)->xyz, (cur_hbond->donor4)->xyz, &tmp3);
+    MakeVector((cur_hbond->donors[2])->xyz, (cur_hbond->donors[0])->xyz, &tmp1);
+    MakeVector((cur_hbond->donors[0])->xyz, (cur_hbond->donors[1])->xyz, &tmp2);
+    MakeVector((cur_hbond->donors[1])->xyz, (cur_hbond->donors[3])->xyz, &tmp3);
     ang_Dphi = struct_calc_dih_ang(tmp1, tmp2, tmp3);
     ang_Dphi *= rad2deg;
-    MakeVector((cur_hbond->donor6)->xyz, (cur_hbond->donor5)->xyz, &tmp1);
-    MakeVector((cur_hbond->donor5)->xyz, (cur_hbond->donor3)->xyz, &tmp2);
-    MakeVector((cur_hbond->donor3)->xyz, (cur_hbond->donor)->xyz, &tmp3);
+    MakeVector((cur_hbond->donors[5])->xyz, (cur_hbond->donors[4])->xyz, &tmp1);
+    MakeVector((cur_hbond->donors[4])->xyz, (cur_hbond->donors[2])->xyz, &tmp2);
+    MakeVector((cur_hbond->donors[2])->xyz, (cur_hbond->donors[0])->xyz, &tmp3);
     ang_Dpsi = struct_calc_dih_ang(tmp1, tmp2, tmp3);
     ang_Dpsi *= rad2deg;
 
-    MakeVector((cur_hbond->acceptor2)->xyz, (cur_hbond->acceptor4)->xyz, &tmp1);
-    MakeVector((cur_hbond->acceptor4)->xyz, (cur_hbond->acceptor6)->xyz, &tmp2);
-    MakeVector((cur_hbond->acceptor6)->xyz, (cur_hbond->acceptor7)->xyz, &tmp3);
+    MakeVector((cur_hbond->acceptors[1])->xyz, (cur_hbond->acceptors[3])->xyz, &tmp1);
+    MakeVector((cur_hbond->acceptors[3])->xyz, (cur_hbond->acceptors[5])->xyz, &tmp2);
+    MakeVector((cur_hbond->acceptors[5])->xyz, (cur_hbond->acceptors[6])->xyz, &tmp3);
     ang_Aphi = struct_calc_dih_ang(tmp1, tmp2, tmp3);
     ang_Aphi *= rad2deg;
-    MakeVector((cur_hbond->acceptor5)->xyz, (cur_hbond->acceptor3)->xyz, &tmp1);
-    MakeVector((cur_hbond->acceptor3)->xyz, (cur_hbond->acceptor2)->xyz, &tmp2);
-    MakeVector((cur_hbond->acceptor2)->xyz, (cur_hbond->acceptor4)->xyz, &tmp3);
+    MakeVector((cur_hbond->acceptors[4])->xyz, (cur_hbond->acceptors[2])->xyz, &tmp1);
+    MakeVector((cur_hbond->acceptors[2])->xyz, (cur_hbond->acceptors[1])->xyz, &tmp2);
+    MakeVector((cur_hbond->acceptors[1])->xyz, (cur_hbond->acceptors[3])->xyz, &tmp3);
     ang_Apsi = struct_calc_dih_ang(tmp1, tmp2, tmp3);
     ang_Apsi *= rad2deg;
     ang_Dphi += 180.;
@@ -490,15 +482,15 @@ long int CheckHBond(
     // if we are in an alpha-helical conformation, but beta-sheet is predicted in sec_str file, no
     // h-bond
     {
-        if ((top->secstr[(cur_hbond->donor)->res_num] == 'E') ||
-            (top->secstr[(cur_hbond->acceptor)->res_num] == 'E')) {
+        if ((top->secstr[(cur_hbond->donors[0])->res_num] == 'E') ||
+            (top->secstr[(cur_hbond->acceptors[0])->res_num] == 'E')) {
             if ((ang_Dphi < 180.) && (ang_Dpsi < 180.))
                 return sys->NO_HBOND;
             if ((ang_Aphi < 180.) && (ang_Apsi < 180.))
                 return sys->NO_HBOND;
         }
-        if ((top->secstr[(cur_hbond->donor)->res_num] == 'L') ||
-            (top->secstr[(cur_hbond->acceptor)->res_num] == 'L')) {
+        if ((top->secstr[(cur_hbond->donors[0])->res_num] == 'L') ||
+            (top->secstr[(cur_hbond->acceptors[0])->res_num] == 'L')) {
             if ((ang_Dphi < 180.) && (ang_Dpsi < 180.))
                 return sys->NO_HBOND;
             if ((ang_Aphi < 180.) && (ang_Apsi < 180.))
@@ -516,14 +508,14 @@ long int CheckHBond(
         if ((ang_Apsi > 30.) && (ang_Apsi < 210.))
             return sys->NO_HBOND;
         // don't form long-range h-bonds if L conformation is predicted
-        if (top->secstr[(cur_hbond->donor)->res_num] == 'L')
+        if (top->secstr[(cur_hbond->donors[0])->res_num] == 'L')
             return sys->NO_HBOND;
-        if (top->secstr[(cur_hbond->acceptor)->res_num] == 'L')
+        if (top->secstr[(cur_hbond->acceptors[0])->res_num] == 'L')
             return sys->NO_HBOND;
     }
 
-    MakeVector((cur_hbond->donor5)->xyz, (cur_hbond->donor7)->xyz, &tmp1);
-    MakeVector((cur_hbond->acceptor8)->xyz, (cur_hbond->acceptor6)->xyz, &tmp3);
+    MakeVector((cur_hbond->donors[4])->xyz, (cur_hbond->donors[6])->xyz, &tmp1);
+    MakeVector((cur_hbond->acceptors[7])->xyz, (cur_hbond->acceptors[5])->xyz, &tmp3);
     Normalize(&tmp1);
     Normalize(&tmp3);
     ang_CACA = Angle(tmp1, tmp3);
@@ -535,19 +527,19 @@ long int CheckHBond(
             ctx->helix_sheet = 2;
     }
 
-    MakeVector((cur_hbond->donor2)->xyz, (cur_hbond->donor)->xyz, &tmp1);
-    MakeVector((cur_hbond->donor2)->xyz, (cur_hbond->donor4)->xyz, &tmp2);
-    MakeVector((cur_hbond->acceptor3)->xyz, (cur_hbond->acceptor5)->xyz, &tmp3);
-    MakeVector((cur_hbond->acceptor3)->xyz, (cur_hbond->acceptor2)->xyz, &tmp4);
+    MakeVector((cur_hbond->donors[1])->xyz, (cur_hbond->donors[0])->xyz, &tmp1);
+    MakeVector((cur_hbond->donors[1])->xyz, (cur_hbond->donors[3])->xyz, &tmp2);
+    MakeVector((cur_hbond->acceptors[2])->xyz, (cur_hbond->acceptors[4])->xyz, &tmp3);
+    MakeVector((cur_hbond->acceptors[2])->xyz, (cur_hbond->acceptors[1])->xyz, &tmp4);
     CrossProduct(tmp1, tmp2, &plane1);
     CrossProduct(tmp3, tmp4, &plane2);
     ang_PCA = Angle(plane1, plane2);
     ang_PCA *= rad2deg;
 
-    MakeVector((cur_hbond->donor2)->xyz, (cur_hbond->donor)->xyz, &tmp1);
-    MakeVector((cur_hbond->donor2)->xyz, (cur_hbond->donor4)->xyz, &tmp2);
-    MakeVector((cur_hbond->acceptor3)->xyz, (cur_hbond->acceptor5)->xyz, &tmp3);
-    MakeVector((cur_hbond->acceptor3)->xyz, (cur_hbond->acceptor2)->xyz, &tmp4);
+    MakeVector((cur_hbond->donors[1])->xyz, (cur_hbond->donors[0])->xyz, &tmp1);
+    MakeVector((cur_hbond->donors[1])->xyz, (cur_hbond->donors[3])->xyz, &tmp2);
+    MakeVector((cur_hbond->acceptors[2])->xyz, (cur_hbond->acceptors[4])->xyz, &tmp3);
+    MakeVector((cur_hbond->acceptors[2])->xyz, (cur_hbond->acceptors[1])->xyz, &tmp4);
     Normalize(&tmp1);
     Normalize(&tmp2);
     Normalize(&tmp3);
@@ -557,19 +549,19 @@ long int CheckHBond(
     ang_bCA = Angle(bisect1, bisect2);
     ang_bCA *= rad2deg;
 
-    MakeVector((cur_hbond->donor5)->xyz, (cur_hbond->donor6)->xyz, &tmp1);
-    MakeVector((cur_hbond->donor5)->xyz, (cur_hbond->donor3)->xyz, &tmp2);
-    MakeVector((cur_hbond->acceptor6)->xyz, (cur_hbond->acceptor4)->xyz, &tmp3);
-    MakeVector((cur_hbond->acceptor6)->xyz, (cur_hbond->acceptor7)->xyz, &tmp4);
+    MakeVector((cur_hbond->donors[4])->xyz, (cur_hbond->donors[5])->xyz, &tmp1);
+    MakeVector((cur_hbond->donors[4])->xyz, (cur_hbond->donors[2])->xyz, &tmp2);
+    MakeVector((cur_hbond->acceptors[5])->xyz, (cur_hbond->acceptors[3])->xyz, &tmp3);
+    MakeVector((cur_hbond->acceptors[5])->xyz, (cur_hbond->acceptors[6])->xyz, &tmp4);
     CrossProduct(tmp1, tmp2, &plane1);
     CrossProduct(tmp3, tmp4, &plane2);
     ang_PCAant = Angle(plane1, plane2);
     ang_PCAant *= rad2deg;
 
-    MakeVector((cur_hbond->donor5)->xyz, (cur_hbond->donor6)->xyz, &tmp1);
-    MakeVector((cur_hbond->donor5)->xyz, (cur_hbond->donor3)->xyz, &tmp2);
-    MakeVector((cur_hbond->acceptor6)->xyz, (cur_hbond->acceptor4)->xyz, &tmp3);
-    MakeVector((cur_hbond->acceptor6)->xyz, (cur_hbond->acceptor7)->xyz, &tmp4);
+    MakeVector((cur_hbond->donors[4])->xyz, (cur_hbond->donors[5])->xyz, &tmp1);
+    MakeVector((cur_hbond->donors[4])->xyz, (cur_hbond->donors[2])->xyz, &tmp2);
+    MakeVector((cur_hbond->acceptors[5])->xyz, (cur_hbond->acceptors[3])->xyz, &tmp3);
+    MakeVector((cur_hbond->acceptors[5])->xyz, (cur_hbond->acceptors[6])->xyz, &tmp4);
     Normalize(&tmp1);
     Normalize(&tmp2);
     Normalize(&tmp3);
@@ -583,19 +575,19 @@ long int CheckHBond(
     ang_Aphi = ang_PCAant;
     ang_Apsi = ang_bCAant;
 
-    MakeVector((cur_hbond->donor)->xyz, (cur_hbond->donor3)->xyz, &tmp1);
-    MakeVector((cur_hbond->donor)->xyz, (cur_hbond->donor2)->xyz, &tmp2);
-    MakeVector((cur_hbond->acceptor2)->xyz, (cur_hbond->acceptor3)->xyz, &tmp3);
-    MakeVector((cur_hbond->acceptor2)->xyz, (cur_hbond->acceptor4)->xyz, &tmp4);
+    MakeVector((cur_hbond->donors[0])->xyz, (cur_hbond->donors[2])->xyz, &tmp1);
+    MakeVector((cur_hbond->donors[0])->xyz, (cur_hbond->donors[1])->xyz, &tmp2);
+    MakeVector((cur_hbond->acceptors[1])->xyz, (cur_hbond->acceptors[2])->xyz, &tmp3);
+    MakeVector((cur_hbond->acceptors[1])->xyz, (cur_hbond->acceptors[3])->xyz, &tmp4);
     CrossProduct(tmp1, tmp2, &plane1);
     CrossProduct(tmp3, tmp4, &plane2);
     ang_PH = Angle(plane1, plane2);
     ang_PH *= rad2deg;
 
-    MakeVector((cur_hbond->donor)->xyz, (cur_hbond->donor3)->xyz, &tmp1);
-    MakeVector((cur_hbond->donor)->xyz, (cur_hbond->donor2)->xyz, &tmp2);
-    MakeVector((cur_hbond->acceptor2)->xyz, (cur_hbond->acceptor3)->xyz, &tmp3);
-    MakeVector((cur_hbond->acceptor2)->xyz, (cur_hbond->acceptor4)->xyz, &tmp4);
+    MakeVector((cur_hbond->donors[0])->xyz, (cur_hbond->donors[2])->xyz, &tmp1);
+    MakeVector((cur_hbond->donors[0])->xyz, (cur_hbond->donors[1])->xyz, &tmp2);
+    MakeVector((cur_hbond->acceptors[1])->xyz, (cur_hbond->acceptors[2])->xyz, &tmp3);
+    MakeVector((cur_hbond->acceptors[1])->xyz, (cur_hbond->acceptors[3])->xyz, &tmp4);
     Normalize(&tmp1);
     Normalize(&tmp2);
     Normalize(&tmp3);

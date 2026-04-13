@@ -1,6 +1,7 @@
 #include "align.h"
 
 #include <string.h>
+#include <fstream>
 
 #include "init.h"
 #include "pdb_util.h"
@@ -124,36 +125,6 @@ void SetAlignContactDistance(
     return;
 }
 
-void ReadHelicityData(
-    struct System *sys,
-    struct Topology *top,
-    struct Context *ctx,
-    struct Simulation *sim
-) {
-    int  i;
-    char line[10000], line1[10000];
-
-    if ((sim->DATA = fopen(sim->helicity_data, "r")) == NULL) {
-        fprintf(sim->STATUS, "ERROR: Can't open the file: %s!\n", sim->helicity_data);
-        exit(1);
-    }
-    fgets(line, 10000, sim->DATA);
-    fgets(line, 10000, sim->DATA);
-    fgets(line1, 10000, sim->DATA);
-
-    top->helix = (int *)calloc(strlen(line), sizeof(int));
-
-    for (i = 0; i < strlen(line); i++) {
-        if (line[i] == 'H')
-            top->helix[i] = (int)(line1[i]) - '0';
-        else
-            top->helix[i] = 0;
-    }
-    fclose(sim->DATA);
-
-    return;
-}
-
 void ReadAlignment(
     struct Topology *top,
     struct System *sys
@@ -240,7 +211,7 @@ void SetupAlignmentStructure(
     int i;
 
     ctx->struct_native = (struct atom *)calloc(MAX_ATOMS, sizeof(struct atom));
-    ReadNative(sim, sys, integrator, top, sim->structure_file, ctx->struct_native, &top->struct_natoms);
+    ReadNative(sim, sys, integrator, top, sim->structure_file.c_str(), ctx->struct_native, &top->struct_natoms);
     /* despite name, struct_natoms is an int */
 
     /* this is so unclear:

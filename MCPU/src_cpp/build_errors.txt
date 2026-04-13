@@ -1,3 +1,4 @@
 [0/2] Re-checking globbed directories...
-[1/3] Building CXX object CMakeFiles/MCPU2.dir/src/main.cpp.o
-[2/3] Linking CXX executable MCPU2
+[1/4] Building CXX object CMakeFiles/MCPU_lib.dir/src/loop.cpp.o
+[2/4] Linking CXX static library libMCPU_lib.a
+[3/4] Linking CXX executable MCPU2

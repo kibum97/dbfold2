@@ -6,6 +6,8 @@ void BootSimulationDefaults() {
     sys.k_bias                = 0.0;
     sys.USE_GO_POTENTIAL      = 0;
     sys.MAX_TYPES             = 20;  // Assuming this is your standard
+    sys.ALPHA = 0.75;
+    sys.LAMBDA = 1.8;
 
     /* 2. Integrator Defaults */
     integrator.USE_CLUSTER = 0;
@@ -20,11 +22,14 @@ void BootSimulationDefaults() {
 
     /* 4. Simulation / I/O Defaults */
     sim.fpdb   = NULL;
-    sim.STATUS = NULL;
+    sim.STATUS = fopen("log.txt", "w");
     sim.DATA   = NULL;
+    sim.constraint_file = "None";
+    sim.nprocs          = 1;
+    sim.myrank          = 0;
 
     // WARNING: In C, you cannot use `=` to assign strings after creation!
     // You must use strcpy or snprintf.
-    strcpy(sim.path_dir, "./");
-    strcpy(sim.native_file, "");
+    sim.path_dir = "./";
+    sim.native_file = "";
 }

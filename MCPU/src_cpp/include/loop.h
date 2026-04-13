@@ -92,9 +92,8 @@ void initialize_aromatic(
     struct Topology *top, struct System *sys, struct Simulation *sim,
     struct Context *ctx, struct MCIntegrator *integrator
 );
-int  will2edo(int);
 void read_cluster(
-    struct Simulation *sim, struct System *sys
+    std::string filename, struct System *sys
 );
 void initialize_secstr(
     struct Simulation *sim, struct Topology *top

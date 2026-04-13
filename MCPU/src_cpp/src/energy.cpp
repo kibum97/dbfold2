@@ -21,9 +21,9 @@ void ResetEnergies(
     ctx->E_aro   = aromaticenergy(ctx, sys, top);
     ctx->E_hbond = HydrogenBonds(top, ctx, sys);
 
-    if (strcmp(sim->constraint_file, "None") != 0) {                            // AB
+    if (sim->constraint_file != "None") {                            // AB
         ctx->E_constraint = Compute_constraint_energy(ctx, sys, ctx->native_residue, ctx->native);  // AB
-    } else if (strcmp(sim->rmsd_constraint_file, "None") != 0) {
+    } else if (sim->rmsd_constraint_file != "None") {
         fprintf(sim->STATUS, "RMSD constraint file is not None \n");
         ctx->E_constraint =
             Compute_frag_rmsd_constraint_energy(sys, ctx->struct_f1, ctx->struct_f2, constraint_align);  // AB

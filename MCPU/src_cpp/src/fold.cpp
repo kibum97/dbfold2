@@ -51,8 +51,8 @@ void Fold(
     float etmp;
     int   partner;
 
-    char  rmsd_filename[500];
-    char  temp_filename[500];
+    std::string  rmsd_filename;
+    std::string  temp_filename;
     float E_pot_now        = 0.0;
     float E_tor_now        = 0.0;
     float E_sct_now        = 0.0;
@@ -188,8 +188,10 @@ void Fold(
                 sim->attempted_replica[i] = 0;
             }
 
-            sim->ierr = MPI_Allgather(&ctx->E, 1, MPI_FLOAT, sim->Enode, 1, MPI_FLOAT, sim->mpi_world_comm);
-            sim->ierr = MPI_Allgather(&ctx->natives, 1, MPI_INT, sim->Nnode, 1, MPI_INT, sim->mpi_world_comm);
+            #ifdef USE_MPI
+                sim->ierr = MPI_Allgather(&ctx->E, 1, MPI_FLOAT, sim->Enode, 1, MPI_FLOAT, sim->mpi_world_comm);
+                sim->ierr = MPI_Allgather(&ctx->natives, 1, MPI_INT, sim->Nnode, 1, MPI_INT, sim->mpi_world_comm);
+            #endif
 
             if (sim->myrank == 0) {  // node 0 will mediate the exchange
                 for (irep = 0; irep < sim->MAX_EXCHANGE; irep++) {
@@ -288,13 +290,14 @@ void Fold(
              * decided. `replica_index` holds the new order of replicas,
              * e.g. `replica_index[i]` indicates which current replica will
              * go to replica i. */
-
-            /* Let all nodes know; bcast from rank 0 */
-            sim->ierr = MPI_Bcast(sim->replica_index, sim->nprocs, MPI_INT, 0, sim->mpi_world_comm);
-            sim->ierr = MPI_Bcast(sim->Enode, sim->nprocs, MPI_FLOAT, 0, sim->mpi_world_comm);
-            sim->ierr = MPI_Bcast(sim->Nnode, sim->nprocs, MPI_INT, 0, sim->mpi_world_comm);
-            sim->ierr = MPI_Bcast(sim->accepted_replica, sim->nprocs, MPI_INT, 0, sim->mpi_world_comm);
-            sim->ierr = MPI_Bcast(sim->rejected_replica, sim->nprocs, MPI_INT, 0, sim->mpi_world_comm);
+            #ifdef USE_MPI
+                /* Let all nodes know; bcast from rank 0 */
+                sim->ierr = MPI_Bcast(sim->replica_index, sim->nprocs, MPI_INT, 0, sim->mpi_world_comm);
+                sim->ierr = MPI_Bcast(sim->Enode, sim->nprocs, MPI_FLOAT, 0, sim->mpi_world_comm);
+                sim->ierr = MPI_Bcast(sim->Nnode, sim->nprocs, MPI_INT, 0, sim->mpi_world_comm);
+                sim->ierr = MPI_Bcast(sim->accepted_replica, sim->nprocs, MPI_INT, 0, sim->mpi_world_comm);
+                sim->ierr = MPI_Bcast(sim->rejected_replica, sim->nprocs, MPI_INT, 0, sim->mpi_world_comm);
+            #endif
 
             // fprintf(STATUS, "Replica Index\n");
             // for (i=0; i<nprocs; i++) fprintf(STATUS, "%5d %5d %8.3f\n", i, replica_index[i],
@@ -339,6 +342,7 @@ void Fold(
                           // replica_index[5]=6 and replica_index[6]=5
                     if (sim->myrank == i) {  // For instance, if my rank is 6 and replica_index[6]=5,
                                         // then I received an exchange from node 5
+                        #ifdef USE_MPI
                         sim->ierr = MPI_Recv(
                             sim->buf_in.data(), 3 * top->natoms, MPI_DOUBLE, sim->replica_index[i], (i + 2),
                             sim->mpi_world_comm,
@@ -346,13 +350,16 @@ void Fold(
                         /* Also receive the "replica number" of the partner */
                         sim->ierr = MPI_Recv(&receive_replicano, 1, MPI_INT, sim->replica_index[i], (i + 3),
                                         sim->mpi_world_comm, &sim->mpi_status);
+                        #endif
                     } else if (sim->myrank == sim->replica_index[i]) {  // For instance, if my rank is 5 and
                                                               // replica_index[6]=5, then this means
                                                               // I gave an exchange to node 6
+                        #ifdef USE_MPI
                         sim->ierr = MPI_Send(sim->buf_out.data(), 3 * top->natoms, MPI_DOUBLE, i, (i + 2),
                                         sim->mpi_world_comm);  // give my coordinates to my partner
                         /* Send the "replica number" of this replica */
                         sim->ierr = MPI_Send(&sim->current_replica, 1, MPI_INT, i, (i + 3), sim->mpi_world_comm);
+                        #endif
                     }
                 }
             }
@@ -416,9 +423,9 @@ void Fold(
             E_aro_now   = aromaticenergy(ctx, sys, top);
             E_hbond_now = HydrogenBonds(top, ctx, sys);
 
-            if (strcmp(sim->constraint_file, "None") != 0) {                                // AB
+            if (std::string(sim->constraint_file) != "None") {                                // AB
                 E_constraint_now = Compute_constraint_energy(ctx, sys, ctx->native_residue, ctx->native);  // AB
-            } else if (strcmp(sim->rmsd_constraint_file, "None") != 0) {
+            } else if (std::string(sim->rmsd_constraint_file) != "None") {
                 E_constraint_now = Compute_frag_rmsd_constraint_energy(sys, ctx->struct_f1, ctx->struct_f2,
                                                                        constraint_align);  // AB
             } else {                                                                       // AB
@@ -459,9 +466,8 @@ void Fold(
         /* Output Structure */
         if (sim->PRINT_PDB) {
             if (ctx->mcstep % sim->MC_PDB_PRINT_STEPS == 0) {
-                sprintf(temp_filename, "%s.%ld", sim->pdb_out_file, ctx->mcstep);
-                //    if ((MC_TEMP < 0.18) || (mcstep > MC_STEPS - 100000))
-                PrintPDB(sim, ctx, top, temp_filename);
+                temp_filename = std::string(sim->pdb_out_file) + "." + std::to_string(ctx->mcstep);
+                PrintPDB(sim, ctx, top, temp_filename.c_str());
             }
         }
 
@@ -497,26 +503,26 @@ void Fold(
             integrator->STEP_SIZE, integrator->USE_GLOBAL_BB_MOVES
         );
     } /* end main folding loop */
-
-    sprintf(temp_filename, "%s_Emin.pdb", sim->pdb_out_file);
-    PrintPDB_Emin(sim, ctx, top, temp_filename);
+    std::cout << "DEBUG: PDB OUT FILE: " << sim->pdb_out_file << std::endl;
+    temp_filename = std::string(sim->pdb_out_file) + "_Emin.pdb";
+    PrintPDB_Emin(sim, ctx, top, temp_filename.c_str());
     fprintf(sim->STATUS, "\nMC step at Emin: %10ld\n", ctx->mcstep_Emin);
     fprintf(sim->STATUS,
             "Emin:%8.2f  Emin_pot:%8.2f  E_hb:%7.2f  E_tor:%7.2f  E_sct:%7.2f E_aro:%7.2f "
             "E_constraint:%7.2f \n",
             ctx->Emin, ctx->Emin_pot, ctx->Emin_hbond, ctx->Emin_tor, ctx->Emin_sct, ctx->Emin_aro, ctx->Emin_constraint);
     fprintf(sim->STATUS, "rmsd at Emin:%8.2f  ", ctx->rms_Emin);
-    fprintf(sim->STATUS, "Pdb file at Emin: %s\n", temp_filename);
+    fprintf(sim->STATUS, "Pdb file at Emin: %s\n", temp_filename.c_str());
 
-    sprintf(rmsd_filename, "%s_RMSDmin.pdb", sim->pdb_out_file);
-    PrintPDB_RMSDmin(sim, ctx, top, rmsd_filename);
+    rmsd_filename = std::string(sim->pdb_out_file) + "_RMSDmin.pdb";
+    PrintPDB_RMSDmin(sim, ctx, top, rmsd_filename.c_str());
     fprintf(sim->STATUS, "\nMC step at RMSDmin: %10ld\n", ctx->mcstep_RMSDmin);
     fprintf(sim->STATUS,
             "rms_Rmin:%8.2f  E_RMSDmin:%8.2f E_Rmin_pot:%8.2f E_Rhb:%8.2f E_Rtor:%8.2f "
             "E_Rsct:%8.2f E_Raro:%8.2f E_Rconstraint:%8.2f \n",
             ctx->rms_RMSDmin, ctx->E_RMSDmin, ctx->E_RMSDmin_pot, ctx->E_RMSDmin_hbond, ctx->E_RMSDmin_tor, ctx->E_RMSDmin_sct,
             ctx->E_RMSDmin_aro, ctx->E_RMSDmin_constraint);
-    fprintf(sim->STATUS, "Pdb file at RMSDmin: %s\n", rmsd_filename);
+    fprintf(sim->STATUS, "Pdb file at RMSDmin: %s\n", rmsd_filename.c_str());
 
     return;
 }

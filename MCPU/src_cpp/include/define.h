@@ -64,16 +64,34 @@ typedef float Float;
 #include <string.h>
 #include <time.h>
 #include <unistd.h>
+#include <unordered_map>
+#include <string_view>
+#include <string>
+#include <stdexcept>
 
 #include "rng.h"
 
 extern short three[5];
-const static char *at_types[NSMOGTYPES] __attribute__((unused)) = {
-    "CA", "C3", "C2", "CP", "CC", "OC", "OB", "OD", "NC", "ND", "NM", "SP", "ME"};
+// const static char *at_types[NSMOGTYPES] __attribute__((unused)) = {
+//     "CA", "C3", "C2", "CP", "CC", "OC", "OB", "OD", "NC", "ND", "NM", "SP", "ME"};
 
-const static char *ATOMNAME[NUM_ATOMNAMES] __attribute__((unused)) = {
-    "C",   "CA",  "CB",  "CD",  "CD1", "CD2", "CE",  "CE1", "CE2", "CE3", "CG",  "CG1",
-    "CG2", "CH2", "CZ",  "CZ2", "CZ3", "N",   "ND1", "ND2", "NE",  "NE1", "NE2", "NZ",
-    "O",   "OCT", "OD1", "OD2", "OE1", "OE2", "OG",  "OG1", "OH",  "OXT", "SD",  "SG"};
+// const static char *ATOMNAME[NUM_ATOMNAMES] __attribute__((unused)) = {
+//     "C",   "CA",  "CB",  "CD",  "CD1", "CD2", "CE",  "CE1", "CE2", "CE3", "CG",  "CG1",
+//     "CG2", "CH2", "CZ",  "CZ2", "CZ3", "N",   "ND1", "ND2", "NE",  "NE1", "NE2", "NZ",
+//     "O",   "OCT", "OD1", "OD2", "OE1", "OE2", "OG",  "OG1", "OH",  "OXT", "SD",  "SG"};
+
+inline const std::unordered_map<std::string_view, int> SMOG_TYPE_MAP = {
+    {"CA", 0}, {"C3", 1}, {"C2", 2}, {"CP", 3}, {"CC", 4}, {"OC", 5}, {"OB", 6},
+    {"OD", 7}, {"NC", 8}, {"ND", 9}, {"NM", 10}, {"SP", 11}, {"ME", 12}
+};
+
+inline const std::unordered_map<std::string_view, int> ATOM_NAME_MAP = {
+    {"C", 0},   {"CA", 1},  {"CB", 2},  {"CD", 3},  {"CD1", 4}, {"CD2", 5},
+    {"CE", 6},  {"CE1", 7}, {"CE2", 8}, {"CE3", 9}, {"CG", 10}, {"CG1", 11},
+    {"CG2", 12},{"CH2", 13},{"CZ", 14}, {"CZ2", 15},{"CZ3", 16},{"N", 17},
+    {"ND1", 18},{"ND2", 19},{"NE", 20}, {"NE1", 21},{"NE2", 22},{"NZ", 23},
+    {"O", 24},  {"OCT", 25},{"OD1", 26},{"OD2", 27},{"OE1", 28},{"OE2", 29},
+    {"OG", 30}, {"OG1", 31},{"OH", 32}, {"OXT", 33},{"SD", 34}, {"SG", 35}
+};
 
 #endif

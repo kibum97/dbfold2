@@ -1,5 +1,7 @@
 #include "constraint.h"
 
+#include <fstream>
+
 void Init_frag_rmsd_constraints(
     struct Simulation *sim
 ) {
@@ -10,16 +12,16 @@ void Init_frag_rmsd_constraints(
     struct fragments constraint_seqptr[MAXFRAG];
     struct fragments constraint_structptr[MAXFRAG];
 
-    FILE *fp    = fopen(sim->rmsd_constraint_file, "r");
+    std::ifstream file(sim->rmsd_constraint_file);
     int   nfrag = 0;
-    if (fp == NULL) {
+    if (!file.is_open()) {
         fprintf(sim->STATUS, "Could not open file %s \n", sim->rmsd_constraint_file);
         exit(1);
     } else {
         fprintf(sim->STATUS, "Successfully opened constraint file %s \n", sim->rmsd_constraint_file);
         fflush(sim->STATUS);
     }
-    while (fgets(str, 1000, fp) != NULL) {
+    while (file.getline(str, 1000)) {
         if (str[0] != '#') {
             if (sscanf(str, "%d %d %d", &frag_idx, &frag_x1, &frag_x2) != 3)
                 continue;
@@ -30,7 +32,7 @@ void Init_frag_rmsd_constraints(
             nfrag++;
         }
     }
-    fclose(fp);
+    file.close();
 
     constraint_align.NFRAG = nfrag;
     for (int i = 1; i <= nfrag; i++) {
@@ -88,15 +90,15 @@ void Read_constraints(
     int   bb;
     float cc;
     int   iii = 0;
-    FILE *fp  = fopen(sim->constraint_file, "r");
-    if (fp == NULL) {
+    std::ifstream file(sim->constraint_file);
+    if (!file.is_open()) {
         fprintf(sim->STATUS, "Could not open file %s \n", sim->constraint_file);
         exit(1);
     } else {
         fprintf(sim->STATUS, "Successfully opened constraint file %s \n", sim->constraint_file);
         fflush(sim->STATUS);
     }
-    while (fgets(str, 1000, fp) != NULL) {
+    while (file.getline(str, 1000)) {
         if (str[0] != '#') {
             // fprintf(STATUS, "%s", str);
             // fflush(STATUS);
@@ -120,7 +122,7 @@ void Read_constraints(
         }
     }
 
-    fclose(fp);
+    file.close();
     sys->N_constraints = iii;
     if (sys->N_constraints > 0) {
         fprintf(sim->STATUS, "We have %i constraints. The 1st constraint is %i, %i with weight %f \n",
